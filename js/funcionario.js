@@ -161,7 +161,7 @@ async function carregarDadosFuncionario(email) {
         }
         
     } catch (error) {
-        console.warn("Usando dados simulados do funcionário");
+        console.log("Carregando dados de demonstração...");
         
         // Dados simulados
         const nomeElement = document.getElementById('funcionarioNome');
