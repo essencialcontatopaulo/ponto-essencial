@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Usuário - Ponto Eletrônico</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .cadastro-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .cadastro-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .cadastro-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-cadastrar {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-cadastrar:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-voltar {
+            width: 100%;
+            padding: 12px;
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .btn-voltar:hover {
+            background: #e9ecef;
+        }
+        
+        .mensagem {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .mensagem.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .mensagem.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .usuarios-cadastrados {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .usuario-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .usuario-info h4 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .usuario-info p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .usuario-tipo {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .tipo-gestor {
+            background: #007bff;
+            color: white;
+        }
+        
+        .tipo-funcionario {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cadastro-container">
+            <div class="cadastro-header">
+                <h1>👥 Cadastrar Usuário</h1>
+                <p>Adicione novos gestores ou funcionários ao sistema</p>
+            </div>
+            
+            <div id="mensagem" class="mensagem"></div>
+            
+            <div class="info-box">
+                <strong>⚠️ Apenas gestores podem cadastrar usuários</strong>
+                <p>Você precisa estar logado como gestor para acessar esta funcionalidade.</p>
+            </div>
+            
+            <form id="formCadastro">
+                <div class="form-group">
+                    <label for="nome">Nome Completo *</label>
+                    <input type="text" id="nome" class="form-control" placeholder="Ex: João Silva" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" class="form-control" placeholder="exemplo@empresa.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cargo">Cargo *</label>
+                    <input type="text" id="cargo" class="form-control" placeholder="Ex: Desenvolvedor, Designer, Gerente" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipo de Usuário *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="tipo-funcionario" name="tipo" value="funcionario" checked>
+                            <label for="tipo-funcionario">Funcionário</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="tipo-gestor" name="tipo" value="gestor">
+                            <label for="tipo-gestor">Gestor</label>
+                        </div>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Gestores têm acesso completo ao sistema, incluindo relatórios e cadastro de usuários.
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="senha">Senha Inicial *</label>
+                    <input type="password" id="senha" class="form-control" placeholder="Mínimo 6 caracteres" required>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        O usuário poderá alterar a senha após o primeiro login.
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn-cadastrar" id="btnCadastrar">
+                    📋 Cadastrar Usuário
+                </button>
+            </form>
+            
+            <div class="usuarios-cadastrados" id="listaUsuarios">
+                <h3>👥 Usuários Cadastrados</h3>
+                <p>Carregando lista de usuários...</p>
+            </div>
+            
+            <a href="index.html" class="btn-voltar">← Voltar para página inicial</a>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("📋 Página de cadastro carregada!");
+            
+            // Verificar se usuário é gestor
+            const usuario = window.auth?.verificarLogin();
+            if (!usuario) {
+                mostrarMensagem('⚠️ Faça login para acessar esta página.', 'error');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+                return;
+            }
+            
+            if (usuario.tipo !== 'gestor') {
+                mostrarMensagem('❌ Apenas gestores podem cadastrar usuários.', 'error');
+                document.getElementById('formCadastro').style.display = 'none';
+                document.querySelector('.info-box').innerHTML = `
+                    <strong>❌ Acesso negado</strong>
+                    <p>Apenas usuários com perfil de gestor podem cadastrar novos usuários.</p>
+                    <p>Seu perfil: <strong>${usuario.tipo}</strong></p>
+                `;
+            }
+            
+            // Carregar lista de usuários
+            carregarListaUsuarios();
+            
+            // Formulário de cadastro
+            const formCadastro = document.getElementById('formCadastro');
+            const btnCadastrar = document.getElementById('btnCadastrar');
+            
+            formCadastro.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const nome = document.getElementById('nome').value;
+                const email = document.getElementById('email').value;
+                const cargo = document.getElementById('cargo').value;
+                const tipo = document.querySelector('input[name="tipo"]:checked').value;
+                const senha = document.getElementById('senha').value;
+                
+                // Validação
+                if (senha.length < 6) {
+                    mostrarMensagem('A senha deve ter no mínimo 6 caracteres.', 'error');
+                    return;
+                }
+                
+                // Desabilitar botão durante cadastro
+                btnCadastrar.disabled = true;
+                btnCadastrar.innerHTML = '🔄 Cadastrando...';
+                
+                try {
+                    const resultado = await window.auth?.registrar({
+                        nome: nome,
+                        email: email,
+                        cargo: cargo,
+                        tipo: tipo,
+                        senha: senha
+                    });
+                    
+                    if (resultado?.success) {
+                        mostrarMensagem(`✅ ${resultado.message}`, 'success');
+                        
+                        // Limpar formulário
+                        formCadastro.reset();
+                        
+                        // Atualizar lista
+                        carregarListaUsuarios();
+                        
+                        // Feedback sonoro (opcional)
+                        if (window.utils?.mostrarMensagem) {
+                            window.utils.mostrarMensagem(resultado.message, 'success');
+                        }
+                        
+                    } else {
+                        mostrarMensagem(`❌ ${resultado?.error || 'Erro ao cadastrar'}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    mostrarMensagem(`❌ Erro: ${error.message}`, 'error');
+                } finally {
+                    btnCadastrar.disabled = false;
+                    btnCadastrar.innerHTML = '📋 Cadastrar Usuário';
+                }
+            });
+            
+            // Funções auxiliares
+            function mostrarMensagem(texto, tipo) {
+                const mensagemDiv = document.getElementById('mensagem');
+                mensagemDiv.textContent = texto;
+                mensagemDiv.className = `mensagem ${tipo}`;
+                
+                setTimeout(() => {
+                    mensagemDiv.className = 'mensagem';
+                    mensagemDiv.textContent = '';
+                }, 5000);
+            }
+            
+            function carregarListaUsuarios() {
+                const listaDiv = document.getElementById('listaUsuarios');
+                const usuarios = window.auth?.listarUsuarios() || [];
+                
+                if (usuarios.length === 0) {
+                    listaDiv.innerHTML = '<p>Nenhum usuário cadastrado ainda.</p>';
+                    return;
+                }
+                
+                let html = '<h3>👥 Usuários Cadastrados (' + usuarios.length + ')</h3>';
+                
+                // Separar gestores e funcionários
+                const gestores = usuarios.filter(u => u.tipo === 'gestor');
+                const funcionarios = usuarios.filter(u => u.tipo === 'funcionario');
+                
+                if (gestores.length > 0) {
+                    html += '<h4 style="margin-top: 20px; color: #007bff;">👔 Gestores</h4>';
+                    gestores.forEach(usuario => {
+                        html += criarItemUsuario(usuario);
+                    });
+                }
+                
+                if (funcionarios.length > 0) {
+                    html += '<h4 style="margin-top: 20px; color: #28a745;">👨‍💼 Funcionários</h4>';
+                    funcionarios.forEach(usuario => {
+                        html += criarItemUsuario(usuario);
+                    });
+                }
+                
+                listaDiv.innerHTML = html;
+            }
+            
+            function criarItemUsuario(usuario) {
+                const tipoClasse = usuario.tipo === 'gestor' ? 'tipo-gestor' : 'tipo-funcionario';
+                const tipoTexto = usuario.tipo === 'gestor' ? 'GESTOR' : 'FUNCIONÁRIO';
+                const status = usuario.ativo ? '✅ Ativo' : '❌ Inativo';
+                
+                return `
+                    <div class="usuario-item">
+                        <div class="usuario-info">
+                            <h4>${usuario.nome}</h4>
+                            <p>${usuario.email} • ${usuario.cargo}</p>
+                            <p><small>Criado em: ${usuario.criadoEm} • ${status}</small></p>
+                        </div>
+                        <span class="usuario-tipo ${tipoClasse}">${tipoTexto}</span>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
