@@ -54,7 +54,7 @@ async function inicializarFirebase() {
             // Timeout após 10 segundos
             setTimeout(() => {
                 clearInterval(checkInterval);
-                console.warn("⚠️ Firebase não carregado - modo simulação ativado");
+               console.log("🔶 Modo simulação ativado (para desenvolvimento)");
                 reject(new Error("Firebase não carregado"));
             }, 10000);
         });
