@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +5,23 @@
     <!-- Meta tags para PWA -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#667eea">
+    <meta name="application-name" content="Ponto Eletrônico">
     
     <title>Ponto Eletrônico - Sistema com Reconhecimento Facial</title>
     
     <!-- Manifest para PWA -->
-    <link rel="icon" href="icons/logo.png">
+    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
     
-    <!-- Ícones -->
-    <link rel="icon" href="icons/icon-192.png">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <!-- Ícones para todos dispositivos -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <link rel="icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-192x192.png">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -25,8 +30,15 @@
     <script type="module">
         console.log("🚀 Iniciando carregamento do Firebase...");
         
-        // SUA CONFIGURAÇÃO DO FIREBASE - VOCÊ PRECISA COLOCAR AQUI
-        npm install firebase
+        // SUA CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDExemplo0000000000000000000000000",
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto-id",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "123456789000",
+            appId: "1:123456789000:web:abcdef1234567890"
+        };
         
         try {
             // Carrega Firebase dinamicamente
@@ -61,73 +73,6 @@
         }
     </script>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>⏰ Ponto Eletrônico</h1>
-            <p class="subtitle">Sistema com Reconhecimento Facial</p>
-            <p class="debug-hint">Verifique o console (F12) para mais detalhes</p>
-        </header>
-
-        <main>
-            <section class="hero">
-                <h2>Bem-vindo ao Sistema de Ponto</h2>
-                <p>Controle de ponto com reconhecimento facial, registro de horas e relatórios completos para sua empresa.</p>
-            </section>
-
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">👤</div>
-                    <h3>Reconhecimento Facial</h3>
-                    <p>Registro seguro com foto armazenada por 7 dias. Tecnologia de ponta para identificação biométrica.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Relatórios Completos</h3>
-                    <p>Controle de horas por dia, semana, mês e ano. Exporte dados em PDF e Excel.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Acesso Multiplataforma</h3>
-                    <p>Funciona no PC e como PWA para celular. Acesse de qualquer lugar, a qualquer hora.</p>
-                </div>
-            </div>
-
-            <div class="firebase-status" id="firebaseStatus">
-                <div class="status-loading">🔄 Conectando ao servidor...</div>
-                <div class="status-success" style="display: none;">
-                    ✅ Sistema conectado e pronto para uso!
-                </div>
-                <div class="status-error" style="display: none;">
-                    ⚠️ Modo simulação ativo<br>
-                    <small>Configure o Firebase para funcionalidades completas</small>
-                </div>
-            </div>
-
-            <section class="actions">
-                <button id="loginBtn" class="btn-primary">
-                    🔐 Acessar Sistema
-                </button>
-                <button id="facialBtn" class="btn-secondary">
-                    📸 Reconhecimento Facial
-                </button>
-                <button id="funcionarioBtn" class="btn-secondary">
-                    👨‍💼 Área do Funcionário
-                </button>
-                <button id="gestorBtn" class="btn-secondary">
-                    👔 Área do Gestor
-                </button>
-            </section>
-        </main>
-
-        <footer>
-            <p>Sistema de Ponto Eletrônico v1.0 © 2024</p>
-            <p class="debug-info">Verifique o console (F12) para detalhes técnicos</p>
-        </footer>
-    </div>
-
     <!-- JavaScripts -->
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
