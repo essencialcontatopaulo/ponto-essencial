@@ -196,4 +196,280 @@
             
             <div class="stat-card">
                 <div class="stat-label">Produtividade</div>
-                <div class="
+                <div class="stat-value" id="produtividade">94%</div>
+                <div class="stat-label">Meta: 90%</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="funcionarios">👥 Funcionários</div>
+            <div class="tab" data-tab="pontos">⏰ Registros de Ponto</div>
+            <div class="tab" data-tab="relatorios">📊 Relatórios</div>
+            <div class="tab" data-tab="config">⚙️ Configurações</div>
+        </div>
+
+        <div class="tab-content active" id="tab-funcionarios">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchFuncionarios" placeholder="Buscar funcionário...">
+                <select class="filter-select" id="filterCargo">
+                    <option value="">Todos os cargos</option>
+                    <option value="dev">Desenvolvedor</option>
+                    <option value="design">Designer</option>
+                    <option value="rh">RH</option>
+                    <option value="gerente">Gerente</option>
+                </select>
+                <button class="btn-primary" id="addFuncionarioBtn">➕ Novo Funcionário</button>
+            </div>
+            
+            <table class="data-table" id="tabelaFuncionarios">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Cargo</th>
+                        <th>E-mail</th>
+                        <th>Status</th>
+                        <th>Último Ponto</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                            Carregando funcionários...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-content" id="tab-pontos">
+            <div class="search-box">
+                <input type="date" class="search-input" id="filterData" value="2026-01-20">
+                <select class="filter-select" id="filterStatus">
+                    <option value="">Todos os status</option>
+                    <option value="presente">Presente</option>
+                    <option value="ausente">Ausente</option>
+                    <option value="atrasado">Atrasado</option>
+                </select>
+                <button class="btn-export" id="exportPontosBtn">📥 Exportar Excel</button>
+            </div>
+            
+            <table class="data-table" id="tabelaPontosGestor">
+                <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Data</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Horas</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                            Carregando registros de ponto...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-content" id="tab-relatorios">
+            <div style="text-align: center; padding: 50px;">
+                <h3>📊 Relatórios Gerenciais</h3>
+                <p>Gere relatórios detalhados para análise gerencial</p>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
+                    <button class="btn-action btn-export" style="padding: 15px 25px;">
+                        📈 Relatório Mensal
+                    </button>
+                    <button class="btn-action btn-export" style="padding: 15px 25px;">
+                        👥 Por Funcionário
+                    </button>
+                    <button class="btn-action btn-export" style="padding: 15px 25px;">
+                        ⏰ Controle de Horas
+                    </button>
+                    <button class="btn-action btn-export" style="padding: 15px 25px;">
+                        📋 Absenteísmo
+                    </button>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 30px;">
+                    <h4>Próximos recursos:</h4>
+                    <p>• Gráficos de produtividade</p>
+                    <p>• Comparativo entre períodos</p>
+                    <p>• Exportação em PDF e Excel</p>
+                    <p>• Alertas automáticos</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-config">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <h3>⚙️ Configurações do Sistema</h3>
+                
+                <div style="background: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Horário de Trabalho</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                        <div>
+                            <label>Entrada padrão</label>
+                            <input type="time" class="form-control" value="08:00" style="width: 100%;">
+                        </div>
+                        <div>
+                            <label>Saída padrão</label>
+                            <input type="time" class="form-control" value="17:00" style="width: 100%;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Notificações</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" checked>
+                            Enviar alertas de atraso
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                            <input type="checkbox" checked>
+                            Relatório semanal automático
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" style="width: 100%; padding: 15px;">
+                    💾 Salvar Configurações
+                </button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" style="color: #667eea; text-decoration: none;">← Voltar para página inicial</a>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("👔 Área do gestor carregada!");
+            
+            // Verificar se é gestor
+            const usuario = window.auth?.verificarLogin();
+            if (!usuario || usuario.tipo !== 'gestor') {
+                window.utils?.mostrarMensagem('⚠️ Acesso restrito a gestores!', 'warning');
+                setTimeout(() => window.location.href = 'index.html', 2000);
+                return;
+            }
+            
+            // Sistema de abas
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remover classe active de todas as abas
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba clicada
+                    this.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
+            
+            // Botão novo funcionário
+            document.getElementById('addFuncionarioBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('👥 Adicionar funcionário em desenvolvimento...', 'info');
+            });
+            
+            // Botão exportar
+            document.getElementById('exportPontosBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📥 Exportação em desenvolvimento...', 'info');
+            });
+            
+            // Carregar dados simulados
+            carregarDadosSimulados();
+        });
+        
+        function carregarDadosSimulados() {
+            // Funcionários
+            const funcionariosTbody = document.querySelector('#tabelaFuncionarios tbody');
+            if (funcionariosTbody) {
+                funcionariosTbody.innerHTML = '';
+                
+                const funcionarios = [
+                    { nome: 'João Silva', cargo: 'Desenvolvedor', email: 'joao@empresa.com', status: 'presente', ultimoPonto: '08:05' },
+                    { nome: 'Maria Santos', cargo: 'Designer', email: 'maria@empresa.com', status: 'presente', ultimoPonto: '08:15' },
+                    { nome: 'Pedro Costa', cargo: 'Gerente', email: 'pedro@empresa.com', status: 'ausente', ultimoPonto: '--:--' },
+                    { nome: 'Ana Oliveira', cargo: 'RH', email: 'ana@empresa.com', status: 'atrasado', ultimoPonto: '08:45' },
+                    { nome: 'Carlos Lima', cargo: 'Desenvolvedor', email: 'carlos@empresa.com', status: 'presente', ultimoPonto: '08:00' }
+                ];
+                
+                funcionarios.forEach(func => {
+                    const row = funcionariosTbody.insertRow();
+                    row.innerHTML = `
+                        <td>${func.nome}</td>
+                        <td>${func.cargo}</td>
+                        <td>${func.email}</td>
+                        <td>
+                            <span style="
+                                padding: 4px 8px;
+                                border-radius: 4px;
+                                font-size: 0.8rem;
+                                background: ${func.status === 'presente' ? '#d4edda' : func.status === 'ausente' ? '#f8d7da' : '#fff3cd'};
+                                color: ${func.status === 'presente' ? '#155724' : func.status === 'ausente' ? '#721c24' : '#856404'};
+                            ">
+                                ${func.status === 'presente' ? '✅ Presente' : func.status === 'ausente' ? '❌ Ausente' : '⚠️ Atrasado'}
+                            </span>
+                        </td>
+                        <td>${func.ultimoPonto}</td>
+                        <td>
+                            <button class="btn-action btn-edit">Editar</button>
+                            <button class="btn-action btn-delete">Excluir</button>
+                        </td>
+                    `;
+                });
+            }
+            
+            // Pontos
+            const pontosTbody = document.querySelector('#tabelaPontosGestor tbody');
+            if (pontosTbody) {
+                pontosTbody.innerHTML = '';
+                
+                const pontos = [
+                    { funcionario: 'João Silva', data: '20/01/2026', entrada: '08:05', saida: '17:00', horas: '8:55', status: 'regular' },
+                    { funcionario: 'Maria Santos', data: '20/01/2026', entrada: '08:15', saida: '17:10', horas: '8:55', status: 'regular' },
+                    { funcionario: 'Ana Oliveira', data: '20/01/2026', entrada: '08:45', saida: '17:30', horas: '8:45', status: 'atrasado' }
+                ];
+                
+                pontos.forEach(ponto => {
+                    const row = pontosTbody.insertRow();
+                    row.innerHTML = `
+                        <td>${ponto.funcionario}</td>
+                        <td>${ponto.data}</td>
+                        <td>${ponto.entrada}</td>
+                        <td>${ponto.saida}</td>
+                        <td>${ponto.horas}</td>
+                        <td>
+                            <span style="
+                                padding: 4px 8px;
+                                border-radius: 4px;
+                                font-size: 0.8rem;
+                                background: ${ponto.status === 'regular' ? '#d4edda' : '#fff3cd'};
+                                color: ${ponto.status === 'regular' ? '#155724' : '#856404'};
+                            ">
+                                ${ponto.status === 'regular' ? '✅ Regular' : '⚠️ Atrasado'}
+                            </span>
+                        </td>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
