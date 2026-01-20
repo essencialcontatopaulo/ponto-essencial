@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Ponto Eletrônico</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .forgot-password {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+        
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .facial-login {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #888;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔐 Login</h1>
+                <p>Acesse o sistema de ponto eletrônico</p>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                
+                <div class="login-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Lembrar-me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Esqueci a senha</a>
+                </div>
+                
+                <button type="submit" class="btn-login" id="submitBtn">
+                    Entrar no Sistema
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>OU</span>
+            </div>
+            
+            <div class="facial-login">
+                <button id="facialLoginBtn" class="btn-secondary" style="width: 100%;">
+                    📸 Login com Reconhecimento Facial
+                </button>
+            </div>
+            
+            <div class="login-footer">
+                <p>Não tem uma conta? <a href="funcionario.html?register=true">Cadastre-se aqui</a></p>
+                <p><a href="index.html">← Voltar para página inicial</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🔐 Página de login carregada!");
+            
+            // Verificar se já está logado
+            const usuario = window.auth?.verificarLogin();
+            if (usuario) {
+                window.location.href = 'funcionario.html';
+                return;
+            }
+            
+            // Formulário de login
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const remember = document.getElementById('remember').checked;
+                
+                // Validação básica
+                if (!email || !password) {
+                    showError('Por favor, preencha todos os campos.');
+                    return;
+                }
+                
+                if (!window.utils?.validarEmail(email)) {
+                    showError('Por favor, insira um e-mail válido.');
+                    return;
+                }
+                
+                // Desabilitar botão durante o login
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '🔄 Entrando...';
+                
+                try {
+                    // Tentar login
+                    const resultado = await window.auth?.login(email, password);
+                    
+                    if (resultado?.success) {
+                        window.utils?.mostrarMensagem('✅ Login realizado com sucesso!', 'success');
+                        
+                        // Redirecionar após 1 segundo
+                        setTimeout(() => {
+                            window.location.href = 'funcionario.html';
+                        }, 1000);
+                        
+                    } else {
+                        showError(resultado?.error || 'Erro ao fazer login. Verifique suas credenciais.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Entrar no Sistema';
+                    }
+                    
+                } catch (error) {
+                    showError('Erro inesperado: ' + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Entrar no Sistema';
+                }
+            });
+            
+            // Login com reconhecimento facial
+            document.getElementById('facialLoginBtn').addEventListener('click', function() {
+                if (window.app && window.app.iniciarReconhecimentoFacial) {
+                    window.app.iniciarReconhecimentoFacial();
+                } else {
+                    showError('Função de reconhecimento facial não disponível no momento.');
+                }
+            });
+            
+            // Função para mostrar erros
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Preencher com dados de teste (apenas para desenvolvimento)
+            if (window.location.href.includes('localhost') || window.location.href.includes('127.0.0.1')) {
+                document.getElementById('email').value = 'teste@empresa.com';
+                document.getElementById('password').value = 'senha123';
+                console.log('Dados de teste preenchidos automaticamente.');
+            }
+        });
+    </script>
+</body>
+</html>
