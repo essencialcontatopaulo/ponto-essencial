@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Funcionário - Ponto Eletrônico</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .funcionario-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .user-details h2 {
+            margin: 0;
+            color: white;
+        }
+        
+        .user-details p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        
+        .ponto-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .hora-atual {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .btn-ponto {
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            margin: 10px;
+            min-width: 250px;
+        }
+        
+        .registros-table {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+        
+        .registros-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .registros-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .registros-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-entrada {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-saida {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+        
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .funcionario-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .hora-atual {
+                font-size: 2.5rem;
+            }
+            
+            .btn-ponto {
+                width: 100%;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="funcionario-header">
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <h2 id="funcionarioNome">Carregando...</h2>
+                    <p id="funcionarioCargo">Funcionário</p>
+                    <p id="funcionarioEmail" style="font-size: 0.9em; opacity: 0.8;">email@empresa.com</p>
+                </div>
+            </div>
+            <button id="sairBtn" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white;">
+                🚪 Sair
+            </button>
+        </header>
+
+        <main>
+            <div class="ponto-card">
+                <h3>⏰ Registrar Ponto</h3>
+                <div class="hora-atual" id="horaAtual">--:--:--</div>
+                <p id="dataAtual">Carregando data...</p>
+                
+                <div style="margin: 30px 0;">
+                    <button id="baterPontoBtn" class="btn-ponto btn-primary">
+                        📍 Registrar Entrada
+                    </button>
+                    <button id="facialBtn" class="btn-ponto btn-secondary">
+                        📸 Reconhecimento Facial
+                    </button>
+                </div>
+                
+                <p style="color: #666; font-size: 0.9em;">
+                    Último registro: <span id="ultimoRegistro">Nenhum registro hoje</span>
+                </p>
+            </div>
+
+            <div class="quick-actions">
+                <div class="action-btn" id="historicoBtn">
+                    <div class="action-icon">📊</div>
+                    <h4>Histórico Completo</h4>
+                    <p>Veja todos os seus registros</p>
+                </div>
+                
+                <div class="action-btn" id="relatorioBtn">
+                    <div class="action-icon">📈</div>
+                    <h4>Meu Relatório</h4>
+                    <p>Horas trabalhadas este mês</p>
+                </div>
+                
+                <div class="action-btn" id="justificativaBtn">
+                    <div class="action-icon">📝</div>
+                    <h4>Justificativas</h4>
+                    <p>Registrar ausência</p>
+                </div>
+                
+                <div class="action-btn" id="configBtn">
+                    <div class="action-icon">⚙️</div>
+                    <h4>Configurações</h4>
+                    <p>Minhas preferências</p>
+                </div>
+            </div>
+
+            <section>
+                <h3>📋 Registros Recentes</h3>
+                <table class="registros-table" id="tabelaPontos">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
+                            <th>Horas</th>
+                            <th>Método</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #888;">
+                                Carregando registros...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="index.html" style="color: #667eea; text-decoration: none;">← Voltar para página inicial</a>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/funcionario.js"></script>
+    
+    <script>
+        // Atualizar hora em tempo real
+        function atualizarHora() {
+            const agora = new Date();
+            const horaElement = document.getElementById('horaAtual');
+            const dataElement = document.getElementById('dataAtual');
+            
+            if (horaElement) {
+                horaElement.textContent = agora.toLocaleTimeString('pt-BR');
+            }
+            
+            if (dataElement) {
+                dataElement.textContent = agora.toLocaleDateString('pt-BR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("👨‍💼 Área do funcionário carregada!");
+            
+            // Atualizar hora a cada segundo
+            atualizarHora();
+            setInterval(atualizarHora, 1000);
+            
+            // Botão de sair
+            document.getElementById('sairBtn').addEventListener('click', function() {
+                if (confirm('Deseja realmente sair do sistema?')) {
+                    window.auth?.logout();
+                }
+            });
+            
+            // Botões de ação rápida
+            document.getElementById('historicoBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📊 Histórico em desenvolvimento...', 'info');
+            });
+            
+            document.getElementById('relatorioBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📈 Relatório em desenvolvimento...', 'info');
+            });
+            
+            document.getElementById('justificativaBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📝 Justificativas em desenvolvimento...', 'info');
+            });
+            
+            document.getElementById('configBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('⚙️ Configurações em desenvolvimento...', 'info');
+            });
+            
+            // Verificar autenticação
+            const usuario = window.auth?.verificarLogin();
+            if (!usuario) {
+                window.utils?.mostrarMensagem('⚠️ Faça login para acessar esta área!', 'warning');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            }
+        });
+    </script>
+</body>
+</html>
