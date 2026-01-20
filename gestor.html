@@ -14,6 +14,34 @@
             margin-bottom: 30px;
         }
         
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .user-details h2 {
+            margin: 0;
+            color: white;
+        }
+        
+        .user-details p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -50,6 +78,7 @@
             display: flex;
             border-bottom: 2px solid #e9ecef;
             margin: 30px 0;
+            flex-wrap: wrap;
         }
         
         .tab {
@@ -59,6 +88,7 @@
             font-weight: 500;
             color: #666;
             transition: all 0.3s;
+            white-space: nowrap;
         }
         
         .tab.active {
@@ -82,6 +112,7 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin: 20px 0;
         }
         
         .data-table th {
@@ -109,6 +140,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             margin: 0 5px;
+            transition: all 0.3s;
         }
         
         .btn-edit {
@@ -116,9 +148,17 @@
             color: white;
         }
         
+        .btn-edit:hover {
+            background: #138496;
+        }
+        
         .btn-delete {
             background: #dc3545;
             color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
         }
         
         .btn-export {
@@ -126,14 +166,29 @@
             color: white;
         }
         
+        .btn-export:hover {
+            background: #218838;
+        }
+        
+        .btn-cadastrar {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .btn-cadastrar:hover {
+            background: #5a32a3;
+        }
+        
         .search-box {
             margin: 20px 0;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .search-input {
             flex: 1;
+            min-width: 200px;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -146,6 +201,77 @@
             border-radius: 8px;
             background: white;
             min-width: 200px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .action-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .action-card h4 {
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        
+        .action-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status-presente {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-ausente {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-atrasado {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-ferias {
+            background: #cce5ff;
+            color: #004085;
         }
         
         @media (max-width: 768px) {
@@ -162,24 +288,83 @@
                 flex-direction: column;
             }
             
-            .filter-select {
+            .filter-select, .search-input {
                 width: 100%;
             }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .action-card {
+                width: 100%;
+            }
+            
+            .btn-action {
+                margin: 2px;
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="gestor-header">
-            <h1>👔 Área do Gestor</h1>
-            <p>Controle completo da equipe e relatórios gerenciais</p>
+            <div class="user-info">
+                <div class="user-avatar">👔</div>
+                <div class="user-details">
+                    <h2 id="gestorNome">Gestor do Sistema</h2>
+                    <p id="gestorEmail">admin@empresa.com</p>
+                    <p id="gestorCargo">Gerente Geral</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="sairBtn" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white;">
+                    🚪 Sair
+                </button>
+                <button id="homeBtn" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white;">
+                    🏠 Página Inicial
+                </button>
+            </div>
         </header>
+
+        <section class="quick-actions">
+            <div class="action-card" id="cardCadastrar">
+                <div class="action-icon">👥</div>
+                <h4>Cadastrar Usuário</h4>
+                <p>Adicionar novo funcionário ou gestor</p>
+            </div>
+            
+            <div class="action-card" id="cardRelatorios">
+                <div class="action-icon">📊</div>
+                <h4>Relatórios</h4>
+                <p>Gerar relatórios de horas e produtividade</p>
+            </div>
+            
+            <div class="action-card" id="cardAjustes">
+                <div class="action-icon">⚙️</div>
+                <h4>Ajustes</h4>
+                <p>Configurar horários e notificações</p>
+            </div>
+            
+            <div class="action-card" id="cardExportar">
+                <div class="action-icon">📥</div>
+                <h4>Exportar Dados</h4>
+                <p>Exportar para Excel ou PDF</p>
+            </div>
+        </section>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Funcionários Ativos</div>
-                <div class="stat-value" id="totalFuncionarios">12</div>
-                <div class="stat-label">Presentes hoje: <span id="presentesHoje">8</span></div>
+                <div class="stat-value" id="totalFuncionarios">5</div>
+                <div class="stat-label">Presentes hoje: <span id="presentesHoje">3</span></div>
             </div>
             
             <div class="stat-card">
@@ -210,15 +395,23 @@
 
         <div class="tab-content active" id="tab-funcionarios">
             <div class="search-box">
-                <input type="text" class="search-input" id="searchFuncionarios" placeholder="Buscar funcionário...">
+                <input type="text" class="search-input" id="searchFuncionarios" placeholder="Buscar funcionário por nome ou email...">
                 <select class="filter-select" id="filterCargo">
                     <option value="">Todos os cargos</option>
-                    <option value="dev">Desenvolvedor</option>
-                    <option value="design">Designer</option>
-                    <option value="rh">RH</option>
-                    <option value="gerente">Gerente</option>
+                    <option value="Desenvolvedor">Desenvolvedor</option>
+                    <option value="Designer">Designer</option>
+                    <option value="Analista de RH">Analista de RH</option>
+                    <option value="Assistente Administrativo">Assistente Administrativo</option>
+                    <option value="Gerente">Gerente</option>
                 </select>
-                <button class="btn-primary" id="addFuncionarioBtn">➕ Novo Funcionário</button>
+                <select class="filter-select" id="filterStatus">
+                    <option value="">Todos os status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+                <button class="btn-action btn-cadastrar" id="addFuncionarioBtn">
+                    👥 Novo Funcionário
+                </button>
             </div>
             
             <table class="data-table" id="tabelaFuncionarios">
@@ -244,14 +437,27 @@
 
         <div class="tab-content" id="tab-pontos">
             <div class="search-box">
-                <input type="date" class="search-input" id="filterData" value="2026-01-20">
-                <select class="filter-select" id="filterStatus">
+                <input type="date" class="search-input" id="filterData" value="">
+                <select class="filter-select" id="filterFuncionarioPonto">
+                    <option value="">Todos os funcionários</option>
+                    <option value="joao.silva@empresa.com">João Silva</option>
+                    <option value="maria.santos@empresa.com">Maria Santos</option>
+                    <option value="carlos.oliveira@empresa.com">Carlos Oliveira</option>
+                    <option value="ana.costa@empresa.com">Ana Costa</option>
+                </select>
+                <select class="filter-select" id="filterStatusPonto">
                     <option value="">Todos os status</option>
                     <option value="presente">Presente</option>
                     <option value="ausente">Ausente</option>
                     <option value="atrasado">Atrasado</option>
+                    <option value="ferias">Férias</option>
                 </select>
-                <button class="btn-export" id="exportPontosBtn">📥 Exportar Excel</button>
+                <button class="btn-action btn-export" id="exportPontosBtn">
+                    📥 Exportar Excel
+                </button>
+                <button class="btn-action" style="background: #6610f2; color: white;" id="imprimirRelatorioBtn">
+                    🖨️ Imprimir
+                </button>
             </div>
             
             <table class="data-table" id="tabelaPontosGestor">
@@ -263,11 +469,12 @@
                         <th>Saída</th>
                         <th>Horas</th>
                         <th>Status</th>
+                        <th>Método</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #888;">
                             Carregando registros de ponto...
                         </td>
                     </tr>
@@ -276,75 +483,168 @@
         </div>
 
         <div class="tab-content" id="tab-relatorios">
-            <div style="text-align: center; padding: 50px;">
-                <h3>📊 Relatórios Gerenciais</h3>
-                <p>Gere relatórios detalhados para análise gerencial</p>
+            <div style="padding: 30px;">
+                <h3 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📊 Relatórios Gerenciais</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 40px;">Gere relatórios detalhados para análise gerencial e tomada de decisão</p>
                 
-                <div style="display: flex; gap: 20px; justify-content: center; margin: 30px 0; flex-wrap: wrap;">
-                    <button class="btn-action btn-export" style="padding: 15px 25px;">
-                        📈 Relatório Mensal
-                    </button>
-                    <button class="btn-action btn-export" style="padding: 15px 25px;">
-                        👥 Por Funcionário
-                    </button>
-                    <button class="btn-action btn-export" style="padding: 15px 25px;">
-                        ⏰ Controle de Horas
-                    </button>
-                    <button class="btn-action btn-export" style="padding: 15px 25px;">
-                        📋 Absenteísmo
-                    </button>
+                <div class="quick-actions">
+                    <div class="action-card" id="relatorioMensal">
+                        <div class="action-icon">📈</div>
+                        <h4>Relatório Mensal</h4>
+                        <p>Análise completa do mês atual</p>
+                        <small>Horas trabalhadas, atrasos, produtividade</small>
+                    </div>
+                    
+                    <div class="action-card" id="relatorioFuncionario">
+                        <div class="action-icon">👤</div>
+                        <h4>Por Funcionário</h4>
+                        <p>Desempenho individual detalhado</p>
+                        <small>Histórico completo por colaborador</small>
+                    </div>
+                    
+                    <div class="action-card" id="relatorioHoras">
+                        <div class="action-icon">⏰</div>
+                        <h4>Controle de Horas</h4>
+                        <p>Horas extras e banco de horas</p>
+                        <small>Saldo de horas por funcionário</small>
+                    </div>
+                    
+                    <div class="action-card" id="relatorioAbsenteismo">
+                        <div class="action-icon">📋</div>
+                        <h4>Absenteísmo</h4>
+                        <p>Faltas e justificativas</p>
+                        <small>Análise de ausências</small>
+                    </div>
                 </div>
                 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 30px;">
-                    <h4>Próximos recursos:</h4>
-                    <p>• Gráficos de produtividade</p>
-                    <p>• Comparativo entre períodos</p>
-                    <p>• Exportação em PDF e Excel</p>
-                    <p>• Alertas automáticos</p>
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-top: 40px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📈 Próximos Recursos:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong>• Gráficos Interativos</strong>
+                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Visualização de dados em gráficos</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong>• Comparativo Periódico</strong>
+                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Comparação entre meses/trimestres</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong>• Exportação Avançada</strong>
+                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">PDF personalizado e Excel</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <strong>• Alertas Automáticos</strong>
+                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Notificações por email</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" id="gerarRelatorioCompleto" style="padding: 15px 30px; font-size: 1.1rem;">
+                        🚀 Gerar Relatório Completo
+                    </button>
                 </div>
             </div>
         </div>
 
         <div class="tab-content" id="tab-config">
-            <div style="max-width: 600px; margin: 0 auto;">
-                <h3>⚙️ Configurações do Sistema</h3>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <h3 style="margin-bottom: 30px; color: #2c3e50;">⚙️ Configurações do Sistema</h3>
                 
-                <div style="background: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
-                    <h4>Horário de Trabalho</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
-                        <div>
-                            <label>Entrada padrão</label>
-                            <input type="time" class="form-control" value="08:00" style="width: 100%;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px; color: #495057;">🕐 Horário de Trabalho</h4>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Entrada padrão</label>
+                            <input type="time" class="form-control" id="entradaPadrao" value="08:00" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
                         </div>
-                        <div>
-                            <label>Saída padrão</label>
-                            <input type="time" class="form-control" value="17:00" style="width: 100%;">
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Saída padrão</label>
+                            <input type="time" class="form-control" id="saidaPadrao" value="17:00" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tolerância de atraso (minutos)</label>
+                            <input type="number" class="form-control" id="toleranciaAtraso" value="10" min="0" max="60" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px; color: #495057;">🔔 Notificações</h4>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <input type="checkbox" id="notificarAtrasos" checked style="width: 18px; height: 18px;">
+                                <span>Enviar alertas de atraso</span>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <input type="checkbox" id="relatorioSemanal" checked style="width: 18px; height: 18px;">
+                                <span>Relatório semanal automático</span>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <input type="checkbox" id="notificarAusencias" checked style="width: 18px; height: 18px;">
+                                <span>Notificar ausências não justificadas</span>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="lembretePonto" checked style="width: 18px; height: 18px;">
+                                <span>Lembrete para registrar ponto</span>
+                            </label>
+                        </div>
+                        
+                        <div style="margin-top: 25px;">
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Email para notificações</label>
+                            <input type="email" class="form-control" id="emailNotificacoes" value="gestor@empresa.com" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
                         </div>
                     </div>
                 </div>
                 
-                <div style="background: white; padding: 25px; border-radius: 10px; margin: 20px 0;">
-                    <h4>Notificações</h4>
-                    <div style="margin: 15px 0;">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" checked>
-                            Enviar alertas de atraso
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
-                            <input type="checkbox" checked>
-                            Relatório semanal automático
-                        </label>
+                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 25px;">
+                    <h4 style="margin-bottom: 20px; color: #495057;">🛡️ Segurança</h4>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tempo de sessão (minutos)</label>
+                            <select id="timeoutSessao" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white;">
+                                <option value="30">30 minutos</option>
+                                <option value="60" selected>1 hora</option>
+                                <option value="120">2 horas</option>
+                                <option value="240">4 horas</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tentativas de login</label>
+                            <select id="tentativasLogin" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white;">
+                                <option value="3">3 tentativas</option>
+                                <option value="5" selected>5 tentativas</option>
+                                <option value="10">10 tentativas</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 
-                <button class="btn-primary" style="width: 100%; padding: 15px;">
-                    💾 Salvar Configurações
-                </button>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" id="salvarConfigBtn" style="padding: 15px 40px; font-size: 1.1rem;">
+                        💾 Salvar Configurações
+                    </button>
+                    <button class="btn-secondary" id="resetarConfigBtn" style="padding: 15px 30px; font-size: 1.1rem; margin-left: 15px;">
+                        🔄 Restaurar Padrões
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="index.html" style="color: #667eea; text-decoration: none;">← Voltar para página inicial</a>
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaeaea;">
+            <a href="index.html" style="color: #667eea; text-decoration: none; font-weight: 500;">← Voltar para página inicial</a>
+            <span style="margin: 0 15px; color: #ccc;">•</span>
+            <a href="cadastro-usuario.html" style="color: #667eea; text-decoration: none; font-weight: 500;">👥 Cadastrar Usuários</a>
+            <span style="margin: 0 15px; color: #ccc;">•</span>
+            <a href="funcionario.html" style="color: #667eea; text-decoration: none; font-weight: 500;">⏰ Área do Funcionário</a>
         </div>
     </div>
 
@@ -359,10 +659,15 @@
             // Verificar se é gestor
             const usuario = window.auth?.verificarLogin();
             if (!usuario || usuario.tipo !== 'gestor') {
-                window.utils?.mostrarMensagem('⚠️ Acesso restrito a gestores!', 'warning');
-                setTimeout(() => window.location.href = 'index.html', 2000);
+                alert('⚠️ Acesso restrito a gestores!\n\nUse:\nEmail: admin@empresa.com\nSenha: admin123');
+                setTimeout(() => window.location.href = 'login.html', 2000);
                 return;
             }
+            
+            // Atualizar informações do gestor
+            document.getElementById('gestorNome').textContent = usuario.nome;
+            document.getElementById('gestorEmail').textContent = usuario.email;
+            document.getElementById('gestorCargo').textContent = usuario.cargo || 'Gestor';
             
             // Sistema de abas
             const tabs = document.querySelectorAll('.tab');
@@ -382,18 +687,100 @@
                 });
             });
             
+            // Botões de ação rápida
+            document.getElementById('cardCadastrar').addEventListener('click', function() {
+                window.location.href = 'cadastro-usuario.html';
+            });
+            
+            document.getElementById('cardRelatorios').addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                document.querySelector('[data-tab="relatorios"]').classList.add('active');
+                document.getElementById('tab-relatorios').classList.add('active');
+            });
+            
+            document.getElementById('cardAjustes').addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                document.querySelector('[data-tab="config"]').classList.add('active');
+                document.getElementById('tab-config').classList.add('active');
+            });
+            
+            document.getElementById('cardExportar').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📥 Exportação em desenvolvimento...', 'info');
+            });
+            
             // Botão novo funcionário
             document.getElementById('addFuncionarioBtn').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('👥 Adicionar funcionário em desenvolvimento...', 'info');
+                window.location.href = 'cadastro-usuario.html';
+            });
+            
+            // Botões de relatórios
+            document.getElementById('relatorioMensal').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📈 Gerando relatório mensal...', 'info');
+            });
+            
+            document.getElementById('relatorioFuncionario').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('👤 Gerando relatório por funcionário...', 'info');
+            });
+            
+            document.getElementById('relatorioHoras').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('⏰ Gerando relatório de horas...', 'info');
+            });
+            
+            document.getElementById('relatorioAbsenteismo').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('📋 Gerando relatório de absenteísmo...', 'info');
+            });
+            
+            document.getElementById('gerarRelatorioCompleto').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('🚀 Gerando relatório completo...', 'info');
             });
             
             // Botão exportar
             document.getElementById('exportPontosBtn').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('📥 Exportação em desenvolvimento...', 'info');
+                window.utils?.mostrarMensagem('📥 Exportando dados para Excel...', 'info');
+            });
+            
+            // Botão imprimir
+            document.getElementById('imprimirRelatorioBtn').addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Botão salvar configurações
+            document.getElementById('salvarConfigBtn').addEventListener('click', function() {
+                window.utils?.mostrarMensagem('✅ Configurações salvas com sucesso!', 'success');
+            });
+            
+            // Botão resetar configurações
+            document.getElementById('resetarConfigBtn').addEventListener('click', function() {
+                if (confirm('Deseja restaurar todas as configurações para os valores padrões?')) {
+                    document.getElementById('entradaPadrao').value = '08:00';
+                    document.getElementById('saidaPadrao').value = '17:00';
+                    document.getElementById('toleranciaAtraso').value = '10';
+                    window.utils?.mostrarMensagem('🔄 Configurações restauradas!', 'success');
+                }
+            });
+            
+            // Botão sair
+            document.getElementById('sairBtn').addEventListener('click', function() {
+                if (confirm('Deseja realmente sair do sistema?')) {
+                    window.auth?.logout();
+                }
+            });
+            
+            // Botão página inicial
+            document.getElementById('homeBtn').addEventListener('click', function() {
+                window.location.href = 'index.html';
             });
             
             // Carregar dados simulados
             carregarDadosSimulados();
+            
+            // Configurar data atual como padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('filterData').value = hoje;
         });
         
         function carregarDadosSimulados() {
@@ -403,34 +790,34 @@
                 funcionariosTbody.innerHTML = '';
                 
                 const funcionarios = [
-                    { nome: 'João Silva', cargo: 'Desenvolvedor', email: 'joao@empresa.com', status: 'presente', ultimoPonto: '08:05' },
-                    { nome: 'Maria Santos', cargo: 'Designer', email: 'maria@empresa.com', status: 'presente', ultimoPonto: '08:15' },
-                    { nome: 'Pedro Costa', cargo: 'Gerente', email: 'pedro@empresa.com', status: 'ausente', ultimoPonto: '--:--' },
-                    { nome: 'Ana Oliveira', cargo: 'RH', email: 'ana@empresa.com', status: 'atrasado', ultimoPonto: '08:45' },
-                    { nome: 'Carlos Lima', cargo: 'Desenvolvedor', email: 'carlos@empresa.com', status: 'presente', ultimoPonto: '08:00' }
+                    { nome: 'João Silva', cargo: 'Desenvolvedor', email: 'joao.silva@empresa.com', status: 'presente', ultimoPonto: '08:05' },
+                    { nome: 'Maria Santos', cargo: 'Designer', email: 'maria.santos@empresa.com', status: 'presente', ultimoPonto: '08:15' },
+                    { nome: 'Carlos Oliveira', cargo: 'Analista de RH', email: 'carlos.oliveira@empresa.com', status: 'ausente', ultimoPonto: '--:--' },
+                    { nome: 'Ana Costa', cargo: 'Assistente Administrativo', email: 'ana.costa@empresa.com', status: 'atrasado', ultimoPonto: '08:45' },
+                    { nome: 'Administrador Sistema', cargo: 'Gerente Geral', email: 'admin@empresa.com', status: 'presente', ultimoPonto: '07:55' }
                 ];
                 
                 funcionarios.forEach(func => {
                     const row = funcionariosTbody.insertRow();
+                    
+                    let statusHTML = '';
+                    if (func.status === 'presente') {
+                        statusHTML = '<span class="status-badge status-presente">✅ Presente</span>';
+                    } else if (func.status === 'ausente') {
+                        statusHTML = '<span class="status-badge status-ausente">❌ Ausente</span>';
+                    } else {
+                        statusHTML = '<span class="status-badge status-atrasado">⚠️ Atrasado</span>';
+                    }
+                    
                     row.innerHTML = `
-                        <td>${func.nome}</td>
+                        <td><strong>${func.nome}</strong></td>
                         <td>${func.cargo}</td>
                         <td>${func.email}</td>
-                        <td>
-                            <span style="
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 0.8rem;
-                                background: ${func.status === 'presente' ? '#d4edda' : func.status === 'ausente' ? '#f8d7da' : '#fff3cd'};
-                                color: ${func.status === 'presente' ? '#155724' : func.status === 'ausente' ? '#721c24' : '#856404'};
-                            ">
-                                ${func.status === 'presente' ? '✅ Presente' : func.status === 'ausente' ? '❌ Ausente' : '⚠️ Atrasado'}
-                            </span>
-                        </td>
+                        <td>${statusHTML}</td>
                         <td>${func.ultimoPonto}</td>
                         <td>
-                            <button class="btn-action btn-edit">Editar</button>
-                            <button class="btn-action btn-delete">Excluir</button>
+                            <button class="btn-action btn-edit" onclick="editarFuncionario('${func.email}')">Editar</button>
+                            <button class="btn-action btn-delete" onclick="excluirFuncionario('${func.email}')">Excluir</button>
                         </td>
                     `;
                 });
@@ -442,34 +829,45 @@
                 pontosTbody.innerHTML = '';
                 
                 const pontos = [
-                    { funcionario: 'João Silva', data: '20/01/2026', entrada: '08:05', saida: '17:00', horas: '8:55', status: 'regular' },
-                    { funcionario: 'Maria Santos', data: '20/01/2026', entrada: '08:15', saida: '17:10', horas: '8:55', status: 'regular' },
-                    { funcionario: 'Ana Oliveira', data: '20/01/2026', entrada: '08:45', saida: '17:30', horas: '8:45', status: 'atrasado' }
+                    { funcionario: 'João Silva', data: '20/01/2026', entrada: '08:05', saida: '17:00', horas: '8:55', status: 'regular', metodo: 'Web' },
+                    { funcionario: 'Maria Santos', data: '20/01/2026', entrada: '08:15', saida: '17:10', horas: '8:55', status: 'regular', metodo: 'Web' },
+                    { funcionario: 'Ana Costa', data: '20/01/2026', entrada: '08:45', saida: '17:30', horas: '8:45', status: 'atrasado', metodo: 'Facial' },
+                    { funcionario: 'Administrador Sistema', data: '20/01/2026', entrada: '07:55', saida: '18:00', horas: '10:05', status: 'regular', metodo: 'Web' }
                 ];
                 
                 pontos.forEach(ponto => {
                     const row = pontosTbody.insertRow();
+                    
+                    let statusHTML = '';
+                    if (ponto.status === 'regular') {
+                        statusHTML = '<span class="status-badge status-presente">✅ Regular</span>';
+                    } else {
+                        statusHTML = '<span class="status-badge status-atrasado">⚠️ Atrasado</span>';
+                    }
+                    
                     row.innerHTML = `
                         <td>${ponto.funcionario}</td>
                         <td>${ponto.data}</td>
                         <td>${ponto.entrada}</td>
                         <td>${ponto.saida}</td>
-                        <td>${ponto.horas}</td>
-                        <td>
-                            <span style="
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 0.8rem;
-                                background: ${ponto.status === 'regular' ? '#d4edda' : '#fff3cd'};
-                                color: ${ponto.status === 'regular' ? '#155724' : '#856404'};
-                            ">
-                                ${ponto.status === 'regular' ? '✅ Regular' : '⚠️ Atrasado'}
-                            </span>
-                        </td>
+                        <td><strong>${ponto.horas}</strong></td>
+                        <td>${statusHTML}</td>
+                        <td>${ponto.metodo}</td>
                     `;
                 });
             }
         }
+        
+        // Funções globais para os botões
+        window.editarFuncionario = function(email) {
+            window.utils?.mostrarMensagem(`✏️ Editando funcionário: ${email}`, 'info');
+        };
+        
+        window.excluirFuncionario = function(email) {
+            if (confirm(`Tem certeza que deseja excluir o funcionário ${email}?`)) {
+                window.utils?.mostrarMensagem(`🗑️ Funcionário ${email} excluído (simulação)`, 'info');
+            }
+        };
     </script>
 </body>
 </html>
