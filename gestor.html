@@ -3,223 +3,1063 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor - Essencial Print</title>
+    <title>Painel do Gestor - Essencial Print</title>
     
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-        
-        .header {
-            background: #1a237e;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .form-container {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        
-        button:hover {
-            background: #45a049;
-        }
-        
-        .user-list {
+
+        header {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
-        
-        .user-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        .logout-btn {
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo h1 {
+            color: #1a237e;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #3949ab;
+            font-weight: 300;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info h3 {
+            color: #1a237e;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #1a237e;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eaf6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-logout {
             background: #f44336;
-            width: auto;
-            padding: 8px 15px;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #e8eaf6;
+            color: #1a237e;
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #1a237e;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a237e;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #1a237e;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3949ab;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #1a237e;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #1a237e;
+            border-bottom: 3px solid #1a237e;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-presente {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-atrasado {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-falta {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>👑 Painel do Gestor</h1>
-        <p>Criar e gerenciar usuários do sistema</p>
-        <button class="logout-btn" onclick="logout()">Sair</button>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>Essencial<span>Print</span></h1>
+            </div>
+            <div class="user-info">
+                <h3 id="userName">Gestor</h3>
+                <p id="userCargo">Painel Administrativo</p>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <!-- Estatísticas -->
+            <div class="card">
+                <h2>📊 Estatísticas Gerais</h2>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Será preenchido por JavaScript -->
+                </div>
+            </div>
+
+            <!-- Funcionários Ativos -->
+            <div class="card">
+                <h2>👥 Funcionários Ativos 
+                    <button class="btn btn-success" onclick="openModal('novoFuncionario')">+ Novo</button>
+                </h2>
+                <div class="search-box">
+                    <input type="text" id="searchFuncionarios" placeholder="Buscar funcionário..." onkeyup="filtrarFuncionarios()">
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="tabelaFuncionarios">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Registros do Dia -->
+            <div class="card">
+                <h2>📅 Registros de Hoje</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="tabelaRegistros">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Horário</th>
+                                <th>Tipo</th>
+                                <th>Localização</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Justificativas Pendentes -->
+            <div class="card">
+                <h2>⏳ Justificativas Pendentes</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="tabelaJustificativas">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatórios -->
+        <div class="card" style="margin-bottom: 25px;">
+            <h2>📈 Relatórios</h2>
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="openTab('relatorioMensal')">Mensal</button>
+                <button class="tab-btn" onclick="openTab('relatorioFuncionario')">Por Funcionário</button>
+                <button class="tab-btn" onclick="openTab('relatorioAtrasos')">Atrasos</button>
+            </div>
+            
+            <div id="relatorioMensal" class="tab-content active">
+                <div class="form-group">
+                    <label for="mesRelatorio">Mês:</label>
+                    <input type="month" id="mesRelatorio" class="form-control" onchange="gerarRelatorioMensal()">
+                </div>
+                <div id="relatorioMensalContent">
+                    <!-- Conteúdo do relatório mensal -->
+                </div>
+            </div>
+            
+            <div id="relatorioFuncionario" class="tab-content">
+                <div class="form-group">
+                    <label for="funcionarioRelatorio">Funcionário:</label>
+                    <select id="funcionarioRelatorio" class="form-control" onchange="gerarRelatorioFuncionario()">
+                        <option value="">Selecione um funcionário</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="periodoRelatorio">Período:</label>
+                    <input type="month" id="periodoRelatorio" class="form-control" onchange="gerarRelatorioFuncionario()">
+                </div>
+                <div id="relatorioFuncionarioContent">
+                    <!-- Conteúdo do relatório por funcionário -->
+                </div>
+            </div>
+            
+            <div id="relatorioAtrasos" class="tab-content">
+                <div class="form-group">
+                    <label for="periodoAtrasos">Período:</label>
+                    <input type="month" id="periodoAtrasos" class="form-control" onchange="gerarRelatorioAtrasos()">
+                </div>
+                <div id="relatorioAtrasosContent">
+                    <!-- Conteúdo do relatório de atrasos -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Essencial Print &copy; 2024 - Painel Administrativo</p>
+            <p>Acesso restrito a gestores autorizados</p>
+        </footer>
     </div>
-    
-    <div class="form-container">
-        <h2>Criar Novo Usuário</h2>
-        <input type="text" id="nome" placeholder="Nome completo">
-        <input type="email" id="email" placeholder="E-mail">
-        <input type="password" id="senha" placeholder="Senha">
-        <input type="text" id="cpf" placeholder="CPF">
-        <input type="text" id="cargo" placeholder="Cargo">
-        <input type="text" id="departamento" placeholder="Departamento">
-        <select id="tipo">
-            <option value="funcionario">Funcionário</option>
-            <option value="gestor">Gestor</option>
-        </select>
-        <button onclick="criarUsuario()">Criar Usuário</button>
+
+    <!-- Modal Novo Funcionário -->
+    <div id="modalNovoFuncionario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Cadastrar Novo Funcionário</h3>
+                <button class="close-modal" onclick="closeModal('novoFuncionario')">×</button>
+            </div>
+            <form id="formNovoFuncionario" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="nomeFuncionario">Nome Completo *</label>
+                    <input type="text" id="nomeFuncionario" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="emailFuncionario">E-mail *</label>
+                    <input type="email" id="emailFuncionario" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="senhaFuncionario">Senha *</label>
+                    <input type="password" id="senhaFuncionario" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="cpfFuncionario">CPF</label>
+                    <input type="text" id="cpfFuncionario" class="form-control" placeholder="000.000.000-00">
+                </div>
+                <div class="form-group">
+                    <label for="cargoFuncionario">Cargo *</label>
+                    <input type="text" id="cargoFuncionario" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="departamentoFuncionario">Departamento *</label>
+                    <input type="text" id="departamentoFuncionario" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="salarioFuncionario">Salário (R$)</label>
+                    <input type="number" id="salarioFuncionario" class="form-control" step="0.01" placeholder="0,00">
+                </div>
+                <div class="form-group">
+                    <label for="dataAdmissao">Data de Admissão</label>
+                    <input type="date" id="dataAdmissao" class="form-control">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-primary" onclick="cadastrarFuncionario()" style="flex: 1;">Cadastrar</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('novoFuncionario')" style="flex: 1;">Cancelar</button>
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <div class="user-list">
-        <h2>Usuários Cadastrados</h2>
-        <div id="listaUsuarios">Carregando...</div>
+
+    <!-- Modal Ver Justificativa -->
+    <div id="modalVerJustificativa" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Justificativa</h3>
+                <button class="close-modal" onclick="closeModal('verJustificativa')">×</button>
+            </div>
+            <div id="justificativaContent">
+                <!-- Conteúdo da justificativa -->
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;" id="justificativaActions">
+                <!-- Botões de aprovar/rejeitar -->
+            </div>
+        </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - USE A MESMA
+        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyB...",
-            authDomain: "essencial-print.firebaseapp.com",
-            projectId: "essencial-print",
-            storageBucket: "essencial-print.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
         };
         
-        // Inicializar
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
+        // Inicializar Firebase
+        let db, auth;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+            auth = firebase.auth();
+        } catch (error) {
+            console.error('Erro Firebase:', error);
+        }
+
         // Verificar se é gestor
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Verificar no Firestore se é gestor
-                db.collection('usuarios').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().tipo === 'gestor') {
-                        carregarUsuarios();
-                    } else {
-                        alert('Acesso restrito a gestores!');
-                        window.location.href = 'index.html';
-                    }
-                });
+                verificarPermissaoGestor(user.uid);
             } else {
                 window.location.href = 'index.html';
             }
         });
-        
-        async function criarUsuario() {
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            const cpf = document.getElementById('cpf').value;
-            const cargo = document.getElementById('cargo').value;
-            const departamento = document.getElementById('departamento').value;
-            const tipo = document.getElementById('tipo').value;
+
+        async function verificarPermissaoGestor(userId) {
+            try {
+                const userDoc = await db.collection('usuarios').doc(userId).get();
+                
+                if (!userDoc.exists || userDoc.data().tipo !== 'gestor') {
+                    alert('Acesso restrito a gestores!');
+                    logout();
+                    return;
+                }
+                
+                // Configurar dados do gestor
+                const userData = userDoc.data();
+                document.getElementById('userName').textContent = userData.nome;
+                document.getElementById('userCargo').textContent = `${userData.cargo} - ${userData.departamento}`;
+                
+                // Carregar dados
+                carregarFuncionarios();
+                carregarRegistrosHoje();
+                carregarJustificativasPendentes();
+                carregarEstatisticas();
+                carregarSelectFuncionarios();
+                
+            } catch (error) {
+                console.error('Erro verificação:', error);
+                alert('Erro ao verificar permissões!');
+            }
+        }
+
+        // FUNÇÕES PRINCIPAIS
+        async function carregarFuncionarios() {
+            try {
+                const snapshot = await db.collection('usuarios')
+                    .where('tipo', '==', 'funcionario')
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaFuncionarios tbody');
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="5" style="text-align: center;">Nenhum funcionário cadastrado</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const func = doc.data();
+                        html += `
+                            <tr>
+                                <td>${func.nome}</td>
+                                <td>${func.email}</td>
+                                <td>${func.cargo || 'Não informado'}</td>
+                                <td><span class="status-badge status-presente">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="editarFuncionario('${doc.id}')">Editar</button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="excluirFuncionario('${doc.id}')">Excluir</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro carregar funcionários:', error);
+            }
+        }
+
+        async function carregarRegistrosHoje() {
+            try {
+                const hoje = new Date().toISOString().split('T')[0];
+                const snapshot = await db.collection('pontos')
+                    .where('data', '==', hoje)
+                    .orderBy('timestamp', 'desc')
+                    .limit(50)
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="4" style="text-align: center;">Nenhum registro hoje</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const reg = doc.data();
+                        html += `
+                            <tr>
+                                <td>${reg.funcionarioNome}</td>
+                                <td>${reg.horario}</td>
+                                <td>${reg.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
+                                <td>${reg.localizacao.latitude ? '📍' : '--'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro carregar registros:', error);
+            }
+        }
+
+        async function carregarJustificativasPendentes() {
+            try {
+                const snapshot = await db.collection('justificativas')
+                    .where('status', '==', 'pendente')
+                    .orderBy('dataEnvio', 'desc')
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaJustificativas tbody');
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="4" style="text-align: center;">Nenhuma justificativa pendente</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const just = doc.data();
+                        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
+                        const tipoTexto = {
+                            'atraso': 'Atraso',
+                            'falta': 'Falta',
+                            'saida_antecipada': 'Saída Antecipada',
+                            'outro': 'Outro'
+                        }[just.tipo] || just.tipo;
+                        
+                        html += `
+                            <tr>
+                                <td>${just.funcionarioNome}</td>
+                                <td>${dataBR}</td>
+                                <td>${tipoTexto}</td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="verJustificativa('${doc.id}')">Ver</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro carregar justificativas:', error);
+            }
+        }
+
+        async function carregarEstatisticas() {
+            try {
+                // Total de funcionários
+                const funcionariosSnapshot = await db.collection('usuarios')
+                    .where('tipo', '==', 'funcionario')
+                    .get();
+                
+                const totalFuncionarios = funcionariosSnapshot.size;
+                
+                // Registros de hoje
+                const hoje = new Date().toISOString().split('T')[0];
+                const registrosSnapshot = await db.collection('pontos')
+                    .where('data', '==', hoje)
+                    .get();
+                
+                const totalRegistrosHoje = registrosSnapshot.size;
+                
+                // Justificativas pendentes
+                const justificativasSnapshot = await db.collection('justificativas')
+                    .where('status', '==', 'pendente')
+                    .get();
+                
+                const totalJustificativasPendentes = justificativasSnapshot.size;
+                
+                // Atrasos do mês (simulação)
+                const hojeObj = new Date();
+                const primeiroDiaMes = new Date(hojeObj.getFullYear(), hojeObj.getMonth(), 1).toISOString().split('T')[0];
+                const ultimoDiaMes = new Date(hojeObj.getFullYear(), hojeObj.getMonth() + 1, 0).toISOString().split('T')[0];
+                
+                const atrasosSnapshot = await db.collection('justificativas')
+                    .where('tipo', '==', 'atraso')
+                    .where('data', '>=', primeiroDiaMes)
+                    .where('data', '<=', ultimoDiaMes)
+                    .get();
+                
+                const totalAtrasosMes = atrasosSnapshot.size;
+                
+                // Atualizar interface
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${totalFuncionarios}</div>
+                        <div class="stat-label">Funcionários</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalRegistrosHoje}</div>
+                        <div class="stat-label">Registros Hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalJustificativasPendentes}</div>
+                        <div class="stat-label">Pendentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalAtrasosMes}</div>
+                        <div class="stat-label">Atrasos/Mês</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Erro estatísticas:', error);
+            }
+        }
+
+        async function carregarSelectFuncionarios() {
+            try {
+                const snapshot = await db.collection('usuarios')
+                    .where('tipo', '==', 'funcionario')
+                    .get();
+                
+                const select = document.getElementById('funcionarioRelatorio');
+                let html = '<option value="">Selecione um funcionário</option>';
+                
+                snapshot.forEach(doc => {
+                    const func = doc.data();
+                    html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
+                });
+                
+                select.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro carregar select:', error);
+            }
+        }
+
+        // FUNÇÕES DE CADASTRO
+        async function cadastrarFuncionario() {
+            const nome = document.getElementById('nomeFuncionario').value.trim();
+            const email = document.getElementById('emailFuncionario').value.trim();
+            const senha = document.getElementById('senhaFuncionario').value;
+            const cpf = document.getElementById('cpfFuncionario').value.trim();
+            const cargo = document.getElementById('cargoFuncionario').value.trim();
+            const departamento = document.getElementById('departamentoFuncionario').value.trim();
+            const salario = document.getElementById('salarioFuncionario').value;
+            const dataAdmissao = document.getElementById('dataAdmissao').value;
             
-            if (!nome || !email || !senha) {
-                alert('Preencha nome, email e senha!');
+            if (!nome || !email || !senha || !cargo || !departamento) {
+                alert('Preencha todos os campos obrigatórios (*)');
                 return;
             }
             
             try {
-                // Criar usuário no Authentication
+                // 1. Criar usuário no Authentication
                 const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
-                const user = userCredential.user;
+                const userId = userCredential.user.uid;
                 
-                // Salvar dados no Firestore
-                await db.collection('usuarios').doc(user.uid).set({
+                // 2. Criar no Firestore
+                await db.collection('usuarios').doc(userId).set({
                     nome: nome,
                     email: email,
                     cpf: cpf,
                     cargo: cargo,
                     departamento: departamento,
-                    tipo: tipo,
-                    dataCriacao: new Date().toISOString()
+                    salario: salario ? parseFloat(salario) : null,
+                    dataAdmissao: dataAdmissao || null,
+                    tipo: 'funcionario',
+                    dataCriacao: new Date().toISOString(),
+                    status: 'ativo'
                 });
                 
-                alert('✅ Usuário criado com sucesso!');
-                
-                // Limpar formulário
-                document.getElementById('nome').value = '';
-                document.getElementById('email').value = '';
-                document.getElementById('senha').value = '';
-                document.getElementById('cpf').value = '';
-                document.getElementById('cargo').value = '';
-                document.getElementById('departamento').value = '';
-                
-                // Atualizar lista
-                carregarUsuarios();
+                alert('✅ Funcionário cadastrado com sucesso!');
+                closeModal('novoFuncionario');
+                document.getElementById('formNovoFuncionario').reset();
+                carregarFuncionarios();
+                carregarSelectFuncionarios();
+                carregarEstatisticas();
                 
             } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro: ' + error.message);
+                console.error('Erro cadastrar:', error);
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('Este e-mail já está cadastrado!');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('A senha deve ter pelo menos 6 caracteres!');
+                } else {
+                    alert('Erro ao cadastrar funcionário: ' + error.message);
+                }
             }
         }
-        
-        async function carregarUsuarios() {
+
+        // FUNÇÕES DE JUSTIFICATIVAS
+        async function verJustificativa(justificativaId) {
             try {
-                const snapshot = await db.collection('usuarios').get();
-                const lista = document.getElementById('listaUsuarios');
+                const doc = await db.collection('justificativas').doc(justificativaId).get();
                 
-                if (snapshot.empty) {
-                    lista.innerHTML = '<p>Nenhum usuário cadastrado</p>';
+                if (!doc.exists) {
+                    alert('Justificativa não encontrada!');
                     return;
                 }
                 
-                let html = '';
-                snapshot.forEach(doc => {
-                    const user = doc.data();
-                    html += `
-                        <div class="user-item">
-                            <div>
-                                <strong>${user.nome}</strong><br>
-                                <small>${user.email} | ${user.tipo}</small>
-                            </div>
-                            <div>
-                                ${user.cargo || ''}
-                            </div>
-                        </div>
-                    `;
-                });
+                const justificativa = doc.data();
+                const dataBR = new Date(justificativa.data).toLocaleDateString('pt-BR');
+                const tipoTexto = {
+                    'atraso': 'Atraso',
+                    'falta': 'Falta',
+                    'saida_antecipada': 'Saída Antecipada',
+                    'outro': 'Outro'
+                }[justificativa.tipo] || justificativa.tipo;
                 
-                lista.innerHTML = html;
+                document.getElementById('justificativaContent').innerHTML = `
+                    <p><strong>Funcionário:</strong> ${justificativa.funcionarioNome}</p>
+                    <p><strong>Data:</strong> ${dataBR}</p>
+                    <p><strong>Tipo:</strong> ${tipoTexto}</p>
+                    <p><strong>Descrição:</strong></p>
+                    <p style="background: #f5f5f5; padding: 15px; border-radius: 8px;">${justificativa.descricao}</p>
+                    <p><strong>Enviada em:</strong> ${new Date(justificativa.dataEnvio).toLocaleString('pt-BR')}</p>
+                `;
+                
+                document.getElementById('justificativaActions').innerHTML = `
+                    <button class="btn btn-success" style="flex: 1;" onclick="aprovarJustificativa('${justificativaId}')">✅ Aprovar</button>
+                    <button class="btn btn-danger" style="flex: 1;" onclick="rejeitarJustificativa('${justificativaId}')">❌ Rejeitar</button>
+                `;
+                
+                openModal('verJustificativa');
                 
             } catch (error) {
-                console.error('Erro ao carregar usuários:', error);
+                console.error('Erro ver justificativa:', error);
             }
         }
-        
-        function logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
+
+        async function aprovarJustificativa(justificativaId) {
+            if (!confirm('Tem certeza que deseja aprovar esta justificativa?')) return;
+            
+            try {
+                await db.collection('justificativas').doc(justificativaId).update({
+                    status: 'aprovado',
+                    dataAnalise: new Date().toISOString(),
+                    analisadoPor: auth.currentUser.uid
+                });
+                
+                alert('✅ Justificativa aprovada!');
+                closeModal('verJustificativa');
+                carregarJustificativasPendentes();
+                carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro aprovar:', error);
+                alert('Erro ao aprovar justificativa!');
+            }
+        }
+
+        async function rejeitarJustificativa(justificativaId) {
+            if (!confirm('Tem certeza que deseja rejeitar esta justificativa?')) return;
+            
+            try {
+                await db.collection('justificativas').doc(justificativaId).update({
+                    status: 'rejeitado',
+                    dataAnalise: new Date().toISOString(),
+                    analisadoPor: auth.currentUser.uid
+                });
+                
+                alert('❌ Justificativa rejeitada!');
+                closeModal('verJustificativa');
+                carregarJustificativasPendentes();
+                carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro rejeitar:', error);
+                alert('Erro ao rejeitar justificativa!');
+            }
+        }
+
+        // FUNÇÕES DE RELATÓRIOS
+        async function gerarRelatorioMensal() {
+            const mesAno = document.getElementById('mesRelatorio').value;
+            if (!mesAno) return;
+            
+            try {
+                const [ano, mes] = mesAno.split('-');
+                const primeiroDia = `${ano}-${mes}-01`;
+                const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
+                
+                // Buscar registros do mês
+                const snapshot = await db.collection('pontos')
+                    .where('data', '>=', primeiroDia)
+                    .where('data', '<=', ultimoDia)
+                    .get();
+                
+                let totalRegistros = snapshot.size;
+                let entradas = 0;
+                let saidas = 0;
+                
+                snapshot.forEach(doc => {
+                    const reg = doc.data();
+                    if (reg.tipo === 'entrada') entradas++;
+                    if (reg.tipo === 'saida') saidas++;
+                });
+                
+                const mesNome = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                
+                document.getElementById('relatorioMensalContent').innerHTML = `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h4>Relatório de ${mesNome}</h4>
+                        <div class="stats-grid" style="margin-top: 15px;">
+                            <div class="stat-card">
+                                <div class="stat-number">${totalRegistros}</div>
+                                <div class="stat-label">Total Registros</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${entradas}</div>
+                                <div class="stat-label">Entradas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${saidas}</div>
+                                <div class="stat-label">Saídas</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${Math.round((entradas + saidas) / 2)}</div>
+                                <div class="stat-label">Dias Úteis</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Erro relatório:', error);
+            }
+        }
+
+        // FUNÇÕES AUXILIARES
+        function openModal(modalName) {
+            document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`).style.display = 'flex';
+        }
+
+        function closeModal(modalName) {
+            document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`).style.display = 'none';
+        }
+
+        function openTab(tabName) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function filtrarFuncionarios() {
+            const input = document.getElementById('searchFuncionarios').value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaFuncionarios tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
             });
         }
+
+        function logout() {
+            if (confirm('Deseja realmente sair?')) {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('usuario_logado');
+                    localStorage.removeItem('funcionario_logado');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar data atual nos inputs
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            document.getElementById('mesRelatorio').value = mesAtual;
+            document.getElementById('periodoRelatorio').value = mesAtual;
+            document.getElementById('periodoAtrasos').value = mesAtual;
+            document.getElementById('dataAdmissao').value = hoje;
+            
+            // Gerar relatório inicial
+            gerarRelatorioMensal();
+        });
     </script>
 </body>
 </html>
