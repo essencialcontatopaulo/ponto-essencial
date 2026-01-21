@@ -12,15 +12,14 @@ const firebaseConfig = {
 let firebaseApp;
 let db;
 let auth;
-
-try {
-    firebaseApp = firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    auth = firebase.auth();
-    console.log('Firebase inicializado com sucesso!');
-} catch (error) {
-    console.error('Erro ao inicializar Firebase:', error);
-}
+const firebaseConfig = {
+    apiKey: "AIzaSyB...",  // ← SEU apiKey AQUI
+    authDomain: "essencial-print.firebaseapp.com",  // ← SEU authDomain
+    projectId: "essencial-print",  // ← SEU projectId
+    storageBucket: "essencial-print.appspot.com",  // ← SEU storageBucket
+    messagingSenderId: "123456789",  // ← SEU messagingSenderId
+    appId: "1:123456789:web:abcdef123456"  // ← SEU appId
+};
 
 // Funções utilitárias
 function getCurrentUser() {
