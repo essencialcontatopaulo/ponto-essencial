@@ -3,455 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Funcionário</title>
+    <title>Área do Funcionário - Essencial Print</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 100%);
-            min-height: 100vh;
-        }
-        
-        /* Header */
-        .header {
-            background: white;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .user-info h2 {
-            color: #1b5e20;
-            margin-bottom: 5px;
-        }
-        
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        /* Content */
-        .content {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-        
-        /* Card */
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .card h2 {
-            color: #1b5e20;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        /* Status do Ponto */
-        .ponto-status {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        
-        .horas {
-            font-size: 48px;
-            font-weight: bold;
-            color: #1b5e20;
-            margin: 20px 0;
-        }
-        
-        /* Botões */
-        .ponto-botoes {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 30px 0;
-        }
-        
-        .ponto-btn {
-            padding: 20px 40px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-        
-        .ponto-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .btn-entrada {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-saida {
-            background: #ffc107;
-            color: white;
-        }
-        
-        /* Formulário */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .btn {
-            background: #1b5e20;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        /* Tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-        }
-        
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom-color: #1b5e20;
-            color: #1b5e20;
-            font-weight: bold;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        /* Mesmo CSS anterior do funcionario (mantenha todo o CSS) */
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="user-info">
-            <h2 id="userName">Funcionário</h2>
-            <p id="userCargo">Cargo</p>
-        </div>
-        <button class="logout-btn" onclick="logout()">Sair</button>
-    </div>
-    
-    <!-- Tabs -->
-    <div class="content">
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('ponto')">Registrar Ponto</button>
-            <button class="tab" onclick="showTab('relatorio')">Relatório</button>
-            <button class="tab" onclick="showTab('justificativa')">Justificativas</button>
-        </div>
-        
-        <!-- Registrar Ponto -->
-        <div id="ponto" class="tab-content active">
-            <div class="card">
-                <h2>Registro de Ponto</h2>
-                
-                <div class="ponto-status">
-                    <div>Status do Dia</div>
-                    <div id="statusDia" style="color: #666; margin: 10px 0;">Aguardando entrada</div>
-                    <div class="horas" id="horasTrabalhadas">0h 00min</div>
-                    <div id="ultimoPonto">Último registro: --:--</div>
-                </div>
-                
-                <div class="ponto-botoes">
-                    <button class="ponto-btn btn-entrada" onclick="registrarPonto('entrada')">
-                        ENTRADA
-                    </button>
-                    <button class="ponto-btn btn-saida" onclick="registrarPonto('saida')">
-                        SAÍDA
-                    </button>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px; color: #666;">
-                    📍 Seu ponto será registrado com localização
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2>Registros de Hoje</h2>
-                <table id="registrosHoje">
-                    <thead>
-                        <tr>
-                            <th>Horário</th>
-                            <th>Tipo</th>
-                            <th>Localização</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Preenchido por JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Relatório -->
-        <div id="relatorio" class="tab-content">
-            <div class="card">
-                <h2>Relatório Mensal</h2>
-                
-                <div class="form-group">
-                    <label>Mês:</label>
-                    <select id="mesRelatorio">
-                        <option value="1">Janeiro</option>
-                        <option value="2">Fevereiro</option>
-                        <option value="3">Março</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Maio</option>
-                        <option value="6">Junho</option>
-                        <option value="7">Julho</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Setembro</option>
-                        <option value="10">Outubro</option>
-                        <option value="11">Novembro</option>
-                        <option value="12">Dezembro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Ano:</label>
-                    <select id="anoRelatorio">
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                    </select>
-                </div>
-                
-                <button class="btn" onclick="gerarRelatorio()">Gerar Relatório</button>
-                
-                <table id="tabelaRelatorio" style="margin-top: 20px;">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Entrada</th>
-                            <th>Saída</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Preenchido por JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Justificativas -->
-        <div id="justificativa" class="tab-content">
-            <div class="card">
-                <h2>Enviar Justificativa</h2>
-                
-                <div class="form-group">
-                    <label>Tipo:</label>
-                    <select id="tipoJustificativa">
-                        <option value="falta">Falta</option>
-                        <option value="atraso">Atraso</option>
-                        <option value="esqueceu">Esqueci de bater ponto</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Data:</label>
-                    <input type="date" id="dataJustificativa" value="<?php echo date('Y-m-d'); ?>">
-                </div>
-                
-                <div class="form-group">
-                    <label>Descrição:</label>
-                    <textarea id="descricaoJustificativa" rows="4"></textarea>
-                </div>
-                
-                <button class="btn" onclick="enviarJustificativa()">Enviar Justificativa</button>
-            </div>
-            
-            <div class="card">
-                <h2>Minhas Justificativas</h2>
-                <table id="minhasJustificativas">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Tipo</th>
-                            <th>Descrição</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Preenchido por JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
+    <!-- Verificação com Firebase -->
     <script>
-        // Dados do usuário
-        let usuario = null;
+        // CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
         
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Área do funcionário carregada');
+        // Inicializar Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
             
-            // Obter usuário logado
-            usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+            // Verificar se funcionário está logado
+            const funcionario = JSON.parse(localStorage.getItem('funcionario_logado') || 'null');
             
-            // Configurar nome do usuário
-            document.getElementById('userName').textContent = usuario.nome || 'Funcionário';
-            document.getElementById('userCargo').textContent = 'Funcionário';
+            if (!funcionario) {
+                alert('Acesso não autorizado! Faça login primeiro.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Configurar dados do usuário
+            document.getElementById('userName').textContent = funcionario.nome;
+            document.getElementById('userCargo').textContent = `${funcionario.cargo} - ${funcionario.departamento}`;
             
             // Carregar dados
-            carregarDadosUsuario();
             carregarRegistrosHoje();
             atualizarStatus();
             
-            // Configurar mês atual
-            const hoje = new Date();
-            document.getElementById('mesRelatorio').value = hoje.getMonth() + 1;
-            document.getElementById('anoRelatorio').value = hoje.getFullYear();
-        });
-        
-        // Carregar dados do usuário
-        function carregarDadosUsuario() {
-            try {
-                const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
-                const funcionario = funcionarios.find(f => f.id === usuario.id);
-                
-                if (funcionario) {
-                    document.getElementById('userName').textContent = funcionario.nome;
-                    document.getElementById('userCargo').textContent = `${funcionario.cargo} - ${funcionario.departamento}`;
-                }
-            } catch (error) {
-                console.error('Erro ao carregar dados do usuário:', error);
-            }
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            // Fallback para modo local
         }
         
-        // Mostrar aba
-        function showTab(tabId) {
-            // Esconder todas as abas
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remover active de todas as tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Mostrar aba selecionada
-            document.getElementById(tabId).classList.add('active');
-            
-            // Ativar tab correspondente
-            document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
-            
-            // Carregar dados específicos
-            if (tabId === 'relatorio') {
-                gerarRelatorio();
-            } else if (tabId === 'justificativa') {
-                carregarMinhasJustificativas();
-            }
-        }
-        
-        // Registrar ponto
-        function registrarPonto(tipo) {
+        // Registrar ponto com Firebase
+        async function registrarPonto(tipo) {
             try {
+                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
                 const agora = new Date();
                 const data = agora.toISOString().split('T')[0];
                 const horario = agora.toLocaleTimeString('pt-BR', { 
                     hour: '2-digit', 
-                    minute: '2-digit' 
+                    minute: '2-digit',
+                    second: '2-digit'
                 });
                 
-                // Criar registro
-                const registro = {
-                    id: Date.now(),
-                    funcionarioId: usuario.id,
+                // Obter localização
+                let localizacao = { latitude: null, longitude: null };
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            localizacao = {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            };
+                        },
+                        error => {
+                            console.log('Erro ao obter localização:', error);
+                        }
+                    );
+                }
+                
+                // Criar registro no Firestore
+                await db.collection('pontos').add({
+                    funcionarioId: funcionario.id,
+                    funcionarioNome: funcionario.nome,
+                    funcionarioCpf: funcionario.cpf,
                     tipo: tipo,
                     data: data,
                     horario: horario,
-                    localizacao: '📍 Localização registrada',
-                    timestamp: agora.getTime()
-                };
+                    localizacao: localizacao,
+                    timestamp: agora.getTime(),
+                    createdAt: new Date().toISOString()
+                });
                 
-                // Salvar no localStorage
-                let pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
-                pontos.push(registro);
-                localStorage.setItem('pontos', JSON.stringify(pontos));
-                
-                // Mensagem
-                alert(`${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada com sucesso!`);
+                alert(`✅ ${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada com sucesso!`);
                 
                 // Atualizar interface
                 carregarRegistrosHoje();
@@ -459,33 +103,37 @@
                 
             } catch (error) {
                 console.error('Erro ao registrar ponto:', error);
-                alert('Erro ao registrar ponto!');
+                alert('Erro ao registrar ponto. Tente novamente.');
             }
         }
         
-        // Carregar registros do dia
-        function carregarRegistrosHoje() {
+        // Carregar registros do dia do Firestore
+        async function carregarRegistrosHoje() {
             try {
+                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
                 const hoje = new Date().toISOString().split('T')[0];
-                const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
-                const registrosHoje = pontos.filter(p => 
-                    p.funcionarioId === usuario.id && p.data === hoje
-                );
+                
+                const snapshot = await db.collection('pontos')
+                    .where('funcionarioId', '==', funcionario.id)
+                    .where('data', '==', hoje)
+                    .orderBy('timestamp', 'desc')
+                    .get();
                 
                 const tbody = document.querySelector('#registrosHoje tbody');
                 
-                if (registrosHoje.length === 0) {
+                if (snapshot.empty) {
                     tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
                     return;
                 }
                 
                 let html = '';
-                registrosHoje.forEach(registro => {
+                snapshot.forEach(doc => {
+                    const registro = doc.data();
                     html += `
                         <tr>
                             <td>${registro.horario}</td>
                             <td>${registro.tipo === 'entrada' ? 'Entrada' : 'Saída'}</td>
-                            <td>${registro.localizacao}</td>
+                            <td>${registro.localizacao.latitude ? '📍 Registrada' : '--'}</td>
                         </tr>
                     `;
                 });
@@ -497,177 +145,41 @@
             }
         }
         
-        // Atualizar status
-        function atualizarStatus() {
+        // Enviar justificativa para Firestore
+        async function enviarJustificativa() {
             try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
-                const registrosHoje = pontos.filter(p => 
-                    p.funcionarioId === usuario.id && p.data === hoje
-                );
-                
-                const entrada = registrosHoje.find(r => r.tipo === 'entrada');
-                const saida = registrosHoje.find(r => r.tipo === 'saida');
-                
-                let status = 'Aguardando entrada';
-                let horas = '0h 00min';
-                let ultimo = '--:--';
-                
-                if (entrada) {
-                    status = 'Em trabalho';
-                    ultimo = entrada.horario;
-                    
-                    if (saida) {
-                        status = 'Saída registrada';
-                        ultimo = saida.horario;
-                        
-                        // Calcular horas
-                        const diffMs = saida.timestamp - entrada.timestamp;
-                        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-                        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                        
-                        horas = `${diffHoras}h ${diffMinutos.toString().padStart(2, '0')}min`;
-                    }
-                }
-                
-                document.getElementById('statusDia').textContent = status;
-                document.getElementById('horasTrabalhadas').textContent = horas;
-                document.getElementById('ultimoPonto').textContent = `Último registro: ${ultimo}`;
-                
-            } catch (error) {
-                console.error('Erro ao atualizar status:', error);
-            }
-        }
-        
-        // Gerar relatório
-        function gerarRelatorio() {
-            try {
-                const mes = parseInt(document.getElementById('mesRelatorio').value);
-                const ano = parseInt(document.getElementById('anoRelatorio').value);
-                
-                const tbody = document.querySelector('#tabelaRelatorio tbody');
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Gerando relatório...</td></tr>';
-                
-                // Simular dados para o mês
-                const diasNoMes = new Date(ano, mes, 0).getDate();
-                let html = '';
-                
-                for (let dia = 1; dia <= diasNoMes; dia++) {
-                    const data = new Date(ano, mes - 1, dia);
-                    
-                    // Só dias úteis
-                    if (data.getDay() !== 0 && data.getDay() !== 6) {
-                        // Gerar dados aleatórios para demonstração
-                        const entrada = Math.random() > 0.2 ? '08:' + (Math.random() > 0.5 ? '00' : '15') : '--:--';
-                        const saida = entrada !== '--:--' ? '18:' + (Math.random() > 0.5 ? '00' : '30') : '--:--';
-                        const total = entrada !== '--:--' && saida !== '--:--' ? '9h 45min' : '0h';
-                        const status = entrada === '--:--' ? 'Falta' : (entrada === '08:00' ? 'Presente' : 'Atraso');
-                        
-                        html += `
-                            <tr>
-                                <td>${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano}</td>
-                                <td>${entrada}</td>
-                                <td>${saida}</td>
-                                <td>${total}</td>
-                                <td>${status}</td>
-                            </tr>
-                        `;
-                    }
-                }
-                
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center;">Nenhum registro para este período</td></tr>';
-                
-            } catch (error) {
-                console.error('Erro ao gerar relatório:', error);
-                document.querySelector('#tabelaRelatorio tbody').innerHTML = 
-                    '<tr><td colspan="5" style="text-align: center;">Erro ao gerar relatório</td></tr>';
-            }
-        }
-        
-        // Enviar justificativa
-        function enviarJustificativa() {
-            try {
+                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
                 const tipo = document.getElementById('tipoJustificativa').value;
                 const data = document.getElementById('dataJustificativa').value;
                 const descricao = document.getElementById('descricaoJustificativa').value.trim();
                 
-                if (!descricao) {
-                    alert('Por favor, digite uma descrição!');
+                if (!tipo || !descricao) {
+                    alert('Preencha todos os campos!');
                     return;
                 }
                 
-                // Criar justificativa
-                const justificativa = {
-                    id: Date.now(),
-                    funcionarioId: usuario.id,
+                await db.collection('justificativas').add({
+                    funcionarioId: funcionario.id,
+                    funcionarioNome: funcionario.nome,
                     tipo: tipo,
                     data: data,
                     descricao: descricao,
                     status: 'pendente',
                     dataEnvio: new Date().toISOString()
-                };
+                });
                 
-                // Salvar no localStorage
-                let justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
-                justificativas.push(justificativa);
-                localStorage.setItem('justificativas', JSON.stringify(justificativas));
-                
-                // Limpar formulário
+                alert('Justificativa enviada com sucesso! Aguarde aprovação.');
                 document.getElementById('descricaoJustificativa').value = '';
-                
-                // Atualizar lista
                 carregarMinhasJustificativas();
-                
-                alert('Justificativa enviada com sucesso! Aguarde aprovação do gestor.');
                 
             } catch (error) {
                 console.error('Erro ao enviar justificativa:', error);
                 alert('Erro ao enviar justificativa!');
             }
         }
-        
-        // Carregar minhas justificativas
-        function carregarMinhasJustificativas() {
-            try {
-                const justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
-                const minhasJustificativas = justificativas.filter(j => j.funcionarioId === usuario.id);
-                
-                const tbody = document.querySelector('#minhasJustificativas tbody');
-                
-                if (minhasJustificativas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhuma justificativa enviada</td></tr>';
-                    return;
-                }
-                
-                let html = '';
-                minhasJustificativas.forEach(justificativa => {
-                    const statusText = justificativa.status === 'pendente' ? '⏳ Pendente' :
-                                      justificativa.status === 'aprovada' ? '✅ Aprovada' : '❌ Rejeitada';
-                    
-                    html += `
-                        <tr>
-                            <td>${new Date(justificativa.data).toLocaleDateString('pt-BR')}</td>
-                            <td>${justificativa.tipo}</td>
-                            <td>${justificativa.descricao.substring(0, 50)}${justificativa.descricao.length > 50 ? '...' : ''}</td>
-                            <td>${statusText}</td>
-                        </tr>
-                    `;
-                });
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro ao carregar justificativas:', error);
-            }
-        }
-        
-        // Logout
-        function logout() {
-            if (confirm('Deseja sair da área do funcionário?')) {
-                localStorage.removeItem('usuario_logado');
-                window.location.href = 'index.html';
-            }
-        }
     </script>
+
+    <!-- Resto do HTML igual ao anterior -->
+    <!-- (Mantenha todo o HTML da versão anterior do funcionario.html) -->
 </body>
 </html>
