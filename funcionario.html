@@ -8,6 +8,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
         * {
@@ -439,9 +440,8 @@
         </footer>
     </div>
 
-    <!-- Firebase SDK -->
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO DO FIREBASE - MESMA DO INDEX.HTML
         const firebaseConfig = {
             apiKey: "AIzaSyB...",
             authDomain: "essencial-print.firebaseapp.com",
@@ -452,47 +452,81 @@
         };
         
         // Inicializar Firebase
-        let db;
+        let db, auth;
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
+            auth = firebase.auth();
         } catch (error) {
             console.error('Erro ao inicializar Firebase:', error);
         }
 
-        // Verificar se funcionário está logado
-        document.addEventListener('DOMContentLoaded', function() {
-            const funcionario = JSON.parse(localStorage.getItem('funcionario_logado') || 'null');
-            
-            if (!funcionario) {
+        // Verificar autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuário está autenticado
+                carregarDadosFuncionario(user.uid);
+            } else {
+                // Usuário não está autenticado
                 alert('Acesso não autorizado! Faça login primeiro.');
                 window.location.href = 'index.html';
-                return;
-            }
-            
-            // Configurar dados do usuário
-            document.getElementById('userName').textContent = funcionario.nome;
-            document.getElementById('userCargo').textContent = `${funcionario.cargo} - ${funcionario.departamento}`;
-            
-            // Configurar data atual no campo de justificativa
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataJustificativa').value = hoje;
-            
-            // Iniciar relógio
-            atualizarRelogio();
-            setInterval(atualizarRelogio, 1000);
-            
-            // Carregar dados
-            if (db) {
-                carregarRegistrosHoje();
-                carregarMinhasJustificativas();
-                atualizarStatus();
-            } else {
-                alert('Erro de conexão. Algumas funcionalidades podem não estar disponíveis.');
             }
         });
 
-        // Funções
+        async function carregarDadosFuncionario(userId) {
+            try {
+                // Buscar dados do funcionário no Firestore
+                const userDoc = await db.collection('usuarios').doc(userId).get();
+                
+                if (!userDoc.exists) {
+                    alert('Dados do funcionário não encontrados!');
+                    logout();
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                
+                // Verificar se é realmente um funcionário
+                if (userData.tipo !== 'funcionario') {
+                    alert('Acesso restrito a funcionários!');
+                    logout();
+                    return;
+                }
+                
+                // Configurar dados do usuário na interface
+                document.getElementById('userName').textContent = userData.nome;
+                document.getElementById('userCargo').textContent = `${userData.cargo || 'Funcionário'} - ${userData.departamento || 'Não informado'}`;
+                
+                // Salvar dados no localStorage para compatibilidade
+                const funcionarioInfo = {
+                    id: userId,
+                    nome: userData.nome,
+                    cpf: userData.cpf || '',
+                    cargo: userData.cargo || 'Funcionário',
+                    departamento: userData.departamento || 'Não informado'
+                };
+                
+                localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
+                
+                // Configurar data atual no campo de justificativa
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('dataJustificativa').value = hoje;
+                
+                // Iniciar relógio
+                atualizarRelogio();
+                setInterval(atualizarRelogio, 1000);
+                
+                // Carregar dados
+                carregarRegistrosHoje();
+                carregarMinhasJustificativas();
+                atualizarStatus();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados do funcionário!');
+            }
+        }
+
         function atualizarRelogio() {
             const agora = new Date();
             const hora = agora.toLocaleTimeString('pt-BR');
@@ -720,8 +754,13 @@
         
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                localStorage.removeItem('funcionario_logado');
-                window.location.href = 'index.html';
+                auth.signOut().then(() => {
+                    localStorage.removeItem('funcionario_logado');
+                    localStorage.removeItem('usuario_logado');
+                    window.location.href = 'index.html';
+                }).catch(error => {
+                    console.error('Erro ao sair:', error);
+                });
             }
         }
     </script>
