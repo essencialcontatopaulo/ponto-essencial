@@ -468,34 +468,116 @@ window.utils = (function() {
         });
     };
     
-    utils.gerarCorAleatoria = function() {
-        const cores = [
-            '#2E8B57', '#1b5e20', '#388E3C', '#4CAF50',
-            '#2196F3', '#1976D2', '#0097A7', '#00796B',
-            '#7B1FA2', '#512DA8', '#303F9F', '#1976D2'
-        ];
-        return cores[Math.floor(Math.random() * cores.length)];
+    utils.obterLocalizacao = function() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocalização não suportada'));
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        precisao: position.coords.accuracy,
+                        timestamp: new Date(position.timestamp)
+                    });
+                },
+                (error) => {
+                    let mensagem = 'Erro ao obter localização';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            mensagem = 'Permissão de localização negada';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            mensagem = 'Localização indisponível';
+                            break;
+                        case error.TIMEOUT:
+                            mensagem = 'Tempo limite excedido';
+                            break;
+                    }
+                    
+                    reject(new Error(mensagem));
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
     };
     
-    utils.formatarBytes = function(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    utils.calcularDistancia = function(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Raio da Terra em km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distancia = R * c;
+        
+        return {
+            km: distancia,
+            metros: distancia * 1000,
+            formatado: distancia < 1 ? 
+                `${(distancia * 1000).toFixed(0)} metros` : 
+                `${distancia.toFixed(2)} km`
+        };
     };
     
-    utils.validarData = function(data) {
-        if (!data) return false;
-        const d = new Date(data);
-        return d instanceof Date && !isNaN(d);
+    utils.obterEnderecoPorCoordenadas = async function(latitude, longitude) {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+            
+            if (!response.ok) {
+                throw new Error('Erro ao buscar endereço');
+            }
+            
+            const data = await response.json();
+            
+            return {
+                endereco: data.display_name || 'Endereço não disponível',
+                rua: data.address?.road || '',
+                numero: data.address?.house_number || '',
+                bairro: data.address?.suburb || data.address?.neighbourhood || '',
+                cidade: data.address?.city || data.address?.town || data.address?.village || '',
+                estado: data.address?.state || '',
+                cep: data.address?.postcode || '',
+                pais: data.address?.country || ''
+            };
+            
+        } catch (error) {
+            console.error('❌ Erro ao obter endereço:', error);
+            return {
+                endereco: 'Localização não disponível',
+                erro: error.message
+            };
+        }
     };
     
-    utils.diferencaDias = function(data1, data2) {
-        const d1 = new Date(data1);
-        const d2 = new Date(data2);
-        const diffTime = Math.abs(d2 - d1);
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    utils.verificarProximidade = function(latUsuario, lonUsuario, latEmpresa, lonEmpresa, raioMaximoMetros = 100) {
+        const distancia = utils.calcularDistancia(latUsuario, lonUsuario, latEmpresa, lonEmpresa);
+        
+        return {
+            dentroDoRaio: distancia.metros <= raioMaximoMetros,
+            distancia: distancia,
+            mensagem: distancia.metros <= raioMaximoMetros ? 
+                `✅ Dentro do raio permitido (${distancia.formatado})` :
+                `❌ Fora do raio permitido (${distancia.formatado})`
+        };
+    };
+    
+    utils.formatarLocalizacao = function(localizacao) {
+        if (!localizacao) return 'Localização não disponível';
+        
+        return `📍 Lat: ${localizacao.latitude.toFixed(6)}, Lon: ${localizacao.longitude.toFixed(6)}`;
     };
     
     return utils;
