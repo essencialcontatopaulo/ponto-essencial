@@ -69,6 +69,11 @@
             font-weight: 700;
         }
 
+        .logo span {
+            color: #3949ab;
+            font-weight: 300;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -165,6 +170,30 @@
             font-size: 18px;
         }
 
+        .test-credentials {
+            background: #e8eaf6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .test-credentials h4 {
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+
+        .test-credentials button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
         @media (max-width: 480px) {
             .login-body {
                 padding: 30px 20px;
@@ -215,9 +244,15 @@
                 </div>
                 
                 <button type="submit" class="btn-login" onclick="login()">
-                    <span>🔐</span> Entrar
+                    <span>🔐</span> Entrar no Sistema
                 </button>
             </form>
+
+            <div class="test-credentials">
+                <h4>🔧 Credenciais de Teste (Clique para preencher)</h4>
+                <button onclick="preencherCredenciais('gestor')">👑 Acesso Gestor</button>
+                <button onclick="preencherCredenciais('funcionario')">👤 Acesso Funcionário</button>
+            </div>
             
             <div class="login-footer">
                 <p>Em caso de problemas, entre em contato com o RH</p>
@@ -229,7 +264,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO DO FIREBASE - CORRETA
         const firebaseConfig = {
             apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
             authDomain: "essencial-print-5a753.firebaseapp.com",
@@ -274,6 +309,18 @@
             setTimeout(() => {
                 errorDiv.classList.remove('show');
             }, 5000);
+        }
+
+        function preencherCredenciais(tipo) {
+            if (tipo === 'gestor') {
+                document.getElementById('email').value = 'gestor@essencialprint.com';
+                document.getElementById('password').value = 'Gestor123@';
+                showError('Credenciais de gestor preenchidas. Clique em "Entrar no Sistema".');
+            } else if (tipo === 'funcionario') {
+                document.getElementById('email').value = 'essencial.contatoana@gmail.com';
+                document.getElementById('password').value = '202610Ana@';
+                showError('Credenciais de funcionário preenchidas. Clique em "Entrar no Sistema".');
+            }
         }
 
         // Função principal de login
@@ -335,8 +382,10 @@
                     
                     // Redirecionar conforme o tipo de usuário
                     if (userData.tipo === 'gestor') {
+                        console.log("🔄 Redirecionando para gestor.html");
                         window.location.href = 'gestor.html';
                     } else {
+                        console.log("🔄 Redirecionando para funcionario.html");
                         window.location.href = 'funcionario.html';
                     }
                     
@@ -344,30 +393,58 @@
                     // Se usuário existe no Auth mas não no Firestore
                     console.warn("⚠️ Usuário não encontrado no Firestore");
                     
-                    // Criar dados básicos
-                    const userInfo = {
-                        id: user.uid,
-                        email: user.email,
-                        nome: user.email.split('@')[0],
-                        cargo: 'Funcionário',
-                        departamento: 'Não informado',
-                        tipo: 'funcionario'
-                    };
-                    
-                    localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
-                    
-                    // Criar no Firestore para próxima vez
-                    await db.collection('usuarios').doc(user.uid).set({
-                        nome: userInfo.nome,
-                        email: user.email,
-                        tipo: 'funcionario',
-                        cargo: userInfo.cargo,
-                        departamento: userInfo.departamento,
-                        dataCriacao: new Date().toISOString()
-                    });
-                    
-                    // Redirecionar para área do funcionário
-                    window.location.href = 'funcionario.html';
+                    // Verificar se é o gestor padrão
+                    if (email === 'gestor@essencialprint.com') {
+                        // Criar gestor automaticamente no Firestore
+                        await db.collection('usuarios').doc(user.uid).set({
+                            nome: 'Administrador Gestor',
+                            email: email,
+                            tipo: 'gestor',
+                            cargo: 'Gestor',
+                            departamento: 'Administração',
+                            dataCriacao: new Date().toISOString(),
+                            status: 'ativo'
+                        });
+                        
+                        const userInfo = {
+                            id: user.uid,
+                            email: user.email,
+                            nome: 'Administrador Gestor',
+                            cargo: 'Gestor',
+                            departamento: 'Administração',
+                            tipo: 'gestor'
+                        };
+                        
+                        localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                        console.log("🔄 Redirecionando para gestor.html (criado automaticamente)");
+                        window.location.href = 'gestor.html';
+                        
+                    } else {
+                        // Para outros usuários, criar como funcionário
+                        const userInfo = {
+                            id: user.uid,
+                            email: user.email,
+                            nome: user.email.split('@')[0],
+                            cargo: 'Funcionário',
+                            departamento: 'Não informado',
+                            tipo: 'funcionario'
+                        };
+                        
+                        localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                        
+                        // Criar no Firestore para próxima vez
+                        await db.collection('usuarios').doc(user.uid).set({
+                            nome: userInfo.nome,
+                            email: user.email,
+                            tipo: 'funcionario',
+                            cargo: userInfo.cargo,
+                            departamento: userInfo.departamento,
+                            dataCriacao: new Date().toISOString()
+                        });
+                        
+                        console.log("🔄 Redirecionando para funcionario.html");
+                        window.location.href = 'funcionario.html';
+                    }
                 }
                 
             } catch (error) {
@@ -376,25 +453,69 @@
                 // Tratamento de erros
                 switch (error.code) {
                     case 'auth/user-not-found':
-                        showError('Usuário não encontrado.');
+                        // Se tentou login como gestor mas não existe, criar automaticamente
+                        if (email === 'gestor@essencialprint.com') {
+                            try {
+                                // Criar usuário gestor automaticamente
+                                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                                const user = userCredential.user;
+                                
+                                // Criar no Firestore
+                                await db.collection('usuarios').doc(user.uid).set({
+                                    nome: 'Administrador Gestor',
+                                    email: email,
+                                    tipo: 'gestor',
+                                    cargo: 'Gestor',
+                                    departamento: 'Administração',
+                                    dataCriacao: new Date().toISOString(),
+                                    status: 'ativo'
+                                });
+                                
+                                const userInfo = {
+                                    id: user.uid,
+                                    email: user.email,
+                                    nome: 'Administrador Gestor',
+                                    cargo: 'Gestor',
+                                    departamento: 'Administração',
+                                    tipo: 'gestor'
+                                };
+                                
+                                localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                                
+                                alert('✅ Gestor criado automaticamente! Redirecionando...');
+                                window.location.href = 'gestor.html';
+                                return;
+                                
+                            } catch (createError) {
+                                showError('Erro ao criar gestor: ' + createError.message);
+                            }
+                        } else {
+                            showError('Usuário não encontrado.');
+                        }
                         break;
+                        
                     case 'auth/wrong-password':
                         showError('Senha incorreta.');
                         break;
+                        
                     case 'auth/invalid-email':
                         showError('E-mail inválido.');
                         break;
+                        
                     case 'auth/invalid-login-credentials':
                         showError('Credenciais inválidas.');
                         break;
+                        
                     case 'auth/user-disabled':
                         showError('Esta conta foi desativada.');
                         break;
+                        
                     case 'auth/network-request-failed':
-                        showError('Erro de conexão.');
+                        showError('Erro de conexão. Verifique sua internet.');
                         break;
+                        
                     default:
-                        showError('Erro ao fazer login.');
+                        showError('Erro ao fazer login: ' + error.message);
                 }
                 
                 loginBtn.innerHTML = originalText;
@@ -422,6 +543,12 @@
                     window.location.href = 'funcionario.html';
                 }
             }
+            
+            // Testar automaticamente as credenciais de gestor
+            setTimeout(() => {
+                console.log("🔍 Testando credenciais de gestor automaticamente...");
+                preencherCredenciais('gestor');
+            }, 1000);
         });
     </script>
 </body>
