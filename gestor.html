@@ -1,40 +1,1497 @@
-<!-- REMOVA o script antigo e COLE este no início do gestor.html: -->
-<script>
-    // Verificação de login - CORRIGIDO
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("👑 Verificando acesso do gestor...");
-        
-        // Verificar se usuário está logado
-        const usuarioJson = localStorage.getItem('ponto_user');
-        
-        if (!usuarioJson) {
-            console.log("❌ Nenhum usuário logado");
-            alert('⚠️ Faça login para acessar esta área!');
-            window.location.href = 'index.html?v=' + Date.now();
-            return;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Gestor - Sistema de Ponto</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        try {
-            const usuario = JSON.parse(usuarioJson);
-            console.log("📋 Usuário encontrado:", usuario);
+        body {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Verificação de Login */
+        .login-check {
+            display: none;
+        }
+        
+        /* Header */
+        .gestor-header {
+            background: linear-gradient(135deg, #1b5e20, #2E8B57);
+            color: white;
+            padding: 25px 40px;
+            box-shadow: 0 4px 15px rgba(27, 94, 32, 0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header-info p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Navegação */
+        .gestor-nav {
+            background: white;
+            border-bottom: 3px solid #E8F5E9;
+            padding: 0 40px;
+            display: flex;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-tab {
+            padding: 20px 30px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: #555;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab:hover {
+            background: #F1F8E9;
+            color: #1b5e20;
+        }
+        
+        .nav-tab.active {
+            color: #1b5e20;
+            border-bottom-color: #1b5e20;
+            background: #F1F8E9;
+            font-weight: 600;
+        }
+        
+        /* Conteúdo */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Cards e Sections */
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #1b5e20;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E8F5E9;
+            font-size: 1.5rem;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #F8F9FA, #E9ECEF);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #DEE2E6;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1b5e20;
+            margin: 15px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* Formulários */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #C8E6C9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        /* Botões */
+        .btn {
+            background: linear-gradient(135deg, #1b5e20, #2E8B57);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #2E8B57, #388E3C);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(27, 94, 32, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+        
+        /* Tabelas */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th {
+            background: #E8F5E9;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #C8E6C9;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid #E8F5E9;
+        }
+        
+        .table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .table tr:hover {
+            background: #F1F8E9;
+        }
+        
+        /* Badges */
+        .badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .badge-success {
+            background: #C8E6C9;
+            color: #1b5e20;
+        }
+        
+        .badge-warning {
+            background: #FFF3CD;
+            color: #856404;
+        }
+        
+        .badge-danger {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .badge-info {
+            background: #D1ECF1;
+            color: #0c5460;
+        }
+        
+        /* Mensagens */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+        
+        /* Funcionários Grid */
+        .funcionarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .funcionario-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #E8F5E9;
+            transition: all 0.3s;
+        }
+        
+        .funcionario-card:hover {
+            box-shadow: 0 10px 30px rgba(27, 94, 32, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .funcionario-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .funcionario-foto {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4CAF50;
+            background: #E8F5E9;
+        }
+        
+        .funcionario-nome {
+            font-weight: 600;
+            color: #1b5e20;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .funcionario-cargo {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .funcionario-detalhes {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .funcionario-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Filtros */
+        .filtros {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            align-items: flex-end;
+        }
+        
+        .filtro-group {
+            min-width: 200px;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .gestor-nav {
+                padding: 0 20px;
+            }
             
-            if (usuario.tipo !== 'gestor') {
-                console.log("❌ Usuário não é gestor:", usuario.tipo);
-                alert('❌ Acesso restrito! Apenas gestores podem acessar esta área.');
-                window.location.href = 'index.html?v=' + Date.now();
+            .nav-tab {
+                padding: 15px 20px;
+                font-size: 15px;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .funcionarios-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filtros {
+                flex-direction: column;
+            }
+            
+            .filtro-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Verificação de Login -->
+    <script>
+        const usuario = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
+        
+        if (!usuario || usuario.tipo !== 'gestor') {
+            alert('Acesso restrito! Faça login como gestor.');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Header -->
+    <div class="gestor-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1>Área do Gestor</h1>
+                <p>Logado como: <strong id="gestorNome">Administrador</strong></p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+    
+    <!-- Navegação -->
+    <nav class="gestor-nav">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-tab" data-tab="cadastro">Cadastrar Funcionário</button>
+        <button class="nav-tab" data-tab="funcionarios">Funcionários</button>
+        <button class="nav-tab" data-tab="pontos">Controle de Ponto</button>
+        <button class="nav-tab" data-tab="relatorios">Relatórios</button>
+        <button class="nav-tab" data-tab="justificativas">Justificativas</button>
+        <button class="nav-tab" data-tab="config">Configurações</button>
+    </nav>
+    
+    <!-- Conteúdo -->
+    <div class="container">
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <div class="section">
+                <h2 class="section-title">Dashboard Geral</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Funcionários Ativos</div>
+                        <div class="stat-value" id="totalFuncionarios">0</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Pontos Hoje</div>
+                        <div class="stat-value" id="pontosHoje">0</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Faltas Hoje</div>
+                        <div class="stat-value" id="faltasHoje">0</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Presença (%)</div>
+                        <div class="stat-value" id="taxaPresenca">0%</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">Ações Rápidas</h3>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn" onclick="abrirAba('cadastro')">
+                            Cadastrar Funcionário
+                        </button>
+                        <button class="btn" onclick="abrirAba('pontos')">
+                            Ver Pontos do Dia
+                        </button>
+                        <button class="btn" onclick="gerarRelatorio('diario')">
+                            Gerar Relatório Diário
+                        </button>
+                        <button class="btn" onclick="abrirAba('justificativas')">
+                            Ver Justificativas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cadastro de Funcionário -->
+        <div id="cadastro" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Cadastrar Novo Funcionário</h2>
+                
+                <div id="cadastroMessage" class="alert alert-info">
+                    Preencha todos os campos obrigatórios para cadastrar um novo funcionário.
+                </div>
+                
+                <form id="formCadastro">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nome Completo *</label>
+                            <input type="text" class="form-control" id="nome" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">CPF *</label>
+                            <input type="text" class="form-control" id="cpf" required maxlength="14">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">RG</label>
+                            <input type="text" class="form-control" id="rg">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="nascimento">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">E-mail *</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Telefone *</label>
+                            <input type="tel" class="form-control" id="telefone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Senha *</label>
+                            <input type="password" class="form-control" id="senha" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Confirmar Senha *</label>
+                            <input type="password" class="form-control" id="confirmarSenha" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Cargo *</label>
+                            <input type="text" class="form-control" id="cargo" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Departamento *</label>
+                            <select class="form-control" id="departamento" required>
+                                <option value="">Selecione...</option>
+                                <option value="ti">TI</option>
+                                <option value="rh">RH</option>
+                                <option value="vendas">Vendas</option>
+                                <option value="financeiro">Financeiro</option>
+                                <option value="producao">Produção</option>
+                                <option value="administrativo">Administrativo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Data de Admissão *</label>
+                            <input type="date" class="form-control" id="admissao" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Salário Base (R$)</label>
+                            <input type="number" class="form-control" id="salario" step="0.01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Horário de Trabalho</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="time" class="form-control" id="horarioEntrada" value="08:00">
+                                <input type="time" class="form-control" id="horarioSaida" value="18:00">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-control" id="status">
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="ferias">Férias</option>
+                                <option value="afastado">Afastado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px; text-align: center;">
+                        <button type="submit" class="btn" style="padding: 18px 40px; font-size: 18px;">
+                            Salvar Funcionário
+                        </button>
+                        <button type="reset" class="btn btn-secondary" style="margin-left: 15px;">
+                            Limpar Formulário
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Funcionários Cadastrados -->
+        <div id="funcionarios" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Funcionários Cadastrados</h2>
+                
+                <div class="filtros">
+                    <div class="filtro-group">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" class="form-control" id="buscarFuncionario" 
+                               placeholder="Nome, CPF ou cargo...">
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Departamento</label>
+                        <select class="form-control" id="filtroDepartamento">
+                            <option value="todos">Todos</option>
+                            <option value="ti">TI</option>
+                            <option value="rh">RH</option>
+                            <option value="vendas">Vendas</option>
+                            <option value="financeiro">Financeiro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="filtroStatus">
+                            <option value="todos">Todos</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" onclick="filtrarFuncionarios()">Filtrar</button>
+                    <button class="btn btn-secondary" onclick="exportarFuncionarios()">Exportar</button>
+                </div>
+                
+                <div id="listaFuncionarios" class="funcionarios-grid">
+                    <!-- Preenchido por JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controle de Ponto -->
+        <div id="pontos" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Controle de Ponto</h2>
+                
+                <div class="filtros">
+                    <div class="filtro-group">
+                        <label class="form-label">Data</label>
+                        <input type="date" class="form-control" id="dataPonto" 
+                               value="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Departamento</label>
+                        <select class="form-control" id="deptoPonto">
+                            <option value="todos">Todos</option>
+                            <option value="ti">TI</option>
+                            <option value="rh">RH</option>
+                            <option value="vendas">Vendas</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" onclick="carregarPontos()">Buscar</button>
+                    <button class="btn btn-secondary" onclick="exportarPontos()">Exportar</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="tabelaPontos">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>CPF</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Horas</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Relatórios -->
+        <div id="relatorios" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Relatórios</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="gerarRelatorio('diario')" style="cursor: pointer;">
+                        <div class="stat-label">Relatório Diário</div>
+                        <div class="stat-value">📅</div>
+                        <p style="color: #666; margin-top: 10px;">Pontuação do dia atual</p>
+                    </div>
+                    
+                    <div class="stat-card" onclick="gerarRelatorio('mensal')" style="cursor: pointer;">
+                        <div class="stat-label">Relatório Mensal</div>
+                        <div class="stat-value">📊</div>
+                        <p style="color: #666; margin-top: 10px;">Resumo mensal completo</p>
+                    </div>
+                    
+                    <div class="stat-card" onclick="gerarRelatorio('funcionario')" style="cursor: pointer;">
+                        <div class="stat-label">Por Funcionário</div>
+                        <div class="stat-value">👤</div>
+                        <p style="color: #666; margin-top: 10px;">Histórico individual</p>
+                    </div>
+                    
+                    <div class="stat-card" onclick="gerarRelatorio('horas')" style="cursor: pointer;">
+                        <div class="stat-label">Horas Extras</div>
+                        <div class="stat-value">💰</div>
+                        <p style="color: #666; margin-top: 10px;">Cálculo de adicional</p>
+                    </div>
+                </div>
+                
+                <div class="section" style="margin-top: 40px;">
+                    <h3 class="section-title">Relatório Personalizado</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control" id="dataInicio">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Data Final</label>
+                            <input type="date" class="form-control" id="dataFim">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Departamento</label>
+                            <select class="form-control" id="deptoRelatorio">
+                                <option value="todos">Todos</option>
+                                <option value="ti">TI</option>
+                                <option value="rh">RH</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Formato</label>
+                            <select class="form-control" id="formatoRelatorio">
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                                <option value="html">HTML</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn" onclick="gerarRelatorioPersonalizado()" 
+                                style="padding: 18px 50px; font-size: 18px;">
+                            Gerar Relatório
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Justificativas -->
+        <div id="justificativas" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Justificativas Pendentes</h2>
+                
+                <div class="filtros">
+                    <div class="filtro-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="filtroStatusJustificativa">
+                            <option value="pendente">Pendentes</option>
+                            <option value="aprovada">Aprovadas</option>
+                            <option value="rejeitada">Rejeitadas</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Data</label>
+                        <input type="date" class="form-control" id="dataJustificativa">
+                    </div>
+                    
+                    <button class="btn" onclick="carregarJustificativas()">Filtrar</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="tabelaJustificativas">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações -->
+        <div id="config" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Configurações do Sistema</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nome da Empresa</label>
+                        <input type="text" class="form-control" id="nomeEmpresa" 
+                               value="Minha Empresa Ltda.">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Horário Padrão Entrada</label>
+                        <input type="time" class="form-control" id="configEntrada" value="08:00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Horário Padrão Saída</label>
+                        <input type="time" class="form-control" id="configSaida" value="18:00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tolerância Atraso (min)</label>
+                        <input type="number" class="form-control" id="tolerancia" value="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Horas Trabalho/Dia</label>
+                        <input type="number" class="form-control" id="horasDia" value="8" step="0.5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Limite Horas Extras</label>
+                        <input type="number" class="form-control" id="limiteHoras" value="2" step="0.5">
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn" onclick="salvarConfiguracoes()">
+                        Salvar Configurações
+                    </button>
+                </div>
+                
+                <div style="margin-top: 50px; border-top: 2px solid #E8F5E9; padding-top: 30px;">
+                    <h3 class="section-title">Ações do Sistema</h3>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn" onclick="fazerBackup()">
+                            Backup dos Dados
+                        </button>
+                        
+                        <button class="btn btn-secondary" onclick="limparCache()">
+                            Limpar Cache
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="resetarSistema()">
+                            Resetar Sistema
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========== INICIALIZAÇÃO ===========
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Área do gestor carregada!');
+            
+            // Configurar nome do gestor
+            const usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+            document.getElementById('gestorNome').textContent = usuario.nome || 'Administrador';
+            
+            // Configurar abas
+            configurarAbas();
+            
+            // Carregar dashboard
+            carregarDashboard();
+            
+            // Configurar formatação de inputs
+            configurarFormatacao();
+            
+            // Configurar formulário de cadastro
+            configurarFormCadastro();
+            
+            // Carregar data atual nos campos
+            document.getElementById('admissao').value = new Date().toISOString().split('T')[0];
+            document.getElementById('nascimento').value = '1990-01-01';
+        });
+        
+        // =========== FUNÇÕES DO SISTEMA ===========
+        
+        function configurarAbas() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remover active de todos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // Adicionar ao clicado
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Carregar conteúdo específico
+                    switch(tabId) {
+                        case 'funcionarios':
+                            carregarFuncionarios();
+                            break;
+                        case 'pontos':
+                            carregarPontos();
+                            break;
+                        case 'justificativas':
+                            carregarJustificativas();
+                            break;
+                    }
+                });
+            });
+        }
+        
+        function abrirAba(abaId) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-tab') === abaId) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === abaId) {
+                    content.classList.add('active');
+                }
+            });
+        }
+        
+        function carregarDashboard() {
+            // Carregar estatísticas
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            const pontosHoje = pontos.filter(p => p.data === hoje);
+            
+            const ativos = funcionarios.filter(f => f.status === 'ativo');
+            const faltas = funcionarios.length - pontosHoje.length;
+            const taxa = funcionarios.length > 0 ? 
+                Math.round((pontosHoje.length / funcionarios.length) * 100) : 0;
+            
+            // Atualizar estatísticas
+            document.getElementById('totalFuncionarios').textContent = ativos.length;
+            document.getElementById('pontosHoje').textContent = pontosHoje.length;
+            document.getElementById('faltasHoje').textContent = faltas > 0 ? faltas : 0;
+            document.getElementById('taxaPresenca').textContent = taxa + '%';
+        }
+        
+        function configurarFormatacao() {
+            // Formatar CPF
+            const cpfInput = document.getElementById('cpf');
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.substring(0, 11);
+                    
+                    if (value.length > 9) {
+                        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                    } else if (value.length > 6) {
+                        value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                    } else if (value.length > 3) {
+                        value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                    }
+                    
+                    e.target.value = value;
+                });
+            }
+            
+            // Formatar telefone
+            const telInput = document.getElementById('telefone');
+            if (telInput) {
+                telInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.substring(0, 11);
+                    
+                    if (value.length > 10) {
+                        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                    } else if (value.length > 6) {
+                        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                    } else if (value.length > 2) {
+                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                    }
+                    
+                    e.target.value = value;
+                });
+            }
+        }
+        
+        function configurarFormCadastro() {
+            const form = document.getElementById('formCadastro');
+            const msgDiv = document.getElementById('cadastroMessage');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Verificar senhas
+                const senha = document.getElementById('senha').value;
+                const confirmar = document.getElementById('confirmarSenha').value;
+                
+                if (senha !== confirmar) {
+                    msgDiv.innerHTML = '❌ As senhas não coincidem!';
+                    msgDiv.className = 'alert alert-warning';
+                    return;
+                }
+                
+                // Coletar dados
+                const funcionario = {
+                    id: Date.now(),
+                    nome: document.getElementById('nome').value.trim(),
+                    cpf: document.getElementById('cpf').value,
+                    rg: document.getElementById('rg').value,
+                    nascimento: document.getElementById('nascimento').value,
+                    email: document.getElementById('email').value.trim(),
+                    telefone: document.getElementById('telefone').value,
+                    senha: senha,
+                    cargo: document.getElementById('cargo').value.trim(),
+                    departamento: document.getElementById('departamento').value,
+                    admissao: document.getElementById('admissao').value,
+                    salario: parseFloat(document.getElementById('salario').value) || 0,
+                    horarioEntrada: document.getElementById('horarioEntrada').value,
+                    horarioSaida: document.getElementById('horarioSaida').value,
+                    status: document.getElementById('status').value,
+                    dataCadastro: new Date().toISOString(),
+                    ativo: true
+                };
+                
+                // Validar campos obrigatórios
+                if (!funcionario.nome || !funcionario.cpf || !funcionario.email || !funcionario.cargo || !funcionario.departamento) {
+                    msgDiv.innerHTML = '❌ Preencha todos os campos obrigatórios!';
+                    msgDiv.className = 'alert alert-warning';
+                    return;
+                }
+                
+                // Salvar no localStorage
+                let funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+                funcionarios.push(funcionario);
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                
+                // Mensagem de sucesso
+                msgDiv.innerHTML = `✅ Funcionário <strong>${funcionario.nome}</strong> cadastrado com sucesso!`;
+                msgDiv.className = 'alert alert-success';
+                
+                // Limpar formulário
+                form.reset();
+                
+                // Restaurar valores padrão
+                document.getElementById('admissao').value = new Date().toISOString().split('T')[0];
+                document.getElementById('horarioEntrada').value = '08:00';
+                document.getElementById('horarioSaida').value = '18:00';
+                document.getElementById('status').value = 'ativo';
+                
+                // Atualizar dashboard
+                carregarDashboard();
+                
+                // Ir para lista de funcionários após 2 segundos
+                setTimeout(() => {
+                    abrirAba('funcionarios');
+                    carregarFuncionarios();
+                }, 2000);
+            });
+        }
+        
+        function carregarFuncionarios() {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const container = document.getElementById('listaFuncionarios');
+            
+            if (funcionarios.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                        <h3 style="color: #666; margin-bottom: 20px;">Nenhum funcionário cadastrado</h3>
+                        <button class="btn" onclick="abrirAba('cadastro')">
+                            Cadastrar Primeiro Funcionário
+                        </button>
+                    </div>
+                `;
                 return;
             }
             
-            // Se chegou aqui, é gestor válido
-            console.log(`✅ Gestor autorizado: ${usuario.nome}`);
-            
-            // Remover verificações antigas do localStorage
-            localStorage.removeItem('gestor_logged_in');
-            
-        } catch (error) {
-            console.error("❌ Erro ao verificar usuário:", error);
-            alert('❌ Erro ao verificar acesso. Faça login novamente.');
-            window.location.href = 'index.html?v=' + Date.now();
+            container.innerHTML = funcionarios.map(func => `
+                <div class="funcionario-card">
+                    <div class="funcionario-header">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: #E8F5E9; 
+                                    display: flex; align-items: center; justify-content: center; 
+                                    border: 3px solid #4CAF50; color: #1b5e20; font-weight: bold; font-size: 1.5rem;">
+                            ${func.nome.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="funcionario-nome">${func.nome}</div>
+                            <div class="funcionario-cargo">${func.cargo} - ${func.departamento}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="funcionario-detalhes">
+                        <p><strong>CPF:</strong> ${func.cpf}</p>
+                        <p><strong>E-mail:</strong> ${func.email}</p>
+                        <p><strong>Telefone:</strong> ${func.telefone}</p>
+                        <p><strong>Admissão:</strong> ${new Date(func.admissao).toLocaleDateString('pt-BR')}</p>
+                        <p><strong>Horário:</strong> ${func.horarioEntrada} às ${func.horarioSaida}</p>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <span class="badge ${func.status === 'ativo' ? 'badge-success' : 'badge-danger'}">
+                            ${func.status}
+                        </span>
+                        <div class="funcionario-actions">
+                            <button class="btn" onclick="editarFuncionario(${func.id})" 
+                                    style="padding: 8px 15px; font-size: 14px;">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger" onclick="excluirFuncionario(${func.id})" 
+                                    style="padding: 8px 15px; font-size: 14px;">
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
-    });
-</script>
+        
+        function filtrarFuncionarios() {
+            // Implementar filtragem
+            carregarFuncionarios();
+        }
+        
+        function editarFuncionario(id) {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const funcionario = funcionarios.find(f => f.id === id);
+            
+            if (funcionario) {
+                // Preencher formulário
+                Object.keys(funcionario).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element && funcionario[key]) {
+                        element.value = funcionario[key];
+                    }
+                });
+                
+                // Ir para aba de cadastro
+                abrirAba('cadastro');
+                
+                // Alterar botão para "Atualizar"
+                const form = document.getElementById('formCadastro');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Atualizar Funcionário';
+                submitBtn.onclick = function(e) {
+                    e.preventDefault();
+                    atualizarFuncionario(id);
+                };
+            }
+        }
+        
+        function atualizarFuncionario(id) {
+            // Coletar dados atualizados
+            const funcionario = {
+                nome: document.getElementById('nome').value,
+                cpf: document.getElementById('cpf').value,
+                // ... coletar todos os campos
+            };
+            
+            // Atualizar no localStorage
+            let funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const index = funcionarios.findIndex(f => f.id === id);
+            
+            if (index !== -1) {
+                funcionarios[index] = { ...funcionarios[index], ...funcionario };
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                
+                alert('✅ Funcionário atualizado com sucesso!');
+                carregarFuncionarios();
+                abrirAba('funcionarios');
+            }
+        }
+        
+        function excluirFuncionario(id) {
+            if (confirm('Tem certeza que deseja excluir este funcionário?\nEsta ação não pode ser desfeita.')) {
+                let funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+                funcionarios = funcionarios.filter(f => f.id !== id);
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                
+                alert('✅ Funcionário excluído com sucesso!');
+                carregarFuncionarios();
+                carregarDashboard();
+            }
+        }
+        
+        function carregarPontos() {
+            const data = document.getElementById('dataPonto').value;
+            const depto = document.getElementById('deptoPonto').value;
+            
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            
+            let pontosFiltrados = pontos.filter(p => p.data === data);
+            
+            if (depto !== 'todos') {
+                const funcionariosDepto = funcionarios.filter(f => f.departamento === depto);
+                pontosFiltrados = pontosFiltrados.filter(p => 
+                    funcionariosDepto.some(f => f.id === p.funcionarioId)
+                );
+            }
+            
+            const tbody = document.querySelector('#tabelaPontos tbody');
+            
+            if (pontosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            Nenhum ponto registrado para esta data.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pontosFiltrados.map(ponto => {
+                    const funcionario = funcionarios.find(f => f.id === ponto.funcionarioId);
+                    
+                    if (!funcionario) return '';
+                    
+                    let status = 'Presente';
+                    let statusClass = 'badge-success';
+                    
+                    if (ponto.entrada && !ponto.saida) {
+                        status = 'Em trabalho';
+                        statusClass = 'badge-info';
+                    } else if (!ponto.entrada && !ponto.saida) {
+                        status = 'Falta';
+                        statusClass = 'badge-danger';
+                    }
+                    
+                    return `
+                        <tr>
+                            <td>${funcionario.nome}</td>
+                            <td>${funcionario.cpf}</td>
+                            <td>${ponto.entrada || '--:--'}</td>
+                            <td>${ponto.saida || '--:--'}</td>
+                            <td>${ponto.totalHoras || '0h'}</td>
+                            <td>
+                                <span class="badge ${statusClass}">${status}</span>
+                            </td>
+                            <td>
+                                <button class="btn" onclick="ajustarPonto(${ponto.id})" 
+                                        style="padding: 6px 12px; font-size: 13px;">
+                                    Ajustar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function carregarJustificativas() {
+            const justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            
+            const statusFiltro = document.getElementById('filtroStatusJustificativa').value;
+            const dataFiltro = document.getElementById('dataJustificativa').value;
+            
+            let justificativasFiltradas = justificativas;
+            
+            if (statusFiltro !== 'todos') {
+                justificativasFiltradas = justificativasFiltradas.filter(j => j.status === statusFiltro);
+            }
+            
+            if (dataFiltro) {
+                justificativasFiltradas = justificativasFiltradas.filter(j => j.data === dataFiltro);
+            }
+            
+            const tbody = document.querySelector('#tabelaJustificativas tbody');
+            
+            if (justificativasFiltradas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px;">
+                            Nenhuma justificativa encontrada.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = justificativasFiltradas.map(j => {
+                    const funcionario = funcionarios.find(f => f.id === j.funcionarioId);
+                    
+                    if (!funcionario) return '';
+                    
+                    let statusClass = 'badge-warning';
+                    if (j.status === 'aprovada') statusClass = 'badge-success';
+                    if (j.status === 'rejeitada') statusClass = 'badge-danger';
+                    
+                    return `
+                        <tr>
+                            <td>${funcionario.nome}</td>
+                            <td>${new Date(j.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${j.tipo}</td>
+                            <td>${j.descricao.substring(0, 50)}...</td>
+                            <td>
+                                <span class="badge ${statusClass}">${j.status}</span>
+                            </td>
+                            <td>
+                                ${j.status === 'pendente' ? `
+                                    <button class="btn" onclick="aprovarJustificativa(${j.id})" 
+                                            style="padding: 6px 12px; font-size: 13px;">
+                                        Aprovar
+                                    </button>
+                                    <button class="btn btn-danger" onclick="rejeitarJustificativa(${j.id})" 
+                                            style="padding: 6px 12px; font-size: 13px; margin-left: 5px;">
+                                        Rejeitar
+                                    </button>
+                                ` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function aprovarJustificativa(id) {
+            let justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+            const index = justificativas.findIndex(j => j.id === id);
+            
+            if (index !== -1) {
+                justificativas[index].status = 'aprovada';
+                justificativas[index].dataAprovacao = new Date().toISOString();
+                justificativas[index].aprovadoPor = JSON.parse(localStorage.getItem('usuario_logado')).nome;
+                
+                localStorage.setItem('justificativas', JSON.stringify(justificativas));
+                carregarJustificativas();
+                alert('✅ Justificativa aprovada!');
+            }
+        }
+        
+        function rejeitarJustificativa(id) {
+            let justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+            const index = justificativas.findIndex(j => j.id === id);
+            
+            if (index !== -1) {
+                justificativas[index].status = 'rejeitada';
+                justificativas[index].dataAprovacao = new Date().toISOString();
+                justificativas[index].aprovadoPor = JSON.parse(localStorage.getItem('usuario_logado')).nome;
+                
+                localStorage.setItem('justificativas', JSON.stringify(justificativas));
+                carregarJustificativas();
+                alert('❌ Justificativa rejeitada!');
+            }
+        }
+        
+        function gerarRelatorio(tipo) {
+            alert(`Gerando relatório ${tipo}...\n\nEm produção, esta função geraria um arquivo PDF/Excel.`);
+        }
+        
+        function gerarRelatorioPersonalizado() {
+            alert('Gerando relatório personalizado...');
+        }
+        
+        function exportarFuncionarios() {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const csv = funcionarios.map(f => 
+                `"${f.nome}","${f.cpf}","${f.cargo}","${f.departamento}","${f.admissao}","${f.status}"`
+            ).join('\n');
+            
+            const blob = new Blob([`Nome,CPF,Cargo,Departamento,Admissão,Status\n${csv}`], 
+                                 { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `funcionarios_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Lista de funcionários exportada com sucesso!');
+        }
+        
+        function exportarPontos() {
+            alert('Exportando registros de ponto...');
+        }
+        
+        function salvarConfiguracoes() {
+            const config = {
+                nomeEmpresa: document.getElementById('nomeEmpresa').value,
+                horarioEntrada: document.getElementById('configEntrada').value,
+                horarioSaida: document.getElementById('configSaida').value,
+                tolerancia: document.getElementById('tolerancia').value,
+                horasDia: document.getElementById('horasDia').value,
+                limiteHoras: document.getElementById('limiteHoras').value
+            };
+            
+            localStorage.setItem('config_sistema', JSON.stringify(config));
+            alert('✅ Configurações salvas com sucesso!');
+        }
+        
+        function fazerBackup() {
+            const backup = {
+                funcionarios: JSON.parse(localStorage.getItem('funcionarios') || '[]'),
+                pontos: JSON.parse(localStorage.getItem('pontos') || '[]'),
+                justificativas: JSON.parse(localStorage.getItem('justificativas') || '[]'),
+                config: JSON.parse(localStorage.getItem('config_sistema') || '{}'),
+                dataBackup: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(backup, null, 2)], 
+                                 { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_ponto_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Backup realizado com sucesso!');
+        }
+        
+        function limparCache() {
+            if (confirm('Deseja limpar o cache do sistema?')) {
+                localStorage.removeItem('funcionarios');
+                localStorage.removeItem('pontos');
+                localStorage.removeItem('justificativas');
+                location.reload();
+            }
+        }
+        
+        function resetarSistema() {
+            if (confirm('⚠️ ATENÇÃO: Esta ação irá resetar TODOS os dados do sistema.\n\nDeseja continuar?')) {
+                localStorage.clear();
+                alert('Sistema resetado com sucesso!');
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function logout() {
+            if (confirm('Deseja sair da área do gestor?')) {
+                localStorage.removeItem('usuario_logado');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
