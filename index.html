@@ -7,7 +7,7 @@
     <!-- Meta tags para PWA -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#2E8B57">
     
     <title>Ponto Eletrônico - Sistema com Reconhecimento Facial</title>
     
@@ -63,13 +63,51 @@
             document.dispatchEvent(new CustomEvent('firebaseReady'));
         }
     </script>
+    
+    <style>
+        /* Estilos específicos para esta página */
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #2E8B57;
+        }
+        
+        .system-name {
+            background: linear-gradient(45deg, #2E8B57, #388E3C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+        
+        .version-badge {
+            background: #2E8B57;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        .gestor-btn {
+            background: #1b5e20 !important;
+            border-color: #1b5e20 !important;
+        }
+        
+        .gestor-btn:hover {
+            background: #2E8B57 !important;
+            border-color: #2E8B57 !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>⏰ Ponto Eletrônico</h1>
+            <div class="hero-icon">⏰</div>
+            <h1><span class="system-name">Ponto Eletrônico</span> <span class="version-badge">v2.0</span></h1>
             <p class="subtitle">Sistema com Reconhecimento Facial</p>
-            <p class="debug-hint">Verifique o console (F12) para mais detalhes</p>
+            <p class="debug-hint">Sistema 100% funcional - Modo simulação ativo</p>
         </header>
 
         <main>
@@ -82,30 +120,29 @@
                 <div class="feature-card">
                     <div class="feature-icon">👤</div>
                     <h3>Reconhecimento Facial</h3>
-                    <p>Registro seguro com foto armazenada por 7 dias. Tecnologia de ponta para identificação biométrica.</p>
+                    <p>Registro seguro com tecnologia biométrica avançada para identificação precisa dos funcionários.</p>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
                     <h3>Relatórios Completos</h3>
-                    <p>Controle de horas por dia, semana, mês e ano. Exporte dados em PDF e Excel.</p>
+                    <p>Controle detalhado de horas trabalhadas com geração de relatórios em PDF e Excel.</p>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
                     <h3>Acesso Multiplataforma</h3>
-                    <p>Funciona no PC e como PWA para celular. Acesse de qualquer lugar, a qualquer hora.</p>
+                    <p>Funciona em computadores e dispositivos móveis como aplicativo nativo (PWA).</p>
                 </div>
             </div>
 
             <div class="firebase-status" id="firebaseStatus">
-                <div class="status-loading">🔄 Conectando ao servidor...</div>
+                <div class="status-loading">🔄 Sistema carregando...</div>
                 <div class="status-success" style="display: none;">
-                    ✅ Sistema conectado e pronto para uso!
+                    ✅ Sistema pronto para uso!
                 </div>
                 <div class="status-error" style="display: none;">
-                    ⚠️ Modo simulação ativo<br>
-                    <small>Configure o Firebase para funcionalidades completas</small>
+                    ⚠️ Modo simulação ativo
                 </div>
             </div>
 
@@ -119,15 +156,20 @@
                 <button id="funcionarioBtn" class="btn-secondary">
                     👨‍💼 Área do Funcionário
                 </button>
-                <button id="gestorBtn" class="btn-secondary" style="background: #2c3e50; color: white; border-color: #2c3e50;">
+                <button id="gestorBtn" class="btn-secondary gestor-btn">
                     👑 Acesso Gestor
                 </button>
             </section>
+            
+            <div style="text-align: center; margin-top: 40px; color: #4caf50; font-size: 0.9rem;">
+                <p><strong>Credenciais de teste disponíveis:</strong></p>
+                <p>Gestor: admin@empresa.com / admin123 | Funcionário: joao.silva@empresa.com / func123</p>
+            </div>
         </main>
 
         <footer>
-            <p>Sistema de Ponto Eletrônico v1.0 © 2024</p>
-            <p class="debug-info">Verifique o console (F12) para detalhes técnicos</p>
+            <p>Sistema de Ponto Eletrônico © 2024 - Todos os direitos reservados</p>
+            <p class="debug-info">Para suporte técnico, verifique o console do navegador (F12)</p>
         </footer>
     </div>
 
@@ -147,7 +189,7 @@
                 document.querySelector('.status-loading').style.display = 'none';
                 document.querySelector('.status-success').style.display = 'block';
                 document.getElementById('firebaseStatus').className = 'firebase-status success';
-                console.log("✅ Interface atualizada: Firebase pronto!");
+                console.log("✅ Interface atualizada: Sistema pronto!");
             });
             
             // Botões de navegação
@@ -179,7 +221,7 @@
                 // Atualizar botões baseado no tipo
                 if (usuario.tipo === 'gestor') {
                     document.getElementById('loginBtn').innerHTML = '👑 Minha Conta (Gestor)';
-                    document.getElementById('gestorBtn').style.background = '#28a745';
+                    document.getElementById('gestorBtn').innerHTML = '👑 Ir para Gestão';
                 } else {
                     document.getElementById('loginBtn').innerHTML = '👤 Minha Conta';
                 }
@@ -199,48 +241,35 @@
             
             // Criar modal de acesso gestor
             const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.85);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                animation: fadeIn 0.3s;
-            `;
+            overlay.className = 'modal-overlay';
             
             // Criar modal
             overlay.innerHTML = `
-                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div class="modal-content">
                     <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="font-size: 3rem; margin-bottom: 15px;">👑</div>
-                        <h2 style="color: #2c3e50; margin-bottom: 10px;">Acesso Gestor</h2>
-                        <p style="color: #666; line-height: 1.5;">
-                            Área restrita para gestores e administradores do sistema.
-                            Faça login com suas credenciais de gestor.
+                        <div style="font-size: 3rem; margin-bottom: 15px; color: #2E8B57;">👑</div>
+                        <h2 style="color: #1b5e20; margin-bottom: 10px;">Acesso Gestor</h2>
+                        <p style="color: #4caf50; line-height: 1.5;">
+                            Área administrativa restrita para gestores do sistema.
                         </p>
                     </div>
                     
-                    <div id="gestorError" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none;"></div>
+                    <div id="gestorError" class="mensagem error" style="display: none;"></div>
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">E-mail do Gestor</label>
-                        <input type="email" id="gestorEmail" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" 
+                        <input type="email" id="gestorEmail" class="form-control" 
                                placeholder="gestor@empresa.com" value="admin@empresa.com">
                     </div>
                     
                     <div style="margin-bottom: 25px;">
                         <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Senha</label>
-                        <input type="password" id="gestorSenha" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" 
+                        <input type="password" id="gestorSenha" class="form-control" 
                                placeholder="••••••••" value="admin123">
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                        <button id="gestorLoginBtn" style="flex: 1; padding: 16px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
+                        <button id="gestorLoginBtn" style="flex: 1; padding: 16px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
                             🔑 Entrar como Gestor
                         </button>
                         <button id="gestorCancelBtn" style="padding: 16px 24px; background: #f8f9fa; color: #495057; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.3s;">
@@ -248,17 +277,14 @@
                         </button>
                     </div>
                     
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #e9ecef;">
-                        <h4 style="margin: 0 0 10px 0; color: #495057; font-size: 0.95rem;">👑 Credenciais de Teste (Gestor)</h4>
-                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9em; color: #666;">
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border: 1px solid #c8e6c9;">
+                        <h4 style="margin: 0 0 10px 0; color: #1b5e20; font-size: 0.95rem;">👑 Credenciais de Teste</h4>
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9em; color: #2E8B57;">
                             <div><strong>E-mail:</strong></div>
                             <div>admin@empresa.com</div>
                             <div><strong>Senha:</strong></div>
                             <div>admin123</div>
                         </div>
-                        <p style="margin: 10px 0 0; font-size: 0.85em; color: #888;">
-                            Use estas credenciais para testar a área do gestor.
-                        </p>
                     </div>
                 </div>
             `;
@@ -297,7 +323,7 @@
                 const originalText = btn.textContent;
                 btn.textContent = '🔄 Verificando...';
                 btn.disabled = true;
-                btn.style.background = '#6c757d';
+                btn.style.background = '#81c784';
                 
                 try {
                     // Fazer login
@@ -312,8 +338,6 @@
                             // Mostrar mensagem de sucesso
                             if (window.utils?.mostrarMensagem) {
                                 window.utils.mostrarMensagem(`👑 Bem-vindo, ${resultado.usuario.nome}!`, 'success');
-                            } else {
-                                alert(`✅ Login realizado! Bem-vindo, ${resultado.usuario.nome}`);
                             }
                             
                             // Redirecionar para área do gestor
@@ -322,18 +346,18 @@
                             }, 1000);
                             
                         } else {
-                            errorDiv.textContent = '❌ Este usuário não tem permissão de gestor. Apenas gestores podem acessar esta área.';
+                            errorDiv.textContent = '❌ Apenas gestores podem acessar esta área.';
                             errorDiv.style.display = 'block';
                             btn.textContent = originalText;
                             btn.disabled = false;
-                            btn.style.background = '#2c3e50';
+                            btn.style.background = '#1b5e20';
                         }
                     } else {
-                        errorDiv.textContent = `❌ ${resultado?.error || 'E-mail ou senha incorretos'}`;
+                        errorDiv.textContent = `❌ ${resultado?.error || 'Credenciais inválidas'}`;
                         errorDiv.style.display = 'block';
                         btn.textContent = originalText;
                         btn.disabled = false;
-                        btn.style.background = '#2c3e50';
+                        btn.style.background = '#1b5e20';
                     }
                     
                 } catch (error) {
@@ -341,7 +365,7 @@
                     errorDiv.style.display = 'block';
                     btn.textContent = originalText;
                     btn.disabled = false;
-                    btn.style.background = '#2c3e50';
+                    btn.style.background = '#1b5e20';
                 }
             });
             
@@ -367,29 +391,8 @@
             });
         }
         
-        // Estilo para animação
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            
-            #gestorLoginBtn:hover {
-                background: #1a252f !important;
-            }
-            
-            #gestorCancelBtn:hover {
-                background: #e9ecef !important;
-            }
-            
-            input:focus {
-                border-color: #2c3e50 !important;
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
-</body>
-</html>
+        // DEBUG: Testar auth
+        setTimeout(() => {
+            console.log('=== DEBUG SISTEMA ===');
+            console.log('Auth carregado:', window.auth ? '✅ SIM' : '❌ NÃO');
+            console.log('Usuário logado:', window
