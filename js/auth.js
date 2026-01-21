@@ -1,15 +1,15 @@
 // auth.js - Sistema de autenticação com usuários pré-cadastrados
 console.log("🔐 Módulo de autenticação carregado!");
 
-// Banco de dados de usuários (simulação)
+// Banco de dados de usuários (simulação) - CORRIGIDO
 const usuariosCadastrados = {
-    // GESTOR - Acesso total
+    // GESTOR - Acesso total (CORRIGIDO: email minúsculo)
     'admin@empresa.com': {
         id: 'user_001',
         nome: 'Administrador Sistema',
         email: 'admin@empresa.com',
         senha: 'admin123',
-        tipo: 'gestor',
+        tipo: 'gestor',  // ← CORRETO: 'gestor' e não 'admin'
         cargo: 'Gerente Geral',
         ativo: true,
         criadoEm: '2024-01-01'
@@ -65,13 +65,18 @@ let usuarioLogado = null;
 
 // Funções de autenticação
 const auth = {
-    // Login com email/senha
+    // Login com email/senha - CORRIGIDO
     async login(email, senha) {
         console.log('🔑 Tentando login com:', email);
         
         try {
+            // Converter email para minúsculo para garantir match
+            const emailLower = email.toLowerCase().trim();
+            
             // Verificar se usuário existe
-            const usuario = usuariosCadastrados[email];
+            const usuario = usuariosCadastrados[emailLower];
+            
+            console.log('👤 Usuário encontrado:', usuario);
             
             if (usuario && usuario.senha === senha) {
                 if (!usuario.ativo) {
@@ -122,10 +127,15 @@ const auth = {
     
     // Verificar se está logado
     verificarLogin() {
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
-            usuarioLogado = JSON.parse(usuarioSalvo);
-            return usuarioLogado;
+        try {
+            const usuarioSalvo = localStorage.getItem('usuarioLogado');
+            if (usuarioSalvo) {
+                usuarioLogado = JSON.parse(usuarioSalvo);
+                console.log('✅ Usuário logado detectado:', usuarioLogado);
+                return usuarioLogado;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao verificar login:', error);
         }
         return null;
     },
@@ -146,7 +156,7 @@ const auth = {
             }
             
             // Verificar se email já existe (simulação)
-            if (usuariosCadastrados[novoUsuario.email]) {
+            if (usuariosCadastrados[novoUsuario.email.toLowerCase()]) {
                 throw new Error('Email já cadastrado no sistema');
             }
             
@@ -154,7 +164,7 @@ const auth = {
             const novoId = 'user_' + Date.now();
             
             // Adicionar ao banco simulado
-            usuariosCadastrados[novoUsuario.email] = {
+            usuariosCadastrados[novoUsuario.email.toLowerCase()] = {
                 id: novoId,
                 nome: novoUsuario.nome,
                 email: novoUsuario.email,
@@ -211,7 +221,7 @@ const auth = {
     
     // Buscar usuário por email
     buscarUsuario(email) {
-        return usuariosCadastrados[email] || null;
+        return usuariosCadastrados[email.toLowerCase()] || null;
     },
     
     // Atualizar usuário
@@ -221,13 +231,14 @@ const auth = {
                 throw new Error('Apenas gestores podem atualizar usuários');
             }
             
-            if (!usuariosCadastrados[email]) {
+            const emailLower = email.toLowerCase();
+            if (!usuariosCadastrados[emailLower]) {
                 throw new Error('Usuário não encontrado');
             }
             
             // Atualizar dados
-            usuariosCadastrados[email] = {
-                ...usuariosCadastrados[email],
+            usuariosCadastrados[emailLower] = {
+                ...usuariosCadastrados[emailLower],
                 ...dadosAtualizados
             };
             
@@ -249,9 +260,9 @@ const auth = {
         
         // Lista de rostos "conhecidos" (simulação)
         const rostosConhecidos = [
-            { nome: 'João Silva', email: 'joao.silva@empresa.com', confidence: 0.95 },
-            { nome: 'Maria Santos', email: 'maria.santos@empresa.com', confidence: 0.92 },
-            { nome: 'Carlos Oliveira', email: 'carlos.oliveira@empresa.com', confidence: 0.88 }
+            { nome: 'João Silva', email: 'joao.silva@empresa.com', confidence: 0.95, tipo: 'funcionario' },
+            { nome: 'Maria Santos', email: 'maria.santos@empresa.com', confidence: 0.92, tipo: 'funcionario' },
+            { nome: 'Carlos Oliveira', email: 'carlos.oliveira@empresa.com', confidence: 0.88, tipo: 'funcionario' }
         ];
         
         // Escolher aleatoriamente (simulação)
@@ -262,11 +273,21 @@ const auth = {
             usuario: {
                 id: 'user_facial_' + Date.now(),
                 nome: usuarioReconhecido.nome,
-                email: usuarioReconhecido.email
+                email: usuarioReconhecido.email,
+                tipo: usuarioReconhecido.tipo
             },
             confidence: usuarioReconhecido.confidence,
             message: `Rosto reconhecido: ${usuarioReconhecido.nome}`
         };
+    },
+    
+    // Método para DEBUG: Ver todos usuários
+    debugListarUsuarios() {
+        console.log('🔍 DEBUG - Todos usuários cadastrados:');
+        Object.keys(usuariosCadastrados).forEach(email => {
+            console.log(`  ${email}:`, usuariosCadastrados[email]);
+        });
+        return usuariosCadastrados;
     }
 };
 
@@ -283,6 +304,13 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.log('🔐 Nenhum usuário logado');
     }
+    
+    // Para debug: mostrar todos usuários
+    console.log('🔍 Usuários disponíveis para login:');
+    Object.keys(usuariosCadastrados).forEach(email => {
+        const user = usuariosCadastrados[email];
+        console.log(`  👤 ${email} - ${user.nome} (${user.tipo}) - Senha: ${user.senha}`);
+    });
 });
 
 // Exportar
