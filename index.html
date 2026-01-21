@@ -3,484 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Meta tags para PWA -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2E8B57">
-    
-    <title>Ponto Eletrônico - Sistema com Reconhecimento Facial</title>
-    
-    <!-- Manifest para PWA -->
+    <title>Ponto Eletrônico v2.0</title>
+    <link rel="stylesheet" href="css/style.css?v=2.0">
     <link rel="manifest" href="manifest.json">
     
-    <!-- Ícones -->
-    <link rel="icon" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Firebase 9 -->
-    <script type="module">
-        console.log("🚀 Iniciando carregamento do Firebase...");
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyDExemplo0000000000000000000000000",
-            authDomain: "seu-projeto.firebaseapp.com",
-            projectId: "seu-projeto-id",
-            storageBucket: "seu-projeto.appspot.com",
-            messagingSenderId: "123456789000",
-            appId: "1:123456789000:web:abcdef1234567890"
-        };
-        
-        try {
-            const firebaseModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
-            const authModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-            const firestoreModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-            const storageModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js');
-            
-            const app = firebaseModule.initializeApp(firebaseConfig);
-            const auth = authModule.getAuth(app);
-            const db = firestoreModule.getFirestore(app);
-            const storage = storageModule.getStorage(app);
-            
-            window.firebaseApp = app;
-            window.firebaseAuth = auth;
-            window.firebaseDb = db;
-            window.firebaseStorage = storage;
-            
-            console.log("✅ Firebase 9 carregado com sucesso!");
-            document.dispatchEvent(new CustomEvent('firebaseReady'));
-            
-        } catch (error) {
-            console.error("❌ Erro ao carregar Firebase:", error);
-            window.firebaseApp = { name: "[SIMULAÇÃO] Firebase" };
-            window.firebaseAuth = { currentUser: null };
-            window.firebaseDb = { name: "[SIMULAÇÃO] Firestore" };
-            window.firebaseStorage = { name: "[SIMULAÇÃO] Storage" };
-            
-            document.dispatchEvent(new CustomEvent('firebaseReady'));
-        }
-    </script>
-    
     <style>
-        /* Estilos específicos para esta página */
-        .hero-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #2E8B57;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .system-name {
-            background: linear-gradient(45deg, #2E8B57, #388E3C);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-        }
-        
-        .version-badge {
-            background: #2E8B57;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 50%, #4CAF50 100%);
             color: white;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-            vertical-align: middle;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
         
-        .gestor-btn {
-            background: #1b5e20 !important;
-            border-color: #1b5e20 !important;
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
         }
         
-        .gestor-btn:hover {
-            background: #2E8B57 !important;
-            border-color: #2E8B57 !important;
+        .logo-container {
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-bottom: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .login-btn {
+            background: white;
+            color: #1b5e20;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            background: #E8F5E9;
+        }
+        
+        .install-prompt {
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .install-btn {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .install-btn:hover {
+            background: #F57C00;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .login-btn {
+                padding: 18px;
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="hero-icon">⏰</div>
-            <h1><span class="system-name">Ponto Eletrônico</span> <span class="version-badge">v2.0</span></h1>
-            <p class="subtitle">Sistema com Reconhecimento Facial</p>
-            <p class="debug-hint">Sistema 100% funcional - Modo simulação ativo</p>
-        </header>
-
-        <main>
-            <section class="hero">
-                <h2>Bem-vindo ao Sistema de Ponto</h2>
-                <p>Controle de ponto com reconhecimento facial, registro de horas e relatórios completos para sua empresa.</p>
-            </section>
-
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">👤</div>
-                    <h3>Reconhecimento Facial</h3>
-                    <p>Registro seguro com tecnologia biométrica avançada para identificação precisa dos funcionários.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Relatórios Completos</h3>
-                    <p>Controle detalhado de horas trabalhadas com geração de relatórios em PDF e Excel.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Acesso Multiplataforma</h3>
-                    <p>Funciona em computadores e dispositivos móveis como aplicativo nativo (PWA).</p>
-                </div>
-            </div>
-
-            <div class="firebase-status" id="firebaseStatus">
-                <div class="status-loading">🔄 Sistema carregando...</div>
-                <div class="status-success" style="display: none;">
-                    ✅ Sistema pronto para uso!
-                </div>
-                <div class="status-error" style="display: none;">
-                    ⚠️ Modo simulação ativo
-                </div>
-            </div>
-
-            <section class="actions">
-                <button id="loginBtn" class="btn-primary">
-                    🔐 Acessar Sistema
-                </button>
-                <button id="facialBtn" class="btn-secondary">
-                    📸 Reconhecimento Facial
-                </button>
-                <button id="funcionarioBtn" class="btn-secondary">
-                    👨‍💼 Área do Funcionário
-                </button>
-                <button id="gestorBtn" class="btn-secondary gestor-btn">
-                    👑 Acesso Gestor
-                </button>
-            </section>
-            
-            <div style="text-align: center; margin-top: 40px; color: #4caf50; font-size: 0.9rem;">
-                <p><strong>Credenciais de teste disponíveis:</strong></p>
-                <p>Gestor: admin@empresa.com / admin123 | Funcionário: joao.silva@empresa.com / func123</p>
-            </div>
-        </main>
-
-        <footer>
-            <p>Sistema de Ponto Eletrônico © 2024 - Todos os direitos reservados</p>
-            <p class="debug-info">Para suporte técnico, verifique o console do navegador (F12)</p>
-        </footer>
+        <div class="logo-container">
+            <div class="logo">⏰</div>
+            <h1>Ponto Eletrônico v2.0</h1>
+            <div class="subtitle">Sistema com Reconhecimento Facial</div>
+        </div>
+        
+        <div class="status-badge">
+            ✅ Sistema 100% funcional - Modo simulação ativo
+        </div>
+        
+        <div class="login-options">
+            <button class="login-btn" onclick="abrirLogin('funcionario')">
+                Área do Funcionário
+            </button>
+            <button class="login-btn" onclick="abrirLogin('gestor')">
+                Acesso Gestor
+            </button>
+        </div>
+        
+        <div id="installPrompt" class="install-prompt">
+            <h3>📱 Instalar App</h3>
+            <p>Instale o aplicativo para acesso rápido ao sistema!</p>
+            <button id="installBtn" class="install-btn">Instalar Agora</button>
+        </div>
     </div>
 
-    <!-- JavaScripts -->
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/script.js"></script>
+    <!-- Modal de Login -->
+    <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; color: #333; padding: 40px; border-radius: 15px; max-width: 400px; width: 90%;">
+            <h2 id="modalTitle" style="color: #1b5e20; margin-bottom: 30px; text-align: center;"></h2>
+            
+            <div style="display: none;" id="loginForm">
+                <input type="text" id="loginUsuario" placeholder="Usuário" 
+                       style="width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px;">
+                <input type="password" id="loginSenha" placeholder="Senha" 
+                       style="width: 100%; padding: 15px; margin-bottom: 25px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px;">
+                <button onclick="fazerLogin()" 
+                        style="width: 100%; padding: 15px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    Entrar
+                </button>
+                <button onclick="fecharModal()" 
+                        style="width: 100%; padding: 15px; margin-top: 15px; background: #666; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    Cancelar
+                </button>
+            </div>
+            
+            <div style="display: none;" id="mensagem">
+                <p id="mensagemTexto" style="text-align: center; margin-bottom: 20px;"></p>
+                <button onclick="fecharModal()" 
+                        style="width: 100%; padding: 15px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Configuração inicial
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("🌐 Página principal carregada!");
-            
-            // Status do Firebase
-            document.addEventListener('firebaseReady', function() {
-                document.querySelector('.status-loading').style.display = 'none';
-                document.querySelector('.status-success').style.display = 'block';
-                document.getElementById('firebaseStatus').className = 'firebase-status success';
-                console.log("✅ Interface atualizada: Sistema pronto!");
-            });
-            
-            // Botões de navegação
-            document.getElementById('loginBtn').addEventListener('click', function() {
-                window.location.href = 'login.html';
-            });
-            
-            document.getElementById('facialBtn').addEventListener('click', function() {
-                if (window.app && window.app.iniciarReconhecimentoFacial) {
-                    window.app.iniciarReconhecimentoFacial();
-                } else {
-                    alert('Função de reconhecimento facial carregando...');
-                }
-            });
-            
-            document.getElementById('funcionarioBtn').addEventListener('click', function() {
-                window.location.href = 'funcionario.html';
-            });
-            
-            document.getElementById('gestorBtn').addEventListener('click', function() {
-                mostrarAcessoGestor();
-            });
-            
-            // Verificar se já está logado
-            const usuario = window.auth?.verificarLogin();
-            if (usuario) {
-                console.log(`👤 Usuário logado: ${usuario.nome} (${usuario.tipo})`);
-                
-                // Atualizar botões baseado no tipo
-                if (usuario.tipo === 'gestor') {
-                    document.getElementById('loginBtn').innerHTML = '👑 Minha Conta (Gestor)';
-                    document.getElementById('gestorBtn').innerHTML = '👑 Ir para Gestão';
-                } else {
-                    document.getElementById('loginBtn').innerHTML = '👤 Minha Conta';
-                }
-            }
-        });
-        
-        // Função para mostrar acesso do gestor
-        function mostrarAcessoGestor() {
-            // Verificar se já está logado como gestor
-            const usuario = window.auth?.verificarLogin();
-            
-            if (usuario && usuario.tipo === 'gestor') {
-                // Já é gestor logado, redireciona direto
-                window.location.href = 'gestor.html';
-                return;
-            }
-            
-            // Criar modal de acesso gestor
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            
-            // Criar modal
-            overlay.innerHTML = `
-                <div class="modal-content">
-                    <div style="text-align: center; margin-bottom: 25px;">
-                        <div style="font-size: 3rem; margin-bottom: 15px; color: #2E8B57;">👑</div>
-                        <h2 style="color: #1b5e20; margin-bottom: 10px;">Acesso Gestor</h2>
-                        <p style="color: #4caf50; line-height: 1.5;">
-                            Área administrativa restrita para gestores do sistema.
-                        </p>
-                    </div>
-                    
-                    <div id="gestorError" class="mensagem error" style="display: none;"></div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">E-mail do Gestor</label>
-                        <input type="email" id="gestorEmail" class="form-control" 
-                               placeholder="gestor@empresa.com" value="admin@empresa.com">
-                    </div>
-                    
-                    <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Senha</label>
-                        <input type="password" id="gestorSenha" class="form-control" 
-                               placeholder="••••••••" value="admin123">
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                        <button id="gestorLoginBtn" style="flex: 1; padding: 16px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
-                            🔑 Entrar como Gestor
-                        </button>
-                        <button id="gestorCancelBtn" style="padding: 16px 24px; background: #f8f9fa; color: #495057; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.3s;">
-                            Cancelar
-                        </button>
-                    </div>
-                    
-                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border: 1px solid #c8e6c9;">
-                        <h4 style="margin: 0 0 10px 0; color: #1b5e20; font-size: 0.95rem;">👑 Credenciais de Teste</h4>
-                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9em; color: #2E8B57;">
-                            <div><strong>E-mail:</strong></div>
-                            <div>admin@empresa.com</div>
-                            <div><strong>Senha:</strong></div>
-                            <div>admin123</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-            
-            // Fechar modal
-            document.getElementById('gestorCancelBtn').addEventListener('click', function() {
-                document.body.removeChild(overlay);
-            });
-            
-            // Fechar ao clicar fora
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    document.body.removeChild(overlay);
-                }
-            });
-            
-            // Login do gestor
-            document.getElementById('gestorLoginBtn').addEventListener('click', async function() {
-                const email = document.getElementById('gestorEmail').value;
-                const senha = document.getElementById('gestorSenha').value;
-                const errorDiv = document.getElementById('gestorError');
-                
-                // Limpar erro anterior
-                errorDiv.style.display = 'none';
-                
-                if (!email || !senha) {
-                    errorDiv.textContent = 'Por favor, preencha todos os campos';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-                
-                // Mostrar loading
-                const btn = this;
-                const originalText = btn.textContent;
-                btn.textContent = '🔄 Verificando...';
-                btn.disabled = true;
-                btn.style.background = '#81c784';
-                
-                try {
-                    // Fazer login
-                    const resultado = await window.auth?.login(email, senha);
-                    
-                    if (resultado?.success) {
-                        // Verificar se é gestor
-                        if (resultado.usuario.tipo === 'gestor') {
-                            // Remover modal
-                            document.body.removeChild(overlay);
-                            
-                            // Mostrar mensagem de sucesso
-                            if (window.utils?.mostrarMensagem) {
-                                window.utils.mostrarMensagem(`👑 Bem-vindo, ${resultado.usuario.nome}!`, 'success');
-                            }
-                            
-                            // Redirecionar para área do gestor
-                            setTimeout(() => {
-                                window.location.href = 'gestor.html';
-                            }, 1000);
-                            
-                        } else {
-                            errorDiv.textContent = '❌ Apenas gestores podem acessar esta área.';
-                            errorDiv.style.display = 'block';
-                            btn.textContent = originalText;
-                            btn.disabled = false;
-                            btn.style.background = '#1b5e20';
-                        }
-                    } else {
-                        errorDiv.textContent = `❌ ${resultado?.error || 'Credenciais inválidas'}`;
-                        errorDiv.style.display = 'block';
-                        btn.textContent = originalText;
-                        btn.disabled = false;
-                        btn.style.background = '#1b5e20';
-                    }
-                    
-                } catch (error) {
-                    errorDiv.textContent = `❌ Erro: ${error.message}`;
-                    errorDiv.style.display = 'block';
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.style.background = '#1b5e20';
-                }
-            });
-            
-            // Permitir Enter para login
-            document.getElementById('gestorSenha').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('gestorLoginBtn').click();
-                }
-            });
-            
-            // Foco no campo de email
-            setTimeout(() => {
-                document.getElementById('gestorEmail').focus();
-            }, 100);
+        // Dados de login (em produção, isso viria do Firebase)
+        const usuarios = {
+            gestor: [
+                { usuario: "admin", senha: "admin123", nome: "Administrador", tipo: "gestor" },
+                { usuario: "gestor", senha: "gestor123", nome: "Gestor", tipo: "gestor" }
+            ],
+            funcionario: [
+                // Serão cadastrados pelo gestor
+            ]
+        };
+
+        let tipoLoginAtual = '';
+        let deferredPrompt;
+
+        // Verificar se é primeira visita
+        if (!localStorage.getItem('primeira_visita')) {
+            localStorage.setItem('primeira_visita', 'true');
+            mostrarInstalarApp();
         }
-        
-        // PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
-                    .catch(err => console.log('❌ Service Worker erro:', err));
-            });
-        }
-        
-        // DEBUG: Testar auth
-        setTimeout(() => {
-            console.log('=== DEBUG SISTEMA ===');
-            console.log('Auth carregado:', window.auth ? '✅ SIM' : '❌ NÃO');
-            console.log('Usuário logado:', window.auth?.verificarLogin());
-        }, 1000);
-    </script>
-    <script>
-    // ============================================
-    // SISTEMA ANTI-CACHE PARA iOS E TODOS NAVEGADORES
-    // ============================================
-    
-    // Versão do sistema - ALTERE SEMPRE QUE ATUALIZAR
-    const SYSTEM_VERSION = '2.0.1';
-    
-    // Função para forçar recarregamento de recursos
-    function forceResourceReload() {
-        console.log('🔧 Sistema anti-cache ativado. Versão:', SYSTEM_VERSION);
-        
-        // Adicionar versão a todos CSS dinamicamente
-        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-            const href = link.getAttribute('href');
-            if (href && !href.includes('?v=')) {
-                link.setAttribute('href', href + '?v=' + SYSTEM_VERSION);
-            }
-        });
-        
-        // Adicionar versão a todos JS dinamicamente
-        document.querySelectorAll('script[src]').forEach(script => {
-            const src = script.getAttribute('src');
-            if (src && !src.includes('?v=')) {
-                script.setAttribute('src', src + '?v=' + SYSTEM_VERSION);
-            }
-        });
-        
-        // Verificar se Service Worker precisa atualizar
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                registrations.forEach(registration => {
-                    registration.update();
-                    console.log('🔄 Service Worker atualizado:', registration.scope);
-                });
-            });
-        }
-    }
-    
-    // Executar quando a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        forceResourceReload();
-        
-        // Verificar se precisa limpar cache (após atualização)
-        const lastVersion = localStorage.getItem('system_version');
-        if (lastVersion !== SYSTEM_VERSION) {
-            console.log('🚀 Nova versão detectada! Limpando cache...');
-            
-            // Limpar cache do Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(registration => {
-                        registration.unregister();
-                        console.log('🗑️ Service Worker removido:', registration.scope);
-                    });
-                });
-            }
-            
-            // Salvar nova versão
-            localStorage.setItem('system_version', SYSTEM_VERSION);
-            
-            // Mostrar mensagem ao usuário
-            setTimeout(() => {
-                if (window.utils && window.utils.mostrarMensagem) {
-                    window.utils.mostrarMensagem('🔄 Sistema atualizado! Recarregando...', 'info');
-                }
-                
-                // Recarregar após 2 segundos
-                setTimeout(() => {
-                    window.location.reload(true); // Forçar recarregamento do servidor
-                }, 2000);
-            }, 1000);
-        }
-    });
-    
-    // Forçar recarregamento com CTRL+F5
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'F5') {
+
+        // PWA - Instalar App
+        window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            console.log('🔄 Recarregamento forçado solicitado');
-            window.location.href = window.location.href.split('?')[0] + '?force=' + Date.now();
+            deferredPrompt = e;
+            mostrarInstalarApp();
+        });
+
+        function mostrarInstalarApp() {
+            const installPrompt = document.getElementById('installPrompt');
+            if (deferredPrompt) {
+                installPrompt.style.display = 'block';
+            }
         }
-    });
-</script>
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+            
+            deferredPrompt = null;
+        });
+
+        function abrirLogin(tipo) {
+            tipoLoginAtual = tipo;
+            const modal = document.getElementById('loginModal');
+            const title = document.getElementById('modalTitle');
+            const loginForm = document.getElementById('loginForm');
+            const mensagemDiv = document.getElementById('mensagem');
+            
+            if (tipo === 'gestor') {
+                title.textContent = 'Acesso Gestor';
+                loginForm.style.display = 'block';
+                mensagemDiv.style.display = 'none';
+                
+                // Preencher com credenciais padrão
+                document.getElementById('loginUsuario').value = 'admin';
+                document.getElementById('loginSenha').value = 'admin123';
+            } else {
+                title.textContent = 'Área do Funcionário';
+                loginForm.style.display = 'block';
+                mensagemDiv.style.display = 'none';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function fazerLogin() {
+            const usuario = document.getElementById('loginUsuario').value;
+            const senha = document.getElementById('loginSenha').value;
+            
+            if (tipoLoginAtual === 'gestor') {
+                const gestor = usuarios.gestor.find(g => g.usuario === usuario && g.senha === senha);
+                
+                if (gestor) {
+                    // Salvar usuário logado
+                    localStorage.setItem('ponto_user', JSON.stringify({
+                        nome: gestor.nome,
+                        tipo: gestor.tipo,
+                        usuario: gestor.usuario
+                    }));
+                    
+                    window.location.href = 'gestor.html';
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            } else {
+                // Funcionário - Verificar no localStorage
+                const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+                const funcionario = funcionarios.find(f => 
+                    (f.cpf === usuario || f.email === usuario) && f.ativo === true
+                );
+                
+                if (funcionario) {
+                    // Para funcionário, não precisa de senha no modo simulação
+                    localStorage.setItem('ponto_user', JSON.stringify({
+                        id: funcionario.id,
+                        nome: funcionario.nome,
+                        tipo: 'funcionario',
+                        cpf: funcionario.cpf,
+                        cargo: funcionario.cargo
+                    }));
+                    
+                    window.location.href = 'funcionario.html';
+                } else {
+                    alert('Funcionário não encontrado ou inativo!');
+                }
+            }
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') fecharModal();
+        });
+    </script>
 </body>
 </html>
