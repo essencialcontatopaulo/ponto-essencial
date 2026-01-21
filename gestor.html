@@ -3,301 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Gestor - Essencial Print</title>
+    <title>Gestor - Essencial Print</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
-        /* Mesmo CSS anterior do gestor (mantenha todo o CSS) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
-            background: #f5f5f5;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
         }
         
-        /* Header */
         .header {
-            background: linear-gradient(135deg, #1b5e20, #2E8B57);
+            background: #1a237e;
             color: white;
-            padding: 20px 40px;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .user-list {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-info h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
         }
         
         .logout-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 10px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
+            background: #f44336;
+            width: auto;
+            padding: 8px 15px;
         }
-        
-        /* Resto do CSS igual ao anterior... */
-        /* (Mantenha todo o CSS da versão anterior do gestor.html) */
     </style>
 </head>
 <body>
-    <!-- Verificação de Login com Firebase -->
+    <div class="header">
+        <h1>👑 Painel do Gestor</h1>
+        <p>Criar e gerenciar usuários do sistema</p>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+    
+    <div class="form-container">
+        <h2>Criar Novo Usuário</h2>
+        <input type="text" id="nome" placeholder="Nome completo">
+        <input type="email" id="email" placeholder="E-mail">
+        <input type="password" id="senha" placeholder="Senha">
+        <input type="text" id="cpf" placeholder="CPF">
+        <input type="text" id="cargo" placeholder="Cargo">
+        <input type="text" id="departamento" placeholder="Departamento">
+        <select id="tipo">
+            <option value="funcionario">Funcionário</option>
+            <option value="gestor">Gestor</option>
+        </select>
+        <button onclick="criarUsuario()">Criar Usuário</button>
+    </div>
+    
+    <div class="user-list">
+        <h2>Usuários Cadastrados</h2>
+        <div id="listaUsuarios">Carregando...</div>
+    </div>
+
     <script>
-        // CONFIGURAÇÃO DO FIREBASE (igual ao index.html)
+        // CONFIGURAÇÃO DO FIREBASE - USE A MESMA
         const firebaseConfig = {
-    apiKey: "AIzaSyB...",
-    authDomain: "essencial-print.firebaseapp.com",
-    projectId: "essencial-print",
-    storageBucket: "essencial-print.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
-};
+            apiKey: "AIzaSyB...",
+            authDomain: "essencial-print.firebaseapp.com",
+            projectId: "essencial-print",
+            storageBucket: "essencial-print.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
         
-        // Inicializar Firebase
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            const auth = firebase.auth();
-            
-            // Verificar se o gestor está logado
-            auth.onAuthStateChanged(async (user) => {
-                if (!user) {
-                    // Não está logado
-                    alert('Acesso não autorizado! Faça login como gestor.');
-                    window.location.href = 'index.html';
-                    return;
-                }
-                
-                // Verificar se é realmente um gestor
-                const gestorDoc = await db.collection('gestores').doc(user.uid).get();
-                
-                if (!gestorDoc.exists) {
-                    alert('Acesso restrito! Apenas gestores podem acessar esta área.');
-                    await auth.signOut();
-                    window.location.href = 'index.html';
-                    return;
-                }
-                
-                const gestorData = gestorDoc.data();
-                
-                // Configurar nome do gestor na interface
-                document.getElementById('gestorNome').textContent = gestorData.nome || 'Gestor';
-                
-                // Carregar dados do sistema
-                carregarDashboard();
-                carregarFuncionarios();
-            });
-            
-        } catch (error) {
-            console.error('Erro ao inicializar Firebase:', error);
-            
-            // Fallback para modo local
-            const gestorLocal = JSON.parse(localStorage.getItem('gestor_logado') || 'null');
-            if (!gestorLocal || gestorLocal.tipo !== 'gestor') {
-                alert('Acesso não autorizado!');
+        // Inicializar
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Verificar se é gestor
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Verificar no Firestore se é gestor
+                db.collection('usuarios').doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().tipo === 'gestor') {
+                        carregarUsuarios();
+                    } else {
+                        alert('Acesso restrito a gestores!');
+                        window.location.href = 'index.html';
+                    }
+                });
+            } else {
                 window.location.href = 'index.html';
-                return;
             }
-            
-            document.getElementById('gestorNome').textContent = gestorLocal.nome || 'Gestor';
-        }
+        });
         
-        // FUNÇÕES DO SISTEMA COM FIREBASE
-        
-        // Carregar dashboard
-        async function carregarDashboard() {
-            try {
-                // Buscar totais do Firestore
-                const funcionariosSnapshot = await db.collection('funcionarios')
-                    .where('ativo', '==', true)
-                    .get();
-                
-                const hoje = new Date().toISOString().split('T')[0];
-                const pontosSnapshot = await db.collection('pontos')
-                    .where('data', '==', hoje)
-                    .get();
-                
-                // Atualizar estatísticas
-                document.getElementById('totalFuncionarios').textContent = funcionariosSnapshot.size;
-                document.getElementById('pontosHoje').textContent = pontosSnapshot.size;
-                
-                const faltas = Math.max(0, funcionariosSnapshot.size - pontosSnapshot.size);
-                document.getElementById('faltasHoje').textContent = faltas;
-                
-                const presenca = funcionariosSnapshot.size > 0 
-                    ? Math.round((pontosSnapshot.size / funcionariosSnapshot.size) * 100) 
-                    : 0;
-                document.getElementById('presenca').textContent = presenca + '%';
-                
-            } catch (error) {
-                console.error('Erro ao carregar dashboard:', error);
-                // Fallback para dados locais
-                carregarDashboardLocal();
-            }
-        }
-        
-        // Cadastrar funcionário (COM FIREBASE)
-        async function cadastrarFuncionario() {
-            const nome = document.getElementById('nome').value.trim();
+        async function criarUsuario() {
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
             const cpf = document.getElementById('cpf').value;
-            const email = document.getElementById('email').value.trim();
-            const cargo = document.getElementById('cargo').value.trim();
+            const cargo = document.getElementById('cargo').value;
             const departamento = document.getElementById('departamento').value;
+            const tipo = document.getElementById('tipo').value;
             
-            if (!nome || !cpf || !cargo || !departamento) {
-                showMessage('cadastroMessage', 'Preencha todos os campos obrigatórios!', 'error');
+            if (!nome || !email || !senha) {
+                alert('Preencha nome, email e senha!');
                 return;
             }
             
             try {
-                // Gerar senha automática (CPF sem pontos e traços)
-                const senha = cpf.replace(/\D/g, '');
+                // Criar usuário no Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                const user = userCredential.user;
                 
-                // Criar funcionário no Firestore
-                const funcionarioRef = await db.collection('funcionarios').add({
+                // Salvar dados no Firestore
+                await db.collection('usuarios').doc(user.uid).set({
                     nome: nome,
-                    cpf: cpf,
                     email: email,
+                    cpf: cpf,
                     cargo: cargo,
                     departamento: departamento,
-                    senha: senha, // Em produção, usar hash
-                    ativo: true,
-                    dataCadastro: new Date().toISOString(),
-                    dataAdmissao: new Date().toISOString(),
-                    horarioEntrada: '08:00',
-                    horarioSaida: '18:00'
+                    tipo: tipo,
+                    dataCriacao: new Date().toISOString()
                 });
                 
-                showMessage('cadastroMessage', `✅ Funcionário ${nome} cadastrado com sucesso!<br>CPF: ${cpf}`, 'success');
+                alert('✅ Usuário criado com sucesso!');
                 
                 // Limpar formulário
                 document.getElementById('nome').value = '';
-                document.getElementById('cpf').value = '';
                 document.getElementById('email').value = '';
+                document.getElementById('senha').value = '';
+                document.getElementById('cpf').value = '';
                 document.getElementById('cargo').value = '';
                 document.getElementById('departamento').value = '';
                 
                 // Atualizar lista
-                setTimeout(() => {
-                    carregarFuncionarios();
-                    carregarDashboard();
-                    showTab('funcionarios');
-                }, 2000);
+                carregarUsuarios();
                 
             } catch (error) {
-                console.error('Erro ao cadastrar funcionário:', error);
-                showMessage('cadastroMessage', 'Erro ao cadastrar funcionário!', 'error');
+                console.error('Erro:', error);
+                alert('Erro: ' + error.message);
             }
         }
         
-        // Carregar funcionários do Firestore
-        async function carregarFuncionarios() {
+        async function carregarUsuarios() {
             try {
-                const snapshot = await db.collection('funcionarios')
-                    .orderBy('nome')
-                    .get();
-                
-                const container = document.getElementById('funcionariosLista');
+                const snapshot = await db.collection('usuarios').get();
+                const lista = document.getElementById('listaUsuarios');
                 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p>Nenhum funcionário cadastrado.</p>';
+                    lista.innerHTML = '<p>Nenhum usuário cadastrado</p>';
                     return;
                 }
                 
-                let html = '<table>';
-                html += '<tr><th>Nome</th><th>CPF</th><th>Cargo</th><th>Departamento</th><th>Status</th><th>Ações</th></tr>';
-                
+                let html = '';
                 snapshot.forEach(doc => {
-                    const func = doc.data();
+                    const user = doc.data();
                     html += `
-                        <tr>
-                            <td>${func.nome || ''}</td>
-                            <td>${func.cpf || ''}</td>
-                            <td>${func.cargo || ''}</td>
-                            <td>${func.departamento || ''}</td>
-                            <td>${func.ativo ? '✅ Ativo' : '❌ Inativo'}</td>
-                            <td>
-                                <button class="btn" onclick="editarFuncionario('${doc.id}')" style="padding: 5px 10px; font-size: 14px;">Editar</button>
-                                <button class="btn btn-danger" onclick="excluirFuncionario('${doc.id}')" style="padding: 5px 10px; font-size: 14px;">${func.ativo ? 'Inativar' : 'Ativar'}</button>
-                            </td>
-                        </tr>
+                        <div class="user-item">
+                            <div>
+                                <strong>${user.nome}</strong><br>
+                                <small>${user.email} | ${user.tipo}</small>
+                            </div>
+                            <div>
+                                ${user.cargo || ''}
+                            </div>
+                        </div>
                     `;
                 });
                 
-                html += '</table>';
-                container.innerHTML = html;
+                lista.innerHTML = html;
                 
             } catch (error) {
-                console.error('Erro ao carregar funcionários:', error);
-                carregarFuncionariosLocal();
+                console.error('Erro ao carregar usuários:', error);
             }
         }
         
-        // Função para excluir/ativar/inativar funcionário
-        async function excluirFuncionario(id) {
-            try {
-                const funcionarioDoc = await db.collection('funcionarios').doc(id).get();
-                const funcionario = funcionarioDoc.data();
-                
-                const novoStatus = !funcionario.ativo;
-                
-                if (confirm(`Deseja ${novoStatus ? 'ativar' : 'inativar'} o funcionário ${funcionario.nome}?`)) {
-                    await db.collection('funcionarios').doc(id).update({
-                        ativo: novoStatus
-                    });
-                    
-                    carregarFuncionarios();
-                    carregarDashboard();
-                    showMessage('cadastroMessage', `Funcionário ${novoStatus ? 'ativado' : 'inativado'} com sucesso!`, 'success');
-                }
-                
-            } catch (error) {
-                console.error('Erro ao alterar status do funcionário:', error);
-                showMessage('cadastroMessage', 'Erro ao alterar status!', 'error');
-            }
-        }
-        
-        // Logout com Firebase
-        async function logout() {
-            if (confirm('Deseja sair da área do gestor?')) {
-                try {
-                    await auth.signOut();
-                    localStorage.removeItem('gestor_logado');
-                    window.location.href = 'index.html';
-                } catch (error) {
-                    console.error('Erro ao fazer logout:', error);
-                    // Fallback
-                    localStorage.removeItem('gestor_logado');
-                    window.location.href = 'index.html';
-                }
-            }
-        }
-        
-        // Funções de fallback para modo local
-        function carregarDashboardLocal() {
-            // ... código para modo local
-        }
-        
-        function carregarFuncionariosLocal() {
-            // ... código para modo local
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
         }
     </script>
-
-    <!-- Resto do HTML igual ao anterior -->
-    <!-- (Mantenha todo o HTML da versão anterior do gestor.html) -->
 </body>
 </html>
