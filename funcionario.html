@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
+        /* MANTENHA TODO O CSS ORIGINAL AQUI */
         * {
             margin: 0;
             padding: 0;
@@ -151,10 +152,6 @@
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
         }
 
         table {
@@ -441,63 +438,65 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - MESMA DO INDEX.HTML
+        // MESMA CONFIGURAÇÃO DO index.html
         const firebaseConfig = {
-    apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-    authDomain: "essencial-print-5a753.firebaseapp.com",
-    projectId: "essencial-print-5a753",
-    storageBucket: "essencial-print-5a753.firebasestorage.app",
-    messagingSenderId: "544082416072",
-    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
-};
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
         
         // Inicializar Firebase
         let db, auth;
         try {
-            firebase.initializeApp(firebaseConfig);
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
             db = firebase.firestore();
             auth = firebase.auth();
         } catch (error) {
-            console.error('Erro ao inicializar Firebase:', error);
+            console.error('Erro Firebase:', error);
         }
 
         // Verificar autenticação
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Usuário está autenticado
+                // Usuário autenticado
                 carregarDadosFuncionario(user.uid);
             } else {
-                // Usuário não está autenticado
-                alert('Acesso não autorizado! Faça login primeiro.');
+                // Não autenticado - redirecionar
+                alert('Acesso não autorizado!');
                 window.location.href = 'index.html';
             }
         });
 
         async function carregarDadosFuncionario(userId) {
             try {
-                // Buscar dados do funcionário no Firestore
+                // Buscar dados do funcionário
                 const userDoc = await db.collection('usuarios').doc(userId).get();
                 
                 if (!userDoc.exists) {
-                    alert('Dados do funcionário não encontrados!');
+                    alert('Dados não encontrados!');
                     logout();
                     return;
                 }
                 
                 const userData = userDoc.data();
                 
-                // Verificar se é realmente um funcionário
+                // Verificar se é funcionário
                 if (userData.tipo !== 'funcionario') {
                     alert('Acesso restrito a funcionários!');
                     logout();
                     return;
                 }
                 
-                // Configurar dados do usuário na interface
+                // Configurar interface
                 document.getElementById('userName').textContent = userData.nome;
                 document.getElementById('userCargo').textContent = `${userData.cargo || 'Funcionário'} - ${userData.departamento || 'Não informado'}`;
                 
-                // Salvar dados no localStorage para compatibilidade
+                // Salvar para compatibilidade
                 const funcionarioInfo = {
                     id: userId,
                     nome: userData.nome,
@@ -508,7 +507,7 @@
                 
                 localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
                 
-                // Configurar data atual no campo de justificativa
+                // Configurar data atual
                 const hoje = new Date().toISOString().split('T')[0];
                 document.getElementById('dataJustificativa').value = hoje;
                 
@@ -522,18 +521,15 @@
                 atualizarStatus();
                 
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                alert('Erro ao carregar dados do funcionário!');
+                console.error('Erro:', error);
+                alert('Erro ao carregar dados!');
             }
         }
 
         function atualizarRelogio() {
             const agora = new Date();
-            const hora = agora.toLocaleTimeString('pt-BR');
-            const data = agora.toLocaleDateString('pt-BR');
-            
-            document.getElementById('horaAtual').textContent = hora;
-            document.getElementById('dataAtual').textContent = data;
+            document.getElementById('horaAtual').textContent = agora.toLocaleTimeString('pt-BR');
+            document.getElementById('dataAtual').textContent = agora.toLocaleDateString('pt-BR');
         }
 
         async function atualizarStatus() {
@@ -554,7 +550,7 @@
                 if (snapshot.empty) {
                     statusBox.className = 'status-box status-entrada';
                     statusBox.querySelector('.status-icon').textContent = '📥';
-                    statusText.textContent = 'Aguardando registro de entrada';
+                    statusText.textContent = 'Aguardando entrada';
                     return;
                 }
                 
@@ -563,15 +559,15 @@
                 if (ultimoRegistro.tipo === 'entrada') {
                     statusBox.className = 'status-box status-saida';
                     statusBox.querySelector('.status-icon').textContent = '📤';
-                    statusText.textContent = 'Entrada registrada às ' + ultimoRegistro.horario;
+                    statusText.textContent = 'Entrada às ' + ultimoRegistro.horario;
                 } else {
                     statusBox.className = 'status-box status-entrada';
                     statusBox.querySelector('.status-icon').textContent = '📥';
-                    statusText.textContent = 'Saída registrada às ' + ultimoRegistro.horario;
+                    statusText.textContent = 'Saída às ' + ultimoRegistro.horario;
                 }
                 
             } catch (error) {
-                console.error('Erro ao atualizar status:', error);
+                console.error('Erro status:', error);
             }
         }
 
@@ -586,7 +582,7 @@
                     second: '2-digit'
                 });
                 
-                // Obter localização
+                // Localização
                 let localizacao = { latitude: null, longitude: null };
                 
                 if (navigator.geolocation) {
@@ -598,12 +594,12 @@
                             };
                         },
                         error => {
-                            console.log('Erro ao obter localização:', error);
+                            console.log('Erro localização:', error);
                         }
                     );
                 }
                 
-                // Criar registro no Firestore
+                // Registrar no Firestore
                 await db.collection('pontos').add({
                     funcionarioId: funcionario.id,
                     funcionarioNome: funcionario.nome,
@@ -616,15 +612,15 @@
                     createdAt: new Date().toISOString()
                 });
                 
-                alert(`✅ ${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada com sucesso!`);
+                alert(`✅ ${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada!`);
                 
-                // Atualizar interface
+                // Atualizar
                 carregarRegistrosHoje();
                 atualizarStatus();
                 
             } catch (error) {
-                console.error('Erro ao registrar ponto:', error);
-                alert('Erro ao registrar ponto. Tente novamente.');
+                console.error('Erro registrar:', error);
+                alert('Erro ao registrar!');
             }
         }
         
@@ -642,7 +638,7 @@
                 const tbody = document.querySelector('#registrosHoje tbody');
                 
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nenhum registro</td></tr>';
                     return;
                 }
                 
@@ -661,9 +657,7 @@
                 tbody.innerHTML = html;
                 
             } catch (error) {
-                console.error('Erro ao carregar registros:', error);
-                document.querySelector('#registrosHoje tbody').innerHTML = 
-                    '<tr><td colspan="3" style="text-align: center; color: #f44336;">Erro ao carregar registros</td></tr>';
+                console.error('Erro carregar:', error);
             }
         }
         
@@ -680,7 +674,7 @@
                 const container = document.getElementById('justificativasLista');
                 
                 if (snapshot.empty) {
-                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Nenhuma justificativa enviada</div>';
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Nenhuma justificativa</div>';
                     return;
                 }
                 
@@ -714,9 +708,7 @@
                 container.innerHTML = html;
                 
             } catch (error) {
-                console.error('Erro ao carregar justificativas:', error);
-                document.getElementById('justificativasLista').innerHTML = 
-                    '<div style="text-align: center; padding: 20px; color: #f44336;">Erro ao carregar justificativas</div>';
+                console.error('Erro justificativas:', error);
             }
         }
         
@@ -742,24 +734,24 @@
                     dataEnvio: new Date().toISOString()
                 });
                 
-                alert('Justificativa enviada com sucesso! Aguarde aprovação.');
+                alert('Justificativa enviada!');
                 document.getElementById('descricaoJustificativa').value = '';
                 carregarMinhasJustificativas();
                 
             } catch (error) {
-                console.error('Erro ao enviar justificativa:', error);
-                alert('Erro ao enviar justificativa!');
+                console.error('Erro enviar:', error);
+                alert('Erro ao enviar!');
             }
         }
         
         function logout() {
-            if (confirm('Deseja realmente sair?')) {
+            if (confirm('Deseja sair?')) {
                 auth.signOut().then(() => {
                     localStorage.removeItem('funcionario_logado');
                     localStorage.removeItem('usuario_logado');
                     window.location.href = 'index.html';
                 }).catch(error => {
-                    console.error('Erro ao sair:', error);
+                    console.error('Erro sair:', error);
                 });
             }
         }
