@@ -10,19 +10,20 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 100%);
             color: #333;
             min-height: 100vh;
         }
         
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* Header */
+        .funcionario-header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -31,122 +32,251 @@
         .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
         
-        .user-photo {
-            width: 60px;
-            height: 60px;
+        .user-avatar {
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            border: 3px solid #2E8B57;
-            object-fit: cover;
+            background: linear-gradient(135deg, #1b5e20, #2E8B57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border: 3px solid #4CAF50;
         }
         
         .user-details h2 {
             color: #1b5e20;
             margin-bottom: 5px;
+            font-size: 1.3rem;
         }
         
         .user-details p {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         
         .logout-btn {
             background: #f44336;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s;
         }
         
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+        
+        /* Container Principal */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
         }
         
-        .card {
+        /* Tabs */
+        .tabs {
+            display: flex;
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border: 1px solid #E8F5E9;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .card-title {
+        .tab-btn {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .tab-btn:hover {
+            background: #F1F8E9;
+            color: #1b5e20;
+        }
+        
+        .tab-btn.active {
+            color: #1b5e20;
+            border-bottom-color: #1b5e20;
+            background: #F1F8E9;
+        }
+        
+        /* Conteúdo */
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 0 0 12px 12px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Seções */
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
             color: #1b5e20;
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 2px solid #E8F5E9;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+        }
+        
+        /* Registro de Ponto */
+        .ponto-status {
+            background: #F1F8E9;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            border: 2px solid #C8E6C9;
+        }
+        
+        .ponto-status h3 {
+            color: #1b5e20;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .horas-trabalhadas {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1b5e20;
+            margin: 20px 0;
+        }
+        
+        .status-info {
+            color: #666;
+            font-size: 1.1rem;
+            margin-top: 10px;
         }
         
         .ponto-buttons {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             justify-content: center;
-            margin: 40px 0;
+            margin: 50px 0;
         }
         
         .ponto-btn {
-            background: linear-gradient(135deg, #1b5e20, #2E8B57);
-            color: white;
+            min-width: 280px;
+            padding: 25px;
             border: none;
-            padding: 25px 50px;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 1.3rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            min-width: 250px;
-            box-shadow: 0 6px 20px rgba(27, 94, 32, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
         
         .ponto-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(27, 94, 32, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
         
-        .ponto-btn.entrada {
+        .btn-entrada {
             background: linear-gradient(135deg, #4CAF50, #2E8B57);
+            color: white;
         }
         
-        .ponto-btn.saida {
+        .btn-saida {
             background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
         }
         
-        .status-ponto {
-            text-align: center;
-            padding: 20px;
+        /* Tabelas */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th {
+            background: #E8F5E9;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #C8E6C9;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid #E8F5E9;
+        }
+        
+        .table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .table tr:hover {
             background: #F1F8E9;
-            border-radius: 10px;
-            margin: 30px 0;
-            border: 2px solid #C8E6C9;
         }
         
-        .status-ponto h3 {
+        /* Badges */
+        .badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .badge-success {
+            background: #C8E6C9;
             color: #1b5e20;
-            margin-bottom: 10px;
         }
         
-        .horas-trabalhadas {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1b5e20;
-            margin: 10px 0;
+        .badge-warning {
+            background: #FFF3CD;
+            color: #856404;
         }
         
+        .badge-danger {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+        
+        /* Formulários */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
             color: #444;
         }
@@ -166,6 +296,12 @@
             box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
         }
         
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Botões */
         .btn {
             background: linear-gradient(135deg, #1b5e20, #2E8B57);
             color: white;
@@ -176,100 +312,94 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-right: 10px;
         }
         
         .btn:hover {
             background: linear-gradient(135deg, #2E8B57, #388E3C);
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(27, 94, 32, 0.3);
         }
         
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
         }
         
-        .table th {
-            background: #E8F5E9;
-            padding: 15px;
-            text-align: left;
-            border-bottom: 2px solid #C8E6C9;
-            color: #1b5e20;
+        /* Mensagens */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid transparent;
         }
         
-        .table td {
-            padding: 15px;
-            border-bottom: 1px solid #E8F5E9;
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
         }
         
-        .table tr:nth-child(even) {
-            background: #f9f9f9;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
         }
         
-        .table tr:hover {
-            background: #F1F8E9;
-        }
-        
-        .badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .badge.presente {
-            background: #C8E6C9;
-            color: #1b5e20;
-        }
-        
-        .badge.atraso {
-            background: #FFF3CD;
+        .alert-warning {
+            background: #fff3cd;
             color: #856404;
+            border-color: #ffeaa7;
         }
         
-        .badge.falta {
-            background: #F8D7DA;
-            color: #721C24;
+        /* Cards de Resumo */
+        .resumo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
         
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #E8F5E9;
-            margin-bottom: 30px;
+        .resumo-card {
+            background: #F8F9FA;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #DEE2E6;
         }
         
-        .tab-btn {
-            padding: 15px 30px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            font-size: 16px;
-            cursor: pointer;
+        .resumo-valor {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1b5e20;
+            margin: 10px 0;
+        }
+        
+        .resumo-label {
             color: #666;
-            font-weight: 600;
-            transition: all 0.3s;
+            font-size: 0.95rem;
         }
         
-        .tab-btn:hover {
-            color: #1b5e20;
+        /* Filtros */
+        .filtros {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            align-items: flex-end;
         }
         
-        .tab-btn.active {
-            color: #1b5e20;
-            border-bottom-color: #1b5e20;
-            background: #F1F8E9;
+        .filtro-group {
+            min-width: 200px;
         }
         
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
+        /* Responsivo */
         @media (max-width: 768px) {
+            .funcionario-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                padding: 20px;
+            }
+            
             .ponto-buttons {
                 flex-direction: column;
                 align-items: center;
@@ -280,190 +410,225 @@
                 min-width: auto;
             }
             
-            .header {
+            .tabs {
                 flex-direction: column;
-                gap: 15px;
-                text-align: center;
+            }
+            
+            .tab-content {
+                padding: 25px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .resumo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filtros {
+                flex-direction: column;
+            }
+            
+            .filtro-group {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Verificação de Login -->
     <script>
-        // Verificar se está logado
-        const usuarioJson = localStorage.getItem('ponto_user');
-        if (!usuarioJson) {
-            window.location.href = 'index.html';
-        }
+        const usuario = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
         
-        const usuario = JSON.parse(usuarioJson);
-        if (usuario.tipo !== 'funcionario') {
+        if (!usuario || usuario.tipo !== 'funcionario') {
+            alert('Acesso restrito! Faça login como funcionário.');
             window.location.href = 'index.html';
         }
     </script>
 
-    <div class="header">
+    <!-- Header -->
+    <div class="funcionario-header">
         <div class="user-info">
-            <img src="" alt="Foto" class="user-photo" id="userPhoto">
+            <div class="user-avatar" id="userAvatar">
+                <!-- Inicial será substituída por JavaScript -->
+            </div>
             <div class="user-details">
                 <h2 id="userName">Carregando...</h2>
-                <p id="userCargo">Cargando cargo...</p>
+                <p id="userCargo">Cargando informações...</p>
             </div>
         </div>
         <button class="logout-btn" onclick="logout()">Sair</button>
     </div>
-
+    
+    <!-- Container Principal -->
     <div class="container">
+        <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="abrirTab('registro')">Registrar Ponto</button>
             <button class="tab-btn" onclick="abrirTab('relatorio')">Relatório</button>
-            <button class="tab-btn" onclick="abrirTab('justificativa')">Justificativas</button>
+            <button class="tab-btn" onclick="abrirTab('justificativas')">Justificativas</button>
+            <button class="tab-btn" onclick="abrirTab('historico')">Histórico</button>
         </div>
         
-        <!-- TAB: REGISTRAR PONTO -->
+        <!-- Conteúdo das Tabs -->
+        
+        <!-- TAB 1: REGISTRO DE PONTO -->
         <div id="tab-registro" class="tab-content active">
-            <div class="card">
-                <h2 class="card-title">Registrar Ponto</h2>
+            <div class="section">
+                <h2 class="section-title">Registro de Ponto</h2>
                 
-                <div class="status-ponto">
+                <div id="localizacaoStatus" class="alert alert-info">
+                    🌍 Aguardando acesso à localização...
+                </div>
+                
+                <div class="ponto-status">
                     <h3>Status do Dia</h3>
-                    <div id="statusDia">Aguardando registro de entrada...</div>
+                    <div class="status-info" id="statusDia">Aguardando registro de entrada</div>
                     <div class="horas-trabalhadas" id="horasHoje">0h 00min</div>
-                    <div id="ultimoRegistro">Último registro: --:--</div>
+                    <div class="status-info" id="ultimoRegistro">Último registro: --:--</div>
                 </div>
                 
                 <div class="ponto-buttons">
-                    <button class="ponto-btn entrada" onclick="registrarPonto('entrada')">
-                        Registrar Entrada
+                    <button class="ponto-btn btn-entrada" onclick="registrarPonto('entrada')">
+                        REGISTRAR ENTRADA
                     </button>
-                    <button class="ponto-btn saida" onclick="registrarPonto('saida')">
-                        Registrar Saída
+                    <button class="ponto-btn btn-saida" onclick="registrarPonto('saida')">
+                        REGISTRAR SAÍDA
                     </button>
                 </div>
                 
-                <div style="text-align: center; margin-top: 30px;">
-                    <p style="color: #666;">⚠️ Ao clicar nos botões, o sistema usará reconhecimento facial</p>
+                <div style="text-align: center; margin-top: 40px;">
+                    <p style="color: #666; font-size: 1.1rem;">
+                        📍 Seu ponto será registrado com sua localização atual
+                    </p>
                 </div>
             </div>
             
-            <div class="card">
-                <h2 class="card-title">Registros de Hoje</h2>
-                <table class="table" id="registrosHoje">
-                    <thead>
-                        <tr>
-                            <th>Horário</th>
-                            <th>Tipo</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="3" style="text-align: center; padding: 40px;">Nenhum registro hoje</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="section">
+                <h2 class="section-title">Registros de Hoje</h2>
+                
+                <div class="table-container">
+                    <table class="table" id="tabelaRegistros">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Tipo</th>
+                                <th>Localização</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
-        <!-- TAB: RELATÓRIO -->
+        <!-- TAB 2: RELATÓRIO -->
         <div id="tab-relatorio" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">Relatório de Horas</h2>
+            <div class="section">
+                <h2 class="section-title">Relatório de Horas</h2>
                 
-                <div style="margin-bottom: 30px;">
-                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 200px;">
-                            <label class="form-label">Mês</label>
-                            <select class="form-control" id="mesRelatorio">
-                                <option value="1">Janeiro</option>
-                                <option value="2">Fevereiro</option>
-                                <option value="3">Março</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Maio</option>
-                                <option value="6">Junho</option>
-                                <option value="7">Julho</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                        
-                        <div style="flex: 1; min-width: 200px;">
-                            <label class="form-label">Ano</label>
-                            <select class="form-control" id="anoRelatorio">
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                            </select>
-                        </div>
-                        
-                        <div style="align-self: flex-end;">
-                            <button class="btn" onclick="gerarRelatorio()">Gerar Relatório</button>
-                        </div>
+                <div class="filtros">
+                    <div class="filtro-group">
+                        <label class="form-label">Mês</label>
+                        <select class="form-control" id="mesRelatorio">
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Ano</label>
+                        <select class="form-control" id="anoRelatorio">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" onclick="gerarRelatorioMensal()">Gerar Relatório</button>
+                </div>
+                
+                <div class="resumo-grid">
+                    <div class="resumo-card">
+                        <div class="resumo-label">Total de Horas</div>
+                        <div class="resumo-valor" id="totalHorasMes">0h</div>
+                    </div>
+                    
+                    <div class="resumo-card">
+                        <div class="resumo-label">Dias Trabalhados</div>
+                        <div class="resumo-valor" id="diasTrabalhados">0</div>
+                    </div>
+                    
+                    <div class="resumo-card">
+                        <div class="resumo-label">Faltas</div>
+                        <div class="resumo-valor" id="totalFaltas">0</div>
+                    </div>
+                    
+                    <div class="resumo-card">
+                        <div class="resumo-label">Horas Extras</div>
+                        <div class="resumo-valor" id="horasExtras">0h</div>
                     </div>
                 </div>
                 
-                <div style="background: #F8F9FA; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                    <h3 style="color: #1b5e20; margin-bottom: 15px;">Resumo do Mês</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.9rem; color: #666;">Total de Horas</div>
-                            <div style="font-size: 2rem; font-weight: 700; color: #1b5e20;" id="totalHorasMes">0h</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.9rem; color: #666;">Dias Trabalhados</div>
-                            <div style="font-size: 2rem; font-weight: 700; color: #1b5e20;" id="diasTrabalhados">0</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.9rem; color: #666;">Faltas</div>
-                            <div style="font-size: 2rem; font-weight: 700; color: #f44336;" id="totalFaltas">0</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.9rem; color: #666;">Horas Extras</div>
-                            <div style="font-size: 2rem; font-weight: 700; color: #FF9800;" id="horasExtras">0h</div>
-                        </div>
-                    </div>
+                <div class="table-container">
+                    <table class="table" id="tabelaRelatorio">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido por JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-                
-                <table class="table" id="tabelaRelatorio">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Entrada</th>
-                            <th>Saída</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Preenchido por JavaScript -->
-                    </tbody>
-                </table>
             </div>
         </div>
         
-        <!-- TAB: JUSTIFICATIVAS -->
-        <div id="tab-justificativa" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">Justificativas</h2>
+        <!-- TAB 3: JUSTIFICATIVAS -->
+        <div id="tab-justificativas" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Enviar Justificativa</h2>
+                
+                <div id="justificativaMessage" class="alert alert-info">
+                    Utilize este formulário para justificar faltas, atrasos ou esquecimentos de ponto.
+                </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Tipo de Justificativa</label>
-                    <select class="form-control" id="tipoJustificativa">
+                    <label class="form-label">Tipo de Justificativa *</label>
+                    <select class="form-control" id="tipoJustificativa" required>
                         <option value="">Selecione...</option>
                         <option value="falta">Falta</option>
                         <option value="atraso">Atraso</option>
-                        <option value="esqueceu_entrada">Esqueceu de registrar entrada</option>
-                        <option value="esqueceu_saida">Esqueceu de registrar saída</option>
+                        <option value="esqueceu_entrada">Esqueci de registrar entrada</option>
+                        <option value="esqueceu_saida">Esqueci de registrar saída</option>
                         <option value="saida_antecipada">Saída antecipada</option>
+                        <option value="outro">Outro</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Data</label>
+                    <label class="form-label">Data *</label>
                     <input type="date" class="form-control" id="dataJustificativa" 
-                           value="<?php echo date('Y-m-d'); ?>">
+                           value="<?php echo date('Y-m-d'); ?>" required>
                 </div>
                 
                 <div class="form-group">
@@ -472,9 +637,9 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Descrição</label>
+                    <label class="form-label">Descrição *</label>
                     <textarea class="form-control" id="descricaoJustificativa" rows="4" 
-                              placeholder="Descreva o motivo da justificativa..."></textarea>
+                              placeholder="Descreva detalhadamente o motivo da justificativa..." required></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -483,11 +648,19 @@
                            accept="image/*,.pdf,.doc,.docx">
                 </div>
                 
-                <button class="btn" onclick="enviarJustificativa()">Enviar Justificativa</button>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="enviarJustificativa()" 
+                            style="padding: 18px 50px; font-size: 18px;">
+                        Enviar Justificativa
+                    </button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">Minhas Justificativas</h2>
                 
-                <div style="margin-top: 40px;">
-                    <h3 style="color: #1b5e20; margin-bottom: 20px;">Justificativas Enviadas</h3>
-                    <table class="table" id="tabelaJustificativas">
+                <div class="table-container">
+                    <table class="table" id="tabelaMinhasJustificativas">
                         <thead>
                             <tr>
                                 <th>Data</th>
@@ -497,11 +670,48 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Preenchido por JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 4: HISTÓRICO -->
+        <div id="tab-historico" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Histórico Completo</h2>
+                
+                <div class="filtros">
+                    <div class="filtro-group">
+                        <label class="form-label">Data Inicial</label>
+                        <input type="date" class="form-control" id="dataInicioHistorico">
+                    </div>
+                    
+                    <div class="filtro-group">
+                        <label class="form-label">Data Final</label>
+                        <input type="date" class="form-control" id="dataFimHistorico">
+                    </div>
+                    
+                    <button class="btn" onclick="carregarHistorico()">Filtrar</button>
+                    <button class="btn btn-secondary" onclick="exportarHistorico()">Exportar</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="tabelaHistorico">
+                        <thead>
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 40px;">
-                                    Nenhuma justificativa enviada
-                                </td>
+                                <th>Data</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Total</th>
+                                <th>Localização Entrada</th>
+                                <th>Localização Saída</th>
+                                <th>Status</th>
                             </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido por JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -510,31 +720,47 @@
     </div>
 
     <script>
-        // Inicializar página
+        // =========== INICIALIZAÇÃO ===========
+        let usuarioFuncionario = null;
+        let localizacaoAtual = null;
+        
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Área do funcionário carregada!');
+            
+            // Carregar dados do usuário
+            usuarioFuncionario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
             carregarDadosUsuario();
+            
+            // Configurar data atual
+            const hoje = new Date();
+            document.getElementById('mesRelatorio').value = hoje.getMonth() + 1;
+            document.getElementById('anoRelatorio').value = hoje.getFullYear();
+            
+            // Solicitar localização
+            solicitarLocalizacao();
+            
+            // Carregar registros do dia
             carregarRegistrosHoje();
-            configurarMesAtual();
+            atualizarStatusDia();
+            
+            // Carregar justificativas do usuário
+            carregarMinhasJustificativas();
+            
+            // Carregar histórico
+            carregarHistorico();
         });
+        
+        // =========== FUNÇÕES DO SISTEMA ===========
         
         function carregarDadosUsuario() {
             const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
-            const funcionario = funcionarios.find(f => f.id === usuario.id);
+            const funcionario = funcionarios.find(f => f.id === usuarioFuncionario.id);
             
             if (funcionario) {
                 document.getElementById('userName').textContent = funcionario.nome;
                 document.getElementById('userCargo').textContent = `${funcionario.cargo} - ${funcionario.departamento}`;
-                
-                if (funcionario.foto) {
-                    document.getElementById('userPhoto').src = funcionario.foto;
-                }
+                document.getElementById('userAvatar').textContent = funcionario.nome.charAt(0);
             }
-        }
-        
-        function configurarMesAtual() {
-            const hoje = new Date();
-            document.getElementById('mesRelatorio').value = hoje.getMonth() + 1;
-            document.getElementById('anoRelatorio').value = hoje.getFullYear();
         }
         
         function abrirTab(tab) {
@@ -550,93 +776,163 @@
             // Adicionar active ao selecionado
             document.querySelector(`.tab-btn[onclick="abrirTab('${tab}')"]`).classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            // Carregar dados se for relatório
-            if (tab === 'relatorio') {
-                gerarRelatorio();
+        }
+        
+        function solicitarLocalizacao() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        localizacaoAtual = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            precisao: position.coords.accuracy
+                        };
+                        
+                        document.getElementById('localizacaoStatus').innerHTML = 
+                            '📍 Localização obtida com sucesso! Pronto para registrar ponto.';
+                        document.getElementById('localizacaoStatus').className = 'alert alert-success';
+                    },
+                    function(error) {
+                        console.error('Erro ao obter localização:', error);
+                        localizacaoAtual = {
+                            latitude: -23.5505, // São Paulo como fallback
+                            longitude: -46.6333,
+                            precisao: 10000
+                        };
+                        
+                        document.getElementById('localizacaoStatus').innerHTML = 
+                            '⚠️ Não foi possível obter a localização. Usando localização padrão.';
+                        document.getElementById('localizacaoStatus').className = 'alert alert-warning';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert('Geolocalização não é suportada pelo seu navegador.');
             }
         }
         
         function registrarPonto(tipo) {
+            if (!localizacaoAtual) {
+                alert('⚠️ Aguardando obtenção da localização...\nPor favor, aguarde alguns segundos.');
+                return;
+            }
+            
             const agora = new Date();
             const horaFormatada = agora.toLocaleTimeString('pt-BR', { 
                 hour: '2-digit', 
-                minute: '2-digit' 
+                minute: '2-digit',
+                second: '2-digit'
             });
-            const dataFormatada = agora.toLocaleDateString('pt-BR');
+            const dataFormatada = agora.toISOString().split('T')[0];
             
-            alert(`✅ ${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada!\n\n` +
-                  `Horário: ${horaFormatada}\n` +
-                  `Data: ${dataFormatada}\n\n` +
-                  `⚠️ Em produção, seria feito reconhecimento facial.`);
+            // Determinar coordenadas baseadas no tipo
+            const coordenadas = {
+                latitude: localizacaoAtual.latitude,
+                longitude: localizacaoAtual.longitude,
+                precisao: localizacaoAtual.precisao
+            };
             
-            // Simular registro
-            const registros = JSON.parse(localStorage.getItem(`registros_${usuario.id}`) || '[]');
-            registros.push({
+            // Criar objeto de ponto
+            const ponto = {
+                id: Date.now(),
+                funcionarioId: usuarioFuncionario.id,
                 tipo: tipo,
-                data: agora.toISOString(),
+                data: dataFormatada,
                 horario: horaFormatada,
-                dataCompleta: dataFormatada
-            });
+                timestamp: agora.getTime(),
+                localizacao: coordenadas,
+                ip: '192.168.1.1', // Em produção, obter IP real
+                dispositivo: navigator.userAgent
+            };
             
-            localStorage.setItem(`registros_${usuario.id}`, JSON.stringify(registros));
+            // Salvar no localStorage
+            let pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            pontos.push(ponto);
+            localStorage.setItem('pontos', JSON.stringify(pontos));
             
+            // Mensagem de sucesso
+            const tipoTexto = tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA';
+            alert(`✅ ${tipoTexto} registrada com sucesso!\n\nHorário: ${horaFormatada}\nData: ${new Date().toLocaleDateString('pt-BR')}`);
+            
+            // Atualizar interface
             carregarRegistrosHoje();
             atualizarStatusDia();
+            
+            // Solicitar nova localização
+            solicitarLocalizacao();
         }
         
         function carregarRegistrosHoje() {
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            const registros = JSON.parse(localStorage.getItem(`registros_${usuario.id}`) || '[]');
-            const registrosHoje = registros.filter(r => r.dataCompleta === hoje);
+            const hoje = new Date().toISOString().split('T')[0];
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            const registrosHoje = pontos.filter(p => 
+                p.funcionarioId === usuarioFuncionario.id && p.data === hoje
+            );
             
-            const tbody = document.querySelector('#registrosHoje tbody');
+            const tbody = document.querySelector('#tabelaRegistros tbody');
             
             if (registrosHoje.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 40px;">
+                        <td colspan="4" style="text-align: center; padding: 40px;">
                             Nenhum registro hoje
                         </td>
                     </tr>
                 `;
             } else {
-                tbody.innerHTML = registrosHoje.map((r, index) => `
+                tbody.innerHTML = registrosHoje.map((registro, index) => `
                     <tr>
-                        <td>${r.horario}</td>
-                        <td>${r.tipo === 'entrada' ? 'Entrada' : 'Saída'}</td>
+                        <td>${registro.horario}</td>
                         <td>
-                            <span class="badge presente">Registrado</span>
+                            <span class="badge ${registro.tipo === 'entrada' ? 'badge-success' : 'badge-warning'}">
+                                ${registro.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                            </span>
+                        </td>
+                        <td>
+                            <small>📍 Localização registrada</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">Registrado</span>
                         </td>
                     </tr>
                 `).join('');
             }
-            
-            atualizarStatusDia();
         }
         
         function atualizarStatusDia() {
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            const registros = JSON.parse(localStorage.getItem(`registros_${usuario.id}`) || '[]');
-            const registrosHoje = registros.filter(r => r.dataCompleta === hoje);
+            const hoje = new Date().toISOString().split('T')[0];
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            const registrosHoje = pontos.filter(p => 
+                p.funcionarioId === usuarioFuncionario.id && p.data === hoje
+            );
             
-            const entradas = registrosHoje.filter(r => r.tipo === 'entrada');
-            const saidas = registrosHoje.filter(r => r.tipo === 'saida');
+            const entrada = registrosHoje.find(r => r.tipo === 'entrada');
+            const saida = registrosHoje.find(r => r.tipo === 'saida');
             
-            let status = '';
+            let status = 'Aguardando entrada';
             let horas = '0h 00min';
             let ultimo = '--:--';
             
-            if (entradas.length > 0) {
-                status = 'Entrada registrada';
-                ultimo = entradas[entradas.length - 1].horario;
+            if (entrada) {
+                status = 'Em trabalho';
+                ultimo = entrada.horario;
                 
-                if (saidas.length > 0) {
+                if (saida) {
                     status = 'Saída registrada';
-                    ultimo = saidas[saidas.length - 1].horario;
+                    ultimo = saida.horario;
                     
-                    // Calcular horas (simulação)
-                    horas = '8h 45min';
+                    // Calcular horas trabalhadas
+                    const horaEntrada = new Date(entrada.timestamp);
+                    const horaSaida = new Date(saida.timestamp);
+                    const diffMs = horaSaida - horaEntrada;
+                    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    horas = `${diffHoras}h ${diffMinutos.toString().padStart(2, '0')}min`;
                 }
             }
             
@@ -645,12 +941,20 @@
             document.getElementById('ultimoRegistro').textContent = `Último registro: ${ultimo}`;
         }
         
-        function gerarRelatorio() {
+        function gerarRelatorioMensal() {
             const mes = parseInt(document.getElementById('mesRelatorio').value);
             const ano = parseInt(document.getElementById('anoRelatorio').value);
             
-            // Simular dados
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const funcionario = funcionarios.find(f => f.id === usuarioFuncionario.id);
+            
+            if (!funcionario) return;
+            
+            // Simular dados para o mês selecionado
             const diasNoMes = new Date(ano, mes, 0).getDate();
+            const horarioEntrada = funcionario.horarioEntrada || '08:00';
+            const horarioSaida = funcionario.horarioSaida || '18:00';
             
             let totalHoras = 0;
             let diasTrabalhados = 0;
@@ -661,20 +965,64 @@
             
             for (let dia = 1; dia <= diasNoMes; dia++) {
                 const data = new Date(ano, mes - 1, dia);
-                if (data.getDay() !== 0 && data.getDay() !== 6) { // Não contar sábado e domingo
-                    // Simular dados aleatórios
-                    const entrada = '08:' + (Math.random() > 0.7 ? '15' : '00');
-                    const saida = '18:' + (Math.random() > 0.7 ? '30' : '00');
-                    const total = '9h 45min';
-                    const status = Math.random() > 0.1 ? 'presente' : (Math.random() > 0.5 ? 'atraso' : 'falta');
+                
+                // Não contar sábado e domingo
+                if (data.getDay() !== 0 && data.getDay() !== 6) {
+                    const dataISO = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
                     
-                    if (status === 'presente') {
+                    // Buscar registros reais
+                    const registrosDia = pontos.filter(p => 
+                        p.funcionarioId === usuarioFuncionario.id && p.data === dataISO
+                    );
+                    
+                    const entradaReg = registrosDia.find(r => r.tipo === 'entrada');
+                    const saidaReg = registrosDia.find(r => r.tipo === 'saida');
+                    
+                    let entrada = '--:--';
+                    let saida = '--:--';
+                    let total = '0h';
+                    let status = 'Falta';
+                    let statusClass = 'badge-danger';
+                    
+                    if (entradaReg && saidaReg) {
+                        entrada = entradaReg.horario;
+                        saida = saidaReg.horario;
+                        
+                        // Calcular horas
+                        const horaEntrada = new Date(entradaReg.timestamp);
+                        const horaSaida = new Date(saidaReg.timestamp);
+                        const diffMs = horaSaida - horaEntrada;
+                        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+                        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        total = `${diffHoras}h ${diffMinutos.toString().padStart(2, '0')}min`;
+                        
+                        // Verificar se bateu ponto dentro do horário
+                        const horaEntradaObj = new Date();
+                        horaEntradaObj.setHours(parseInt(horarioEntrada.split(':')[0]));
+                        horaEntradaObj.setMinutes(parseInt(horarioEntrada.split(':')[1]));
+                        
+                        if (horaEntrada.getTime() > horaEntradaObj.getTime() + 15*60000) {
+                            status = 'Atraso';
+                            statusClass = 'badge-warning';
+                        } else {
+                            status = 'Presente';
+                            statusClass = 'badge-success';
+                        }
+                        
+                        // Calcular horas extras
+                        const horasTrabalhadas = diffHoras + (diffMinutos / 60);
+                        if (horasTrabalhadas > 8) {
+                            horasExtras += (horasTrabalhadas - 8);
+                        }
+                        
+                        totalHoras += horasTrabalhadas;
                         diasTrabalhados++;
-                        totalHoras += 9.75;
-                        if (Math.random() > 0.7) horasExtras += 0.5;
-                    } else if (status === 'atraso') {
-                        diasTrabalhados++;
-                        totalHoras += 9;
+                    } else if (entradaReg && !saidaReg) {
+                        entrada = entradaReg.horario;
+                        saida = '--:--';
+                        status = 'Entrada sem saída';
+                        statusClass = 'badge-warning';
                     } else {
                         faltas++;
                     }
@@ -686,10 +1034,7 @@
                             <td>${saida}</td>
                             <td>${total}</td>
                             <td>
-                                <span class="badge ${status}">
-                                    ${status === 'presente' ? 'Presente' : 
-                                      status === 'atraso' ? 'Atraso' : 'Falta'}
-                                </span>
+                                <span class="badge ${statusClass}">${status}</span>
                             </td>
                         </tr>
                     `;
@@ -704,56 +1049,68 @@
             
             // Atualizar tabela
             const tbody = document.querySelector('#tabelaRelatorio tbody');
-            if (tabelaHTML === '') {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px;">
-                            Nenhum registro para este período
-                        </td>
-                    </tr>
-                `;
-            } else {
-                tbody.innerHTML = tabelaHTML;
-            }
+            tbody.innerHTML = tabelaHTML || `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px;">
+                        Nenhum registro para este período
+                    </td>
+                </tr>
+            `;
         }
         
         function enviarJustificativa() {
             const tipo = document.getElementById('tipoJustificativa').value;
             const data = document.getElementById('dataJustificativa').value;
-            const descricao = document.getElementById('descricaoJustificativa').value;
+            const horario = document.getElementById('horarioJustificativa').value;
+            const descricao = document.getElementById('descricaoJustificativa').value.trim();
             
             if (!tipo || !descricao) {
-                alert('Por favor, preencha todos os campos obrigatórios!');
+                alert('❌ Por favor, preencha todos os campos obrigatórios!');
                 return;
             }
             
-            // Salvar justificativa
-            const justificativas = JSON.parse(localStorage.getItem(`justificativas_${usuario.id}`) || '[]');
-            justificativas.push({
+            // Criar objeto de justificativa
+            const justificativa = {
+                id: Date.now(),
+                funcionarioId: usuarioFuncionario.id,
                 tipo: tipo,
                 data: data,
+                horario: horario,
                 descricao: descricao,
                 status: 'pendente',
-                dataEnvio: new Date().toISOString()
-            });
+                dataEnvio: new Date().toISOString(),
+                anexo: null // Em produção, armazenaria o arquivo
+            };
             
-            localStorage.setItem(`justificativas_${usuario.id}`, JSON.stringify(justificativas));
+            // Salvar no localStorage
+            let justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+            justificativas.push(justificativa);
+            localStorage.setItem('justificativas', JSON.stringify(justificativas));
             
-            alert('✅ Justificativa enviada com sucesso!');
+            // Mensagem de sucesso
+            document.getElementById('justificativaMessage').innerHTML = 
+                '✅ Justificativa enviada com sucesso! Aguarde a aprovação do gestor.';
+            document.getElementById('justificativaMessage').className = 'alert alert-success';
             
             // Limpar formulário
             document.getElementById('tipoJustificativa').value = '';
+            document.getElementById('horarioJustificativa').value = '';
             document.getElementById('descricaoJustificativa').value = '';
+            document.getElementById('anexoJustificativa').value = '';
             
             // Atualizar tabela
-            carregarJustificativas();
+            carregarMinhasJustificativas();
         }
         
-        function carregarJustificativas() {
-            const justificativas = JSON.parse(localStorage.getItem(`justificativas_${usuario.id}`) || '[]');
-            const tbody = document.querySelector('#tabelaJustificativas tbody');
+        function carregarMinhasJustificativas() {
+            const justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+            const minhasJustificativas = justificativas.filter(j => 
+                j.funcionarioId === usuarioFuncionario.id
+            );
             
-            if (justificativas.length === 0) {
+            const tbody = document.querySelector('#tabelaMinhasJustificativas tbody');
+            
+            if (minhasJustificativas.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px;">
@@ -762,20 +1119,21 @@
                     </tr>
                 `;
             } else {
-                tbody.innerHTML = justificativas.map(j => {
-                    const dataFormatada = new Date(j.data).toLocaleDateString('pt-BR');
-                    const statusText = j.status === 'aprovada' ? '✅ Aprovada' : 
-                                      j.status === 'rejeitada' ? '❌ Rejeitada' : '⏳ Pendente';
-                    const statusClass = j.status === 'aprovada' ? 'presente' : 
-                                       j.status === 'rejeitada' ? 'falta' : 'atraso';
+                tbody.innerHTML = minhasJustificativas.map(j => {
+                    let statusClass = 'badge-warning';
+                    if (j.status === 'aprovada') statusClass = 'badge-success';
+                    if (j.status === 'rejeitada') statusClass = 'badge-danger';
                     
                     return `
                         <tr>
-                            <td>${dataFormatada}</td>
+                            <td>${new Date(j.data).toLocaleDateString('pt-BR')}</td>
                             <td>${j.tipo}</td>
                             <td>${j.descricao.substring(0, 50)}${j.descricao.length > 50 ? '...' : ''}</td>
                             <td>
-                                <span class="badge ${statusClass}">${statusText}</span>
+                                <span class="badge ${statusClass}">
+                                    ${j.status === 'pendente' ? 'Pendente' : 
+                                      j.status === 'aprovada' ? 'Aprovada' : 'Rejeitada'}
+                                </span>
                             </td>
                         </tr>
                     `;
@@ -783,9 +1141,108 @@
             }
         }
         
+        function carregarHistorico() {
+            const dataInicio = document.getElementById('dataInicioHistorico').value;
+            const dataFim = document.getElementById('dataFimHistorico').value;
+            
+            const pontos = JSON.parse(localStorage.getItem('pontos') || '[]');
+            let pontosFiltrados = pontos.filter(p => p.funcionarioId === usuarioFuncionario.id);
+            
+            // Aplicar filtros de data se existirem
+            if (dataInicio) {
+                pontosFiltrados = pontosFiltrados.filter(p => p.data >= dataInicio);
+            }
+            if (dataFim) {
+                pontosFiltrados = pontosFiltrados.filter(p => p.data <= dataFim);
+            }
+            
+            // Agrupar por data
+            const pontosPorData = {};
+            pontosFiltrados.forEach(ponto => {
+                if (!pontosPorData[ponto.data]) {
+                    pontosPorData[ponto.data] = { entrada: null, saida: null };
+                }
+                
+                if (ponto.tipo === 'entrada') {
+                    pontosPorData[ponto.data].entrada = ponto;
+                } else if (ponto.tipo === 'saida') {
+                    pontosPorData[ponto.data].saida = ponto;
+                }
+            });
+            
+            const tbody = document.querySelector('#tabelaHistorico tbody');
+            
+            if (Object.keys(pontosPorData).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            Nenhum registro encontrado
+                        </td>
+                    </tr>
+                `;
+            } else {
+                let tabelaHTML = '';
+                
+                Object.keys(pontosPorData).sort().reverse().forEach(data => {
+                    const registro = pontosPorData[data];
+                    const entrada = registro.entrada;
+                    const saida = registro.saida;
+                    
+                    let entradaHorario = '--:--';
+                    let saidaHorario = '--:--';
+                    let totalHoras = '0h';
+                    let locEntrada = '--';
+                    let locSaida = '--';
+                    let status = 'Incompleto';
+                    let statusClass = 'badge-warning';
+                    
+                    if (entrada) {
+                        entradaHorario = entrada.horario;
+                        locEntrada = '📍';
+                        
+                        if (saida) {
+                            saidaHorario = saida.horario;
+                            locSaida = '📍';
+                            
+                            // Calcular horas
+                            const horaEntrada = new Date(entrada.timestamp);
+                            const horaSaida = new Date(saida.timestamp);
+                            const diffMs = horaSaida - horaEntrada;
+                            const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+                            const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                            
+                            totalHoras = `${diffHoras}h ${diffMinutos.toString().padStart(2, '0')}min`;
+                            status = 'Completo';
+                            statusClass = 'badge-success';
+                        }
+                    }
+                    
+                    tabelaHTML += `
+                        <tr>
+                            <td>${new Date(data).toLocaleDateString('pt-BR')}</td>
+                            <td>${entradaHorario}</td>
+                            <td>${saidaHorario}</td>
+                            <td>${totalHoras}</td>
+                            <td>${locEntrada}</td>
+                            <td>${locSaida}</td>
+                            <td>
+                                <span class="badge ${statusClass}">${status}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = tabelaHTML;
+            }
+        }
+        
+        function exportarHistorico() {
+            alert('Exportando histórico...\n\nEm produção, geraria um arquivo CSV/Excel.');
+        }
+        
         function logout() {
-            if (confirm('Deseja sair do sistema?')) {
-                localStorage.removeItem('ponto_user');
+            if (confirm('Deseja sair da área do funcionário?')) {
+                localStorage.removeItem('usuario_logado');
                 window.location.href = 'index.html';
             }
         }
