@@ -69,11 +69,6 @@
             font-weight: 700;
         }
 
-        .logo span {
-            color: #3949ab;
-            font-weight: 300;
-        }
-
         .form-group {
             margin-bottom: 20px;
         }
@@ -101,9 +96,11 @@
             box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.1);
         }
 
-        .btn {
+        .btn-login {
             width: 100%;
             padding: 16px;
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
@@ -114,26 +111,15 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            margin-top: 10px;
         }
 
-        .btn-login {
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .btn-gestor {
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .btn:hover {
+        .btn-login:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .btn:active {
+        .btn-login:active {
             transform: translateY(-1px);
         }
 
@@ -179,31 +165,6 @@
             font-size: 18px;
         }
 
-        .login-type {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .login-type-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s ease;
-        }
-
-        .login-type-btn.active {
-            border-color: #3949ab;
-            background: #e8eaf6;
-            color: #1a237e;
-        }
-
         @media (max-width: 480px) {
             .login-body {
                 padding: 30px 20px;
@@ -225,15 +186,6 @@
         <div class="login-body">
             <div class="logo">
                 <h2>Área de <span>Acesso</span></h2>
-            </div>
-            
-            <div class="login-type">
-                <button class="login-type-btn active" onclick="setLoginType('funcionario')">
-                    👤 Funcionário
-                </button>
-                <button class="login-type-btn" onclick="setLoginType('gestor')">
-                    👑 Gestor
-                </button>
             </div>
             
             <div class="error-message" id="errorMessage"></div>
@@ -262,12 +214,8 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-login" onclick="login()">
+                <button type="submit" class="btn-login" onclick="login()">
                     <span>🔐</span> Entrar
-                </button>
-                
-                <button type="button" class="btn btn-gestor" onclick="loginGestor()">
-                    <span>👑</span> Acesso Gestor
                 </button>
             </form>
             
@@ -281,7 +229,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - VERIFIQUE NO CONSOLE QUAL ESTÁ CORRETA!
+        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
             authDomain: "essencial-print-5a753.firebaseapp.com",
@@ -299,27 +247,10 @@
             }
             auth = firebase.auth();
             db = firebase.firestore();
-            console.log("Firebase inicializado");
+            console.log("✅ Firebase inicializado");
         } catch (error) {
-            console.error('Erro Firebase:', error);
-        }
-
-        let loginType = 'funcionario';
-
-        function setLoginType(type) {
-            loginType = type;
-            
-            document.querySelectorAll('.login-type-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (type === 'funcionario') {
-                document.querySelector('.login-type-btn:nth-child(1)').classList.add('active');
-                document.querySelector('.btn-login').innerHTML = '<span>🔐</span> Entrar como Funcionário';
-            } else {
-                document.querySelector('.login-type-btn:nth-child(2)').classList.add('active');
-                document.querySelector('.btn-login').innerHTML = '<span>👑</span> Entrar como Gestor';
-            }
+            console.error('❌ Erro Firebase:', error);
+            showError('Erro de conexão com o servidor.');
         }
 
         function togglePassword() {
@@ -345,58 +276,52 @@
             }, 5000);
         }
 
-        // Login normal
+        // Função principal de login
         async function login() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                showError('Preencha todos os campos.');
+                showError('Por favor, preencha todos os campos.');
                 return;
             }
             
+            // Mostrar loading
             const loginBtn = document.querySelector('.btn-login');
             const originalText = loginBtn.innerHTML;
-            loginBtn.innerHTML = '<span>⏳</span> Verificando...';
+            loginBtn.innerHTML = '<span>⏳</span> Entrando...';
             loginBtn.disabled = true;
             
             try {
+                console.log(`🔐 Tentando login com: ${email}`);
+                
+                // Tentar autenticar no Firebase
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
+                console.log("✅ Usuário autenticado:", user.email);
+                
+                // Buscar dados do usuário no Firestore
                 const userDoc = await db.collection('usuarios').doc(user.uid).get();
                 
                 if (userDoc.exists) {
                     const userData = userDoc.data();
+                    console.log("📄 Dados do usuário:", userData);
                     
-                    if (loginType === 'gestor' && userData.tipo !== 'gestor') {
-                        await auth.signOut();
-                        showError('Sem permissão de gestor.');
-                        loginBtn.innerHTML = originalText;
-                        loginBtn.disabled = false;
-                        return;
-                    }
-                    
-                    if (loginType === 'funcionario' && userData.tipo !== 'funcionario') {
-                        await auth.signOut();
-                        showError('Não é funcionário.');
-                        loginBtn.innerHTML = originalText;
-                        loginBtn.disabled = false;
-                        return;
-                    }
-                    
+                    // Salvar dados do usuário
                     const userInfo = {
                         id: user.uid,
                         email: user.email,
                         nome: userData.nome,
                         cargo: userData.cargo || 'Funcionário',
                         departamento: userData.departamento || 'Não informado',
-                        tipo: userData.tipo,
+                        tipo: userData.tipo || 'funcionario',
                         cpf: userData.cpf || ''
                     };
                     
                     localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
                     
+                    // Para compatibilidade com sistema antigo
                     if (userData.tipo === 'funcionario') {
                         const funcionarioInfo = {
                             id: user.uid,
@@ -408,6 +333,7 @@
                         localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
                     }
                     
+                    // Redirecionar conforme o tipo de usuário
                     if (userData.tipo === 'gestor') {
                         window.location.href = 'gestor.html';
                     } else {
@@ -415,15 +341,39 @@
                     }
                     
                 } else {
-                    showError('Dados não encontrados.');
-                    await auth.signOut();
-                    loginBtn.innerHTML = originalText;
-                    loginBtn.disabled = false;
+                    // Se usuário existe no Auth mas não no Firestore
+                    console.warn("⚠️ Usuário não encontrado no Firestore");
+                    
+                    // Criar dados básicos
+                    const userInfo = {
+                        id: user.uid,
+                        email: user.email,
+                        nome: user.email.split('@')[0],
+                        cargo: 'Funcionário',
+                        departamento: 'Não informado',
+                        tipo: 'funcionario'
+                    };
+                    
+                    localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                    
+                    // Criar no Firestore para próxima vez
+                    await db.collection('usuarios').doc(user.uid).set({
+                        nome: userInfo.nome,
+                        email: user.email,
+                        tipo: 'funcionario',
+                        cargo: userInfo.cargo,
+                        departamento: userInfo.departamento,
+                        dataCriacao: new Date().toISOString()
+                    });
+                    
+                    // Redirecionar para área do funcionário
+                    window.location.href = 'funcionario.html';
                 }
                 
             } catch (error) {
-                console.error('Erro login:', error);
+                console.error('❌ Erro no login:', error);
                 
+                // Tratamento de erros
                 switch (error.code) {
                     case 'auth/user-not-found':
                         showError('Usuário não encontrado.');
@@ -437,6 +387,12 @@
                     case 'auth/invalid-login-credentials':
                         showError('Credenciais inválidas.');
                         break;
+                    case 'auth/user-disabled':
+                        showError('Esta conta foi desativada.');
+                        break;
+                    case 'auth/network-request-failed':
+                        showError('Erro de conexão.');
+                        break;
                     default:
                         showError('Erro ao fazer login.');
                 }
@@ -446,28 +402,26 @@
             }
         }
 
-        // Login gestor
-        function loginGestor() {
-            const email = 'admin@essencialprint.com';
-            const password = 'admin123';
-            
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            
-            setLoginType('gestor');
-            
-            login();
-        }
-
-        // Eventos
+        // Permitir Enter para login
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("📱 Página de login carregada");
+            
             document.getElementById('loginForm').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     login();
                 }
             });
             
-            // Não redirecionar automaticamente - evitar loop
+            // Verificar se já está logado
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
+            if (usuarioLogado) {
+                // Redirecionar automaticamente se já estiver logado
+                if (usuarioLogado.tipo === 'gestor') {
+                    window.location.href = 'gestor.html';
+                } else {
+                    window.location.href = 'funcionario.html';
+                }
+            }
         });
     </script>
 </body>
