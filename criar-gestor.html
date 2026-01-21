@@ -1,0 +1,39 @@
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  
+  async function criarGestor() {
+    try {
+      const user = await firebase.auth().createUserWithEmailAndPassword(
+        'admin@essencialprint.com',
+        'admin123'
+      );
+      
+      await firebase.firestore().collection('usuarios').doc(user.user.uid).set({
+        nome: 'Administrador',
+        email: 'admin@essencialprint.com',
+        tipo: 'gestor',
+        cargo: 'Administrador',
+        departamento: 'TI',
+        dataCriacao: new Date().toISOString()
+      });
+      
+      alert('Gestor criado com sucesso!');
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
+  }
+  
+  criarGestor();
+</script>
