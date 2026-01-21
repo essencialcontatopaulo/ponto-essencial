@@ -133,14 +133,39 @@
         .divider span {
             padding: 0 15px;
         }
+        
+        .gestor-info {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .gestor-info h4 {
+            margin: 0 0 8px 0;
+            color: #0056b3;
+        }
+        
+        .gestor-info p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="login-container">
             <div class="login-header">
-                <h1>🔐 Login</h1>
-                <p>Acesse o sistema de ponto eletrônico</p>
+                <h1 id="loginTitle">🔐 Login</h1>
+                <p id="loginSubtitle">Acesse o sistema de ponto eletrônico</p>
+            </div>
+            
+            <div id="gestorInfo" class="gestor-info">
+                <h4>👑 Acesso Gestor</h4>
+                <p>Você está acessando a área restrita para gestores. Use suas credenciais de gestor.</p>
             </div>
             
             <div id="errorMessage" class="error-message"></div>
@@ -180,8 +205,13 @@
             </div>
             
             <div class="login-footer">
-                <p>Não tem uma conta? <a href="funcionario.html?register=true">Cadastre-se aqui</a></p>
+                <p>Não tem uma conta? <a href="cadastro-usuario.html">Cadastre-se aqui</a></p>
                 <p><a href="index.html">← Voltar para página inicial</a></p>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
+                    <strong>Credenciais de teste:</strong><br>
+                    Gestor: admin@empresa.com / admin123<br>
+                    Funcionário: joao.silva@empresa.com / func123
+                </p>
             </div>
         </div>
     </div>
@@ -197,8 +227,26 @@
             // Verificar se já está logado
             const usuario = window.auth?.verificarLogin();
             if (usuario) {
-                window.location.href = 'funcionario.html';
+                // Redirecionar baseado no tipo de usuário
+                if (usuario.tipo === 'gestor') {
+                    window.location.href = 'gestor.html';
+                } else {
+                    window.location.href = 'funcionario.html';
+                }
                 return;
+            }
+            
+            // Verificar se é acesso para gestor
+            const urlParams = new URLSearchParams(window.location.search);
+            const isGestorAccess = urlParams.get('redirect') === 'gestor';
+            
+            if (isGestorAccess) {
+                // Configurar para acesso gestor
+                document.getElementById('loginTitle').innerHTML = '👑 Acesso Gestor';
+                document.getElementById('loginSubtitle').innerHTML = 'Área restrita para gestores do sistema';
+                document.getElementById('gestorInfo').style.display = 'block';
+                document.getElementById('email').value = 'admin@empresa.com';
+                document.getElementById('password').value = 'admin123';
             }
             
             // Formulário de login
@@ -233,11 +281,34 @@
                     const resultado = await window.auth?.login(email, password);
                     
                     if (resultado?.success) {
-                        window.utils?.mostrarMensagem('✅ Login realizado com sucesso!', 'success');
+                        // Verificar tipo de usuário para redirecionamento
+                        const usuario = window.auth?.verificarLogin();
+                        
+                        if (isGestorAccess && usuario.tipo !== 'gestor') {
+                            // Tentou acessar área gestor mas não é gestor
+                            showError('❌ Apenas gestores podem acessar esta área. Você será redirecionado para a área do funcionário.');
+                            window.auth?.logout();
+                            
+                            setTimeout(() => {
+                                window.location.href = 'funcionario.html';
+                            }, 3000);
+                            return;
+                        }
+                        
+                        // Mostrar mensagem de sucesso
+                        if (window.utils?.mostrarMensagem) {
+                            window.utils.mostrarMensagem(`✅ Bem-vindo, ${usuario.nome}!`, 'success');
+                        }
+                        
+                        // Redirecionar baseado no tipo
+                        let redirectTo = 'funcionario.html';
+                        if (usuario.tipo === 'gestor') {
+                            redirectTo = 'gestor.html';
+                        }
                         
                         // Redirecionar após 1 segundo
                         setTimeout(() => {
-                            window.location.href = 'funcionario.html';
+                            window.location.href = redirectTo;
                         }, 1000);
                         
                     } else {
@@ -271,10 +342,12 @@
                 }, 5000);
             }
             
-            // Preencher com dados de teste (apenas para desenvolvimento)
+            // Preencher com dados de teste baseado no tipo de acesso
             if (window.location.href.includes('localhost') || window.location.href.includes('127.0.0.1')) {
-                document.getElementById('email').value = 'teste@empresa.com';
-                document.getElementById('password').value = 'senha123';
+                if (!isGestorAccess) {
+                    document.getElementById('email').value = 'joao.silva@empresa.com';
+                    document.getElementById('password').value = 'func123';
+                }
                 console.log('Dados de teste preenchidos automaticamente.');
             }
         });
