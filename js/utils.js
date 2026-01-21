@@ -1,160 +1,84 @@
-// utils.js - Funções utilitárias para o sistema
+// utils.js - Utilitários do Sistema
 window.utils = (function() {
     'use strict';
     
     const utils = {};
     
-    // Formatar data para exibição
     utils.formatarData = function(data) {
         if (!data) return '--/--/----';
-        const d = new Date(data);
-        return d.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+        try {
+            const d = new Date(data);
+            return d.toLocaleDateString('pt-BR');
+        } catch {
+            return '--/--/----';
+        }
     };
     
-    // Formatar hora
     utils.formatarHora = function(data) {
         if (!data) return '--:--';
-        const d = new Date(data);
-        return d.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        try {
+            const d = new Date(data);
+            return d.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch {
+            return '--:--';
+        }
     };
     
-    // Formatar data completa
     utils.formatarDataHora = function(data) {
         if (!data) return '--/--/---- --:--';
-        const d = new Date(data);
-        return d.toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-    
-    // Mostrar mensagem ao usuário
-    utils.mostrarMensagem = function(mensagem, tipo = 'info') {
-        // Remover mensagens anteriores
-        const mensagensAntigas = document.querySelectorAll('.custom-message');
-        mensagensAntigas.forEach(msg => msg.remove());
-        
-        // Criar nova mensagem
-        const mensagemDiv = document.createElement('div');
-        mensagemDiv.className = `custom-message ${tipo}`;
-        mensagemDiv.innerHTML = mensagem;
-        
-        // Estilos
-        Object.assign(mensagemDiv.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '15px 20px',
-            borderRadius: '8px',
-            color: '#fff',
-            zIndex: '9999',
-            minWidth: '300px',
-            maxWidth: '500px',
-            boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-            animation: 'slideInRight 0.3s ease'
-        });
-        
-        // Cores por tipo
-        if (tipo === 'success') {
-            mensagemDiv.style.background = 'linear-gradient(45deg, #2E8B57, #388E3C)';
-            mensagemDiv.style.borderLeft = '4px solid #1b5e20';
-        } else if (tipo === 'error') {
-            mensagemDiv.style.background = 'linear-gradient(45deg, #d32f2f, #f44336)';
-            mensagemDiv.style.borderLeft = '4px solid #b71c1c';
-        } else if (tipo === 'warning') {
-            mensagemDiv.style.background = 'linear-gradient(45deg, #ff9800, #ffb74d)';
-            mensagemDiv.style.borderLeft = '4px solid #f57c00';
-        } else {
-            mensagemDiv.style.background = 'linear-gradient(45deg, #2196F3, #64B5F6)';
-            mensagemDiv.style.borderLeft = '4px solid #1976D2';
-        }
-        
-        // Adicionar ao corpo
-        document.body.appendChild(mensagemDiv);
-        
-        // Remover após 5 segundos
-        setTimeout(() => {
-            if (mensagemDiv.parentNode) {
-                mensagemDiv.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => {
-                    if (mensagemDiv.parentNode) {
-                        mensagemDiv.parentNode.removeChild(mensagemDiv);
-                    }
-                }, 300);
-            }
-        }, 5000);
-        
-        // Criar estilos de animação se não existirem
-        if (!document.querySelector('#animacoes-estilo')) {
-            const estilo = document.createElement('style');
-            estilo.id = 'animacoes-estilo';
-            estilo.textContent = `
-                @keyframes slideInRight {
-                    from {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                }
-                @keyframes slideOutRight {
-                    from {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                    to {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(estilo);
+        try {
+            const d = new Date(data);
+            return d.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch {
+            return '--/--/---- --:--';
         }
     };
     
-    // Gerar ID único
-    utils.gerarId = function() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    utils.formatarCPF = function(cpf) {
+        if (!cpf) return '';
+        cpf = cpf.replace(/\D/g, '');
+        
+        if (cpf.length === 11) {
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+        return cpf;
     };
     
-    // Calcular horas trabalhadas
-    utils.calcularHorasTrabalhadas = function(entrada, saida) {
-        if (!entrada || !saida) return '00:00';
+    utils.formatarTelefone = function(tel) {
+        if (!tel) return '';
+        tel = tel.replace(/\D/g, '');
         
-        const entradaMs = new Date(entrada).getTime();
-        const saidaMs = new Date(saida).getTime();
-        
-        if (saidaMs <= entradaMs) return '00:00';
-        
-        const diffMs = saidaMs - entradaMs;
-        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        
-        return `${diffHoras.toString().padStart(2, '0')}:${diffMinutos.toString().padStart(2, '0')}`;
+        if (tel.length === 11) {
+            return tel.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (tel.length === 10) {
+            return tel.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        }
+        return tel;
     };
     
-    // Validar CPF
+    utils.formatarMoeda = function(valor) {
+        if (!valor && valor !== 0) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
+    };
+    
     utils.validarCPF = function(cpf) {
         cpf = cpf.replace(/\D/g, '');
         
         if (cpf.length !== 11) return false;
-        
-        // Verificar se todos os dígitos são iguais
         if (/^(\d)\1+$/.test(cpf)) return false;
         
-        // Validar primeiro dígito
         let soma = 0;
         for (let i = 0; i < 9; i++) {
             soma += parseInt(cpf.charAt(i)) * (10 - i);
@@ -163,7 +87,6 @@ window.utils = (function() {
         if (resto === 10 || resto === 11) resto = 0;
         if (resto !== parseInt(cpf.charAt(9))) return false;
         
-        // Validar segundo dígito
         soma = 0;
         for (let i = 0; i < 10; i++) {
             soma += parseInt(cpf.charAt(i)) * (11 - i);
@@ -175,72 +98,404 @@ window.utils = (function() {
         return true;
     };
     
-    // Formatar CPF
-    utils.formatarCPF = function(cpf) {
-        cpf = cpf.replace(/\D/g, '');
-        if (cpf.length <= 11) {
-            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        }
-        return cpf;
+    utils.validarEmail = function(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
     };
     
-    // Formatar telefone
-    utils.formatarTelefone = function(telefone) {
-        telefone = telefone.replace(/\D/g, '');
-        if (telefone.length === 11) {
-            return telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-        } else if (telefone.length === 10) {
-            return telefone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-        }
-        return telefone;
+    utils.validarSenha = function(senha) {
+        return senha && senha.length >= 6;
     };
     
-    // Salvar no localStorage com tratamento de erro
     utils.salvarLocalStorage = function(chave, dados) {
         try {
             localStorage.setItem(chave, JSON.stringify(dados));
             return true;
         } catch (error) {
-            console.error('Erro ao salvar no localStorage:', error);
+            console.error('❌ Erro ao salvar no localStorage:', error);
             utils.mostrarMensagem('Erro ao salvar dados localmente', 'error');
             return false;
         }
     };
     
-    // Carregar do localStorage
     utils.carregarLocalStorage = function(chave) {
         try {
             const dados = localStorage.getItem(chave);
             return dados ? JSON.parse(dados) : null;
         } catch (error) {
-            console.error('Erro ao carregar do localStorage:', error);
+            console.error('❌ Erro ao carregar do localStorage:', error);
             return null;
         }
     };
     
-    // Download de arquivo
-    utils.downloadArquivo = function(nome, conteudo, tipo = 'text/plain') {
-        const blob = new Blob([conteudo], { type: tipo });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nome;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    utils.gerarId = function() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     };
     
-    // Gerar relatório em PDF (simulação)
-    utils.gerarPDF = function(titulo, conteudo) {
-        utils.mostrarMensagem(`Gerando PDF: ${titulo}...`, 'info');
+    utils.mostrarMensagem = function(mensagem, tipo = 'info', duracao = 5000) {
+        const mensagensAntigas = document.querySelectorAll('.custom-message');
+        mensagensAntigas.forEach(msg => {
+            if (msg.parentNode) {
+                msg.parentNode.removeChild(msg);
+            }
+        });
         
-        // Em produção, integrar com biblioteca como jsPDF
+        const mensagemDiv = document.createElement('div');
+        mensagemDiv.className = `custom-message ${tipo}`;
+        mensagemDiv.innerHTML = mensagem;
+        
+        Object.assign(mensagemDiv.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '15px 20px',
+            borderRadius: '8px',
+            color: '#fff',
+            zIndex: '99999',
+            minWidth: '300px',
+            maxWidth: '500px',
+            boxShadow: '0 5px 20px rgba(0,0,0,0.3)',
+            animation: 'slideInRight 0.3s ease',
+            fontWeight: '500',
+            fontSize: '14px'
+        });
+        
+        const cores = {
+            success: { bg: '#2E8B57', border: '#1b5e20' },
+            error: { bg: '#f44336', border: '#d32f2f' },
+            warning: { bg: '#ff9800', border: '#f57c00' },
+            info: { bg: '#2196F3', border: '#1976D2' }
+        };
+        
+        const cor = cores[tipo] || cores.info;
+        mensagemDiv.style.background = `linear-gradient(45deg, ${cor.bg}, ${cor.border})`;
+        mensagemDiv.style.borderLeft = `4px solid ${cor.border}`;
+        
+        document.body.appendChild(mensagemDiv);
+        
+        if (!document.querySelector('#animacoes-estilo')) {
+            const estilo = document.createElement('style');
+            estilo.id = 'animacoes-estilo';
+            estilo.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(estilo);
+        }
+        
         setTimeout(() => {
-            const relatorio = `Relatório: ${titulo}\n\n${conteudo}`;
-            utils.downloadArquivo(`${titulo}_${new Date().toISOString().split('T')[0]}.txt`, relatorio);
-            utils.mostrarMensagem('Relatório gerado com sucesso!', 'success');
-        }, 1000);
+            if (mensagemDiv.parentNode) {
+                mensagemDiv.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (mensagemDiv.parentNode) {
+                        mensagemDiv.parentNode.removeChild(mensagemDiv);
+                    }
+                }, 300);
+            }
+        }, duracao);
+        
+        mensagemDiv.addEventListener('click', function() {
+            if (this.parentNode) {
+                this.parentNode.removeChild(this);
+            }
+        });
+    };
+    
+    utils.downloadArquivo = function(nome, conteudo, tipo = 'text/plain') {
+        try {
+            const blob = new Blob([conteudo], { type: tipo });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nome;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            return true;
+        } catch (error) {
+            console.error('❌ Erro ao baixar arquivo:', error);
+            utils.mostrarMensagem('Erro ao baixar arquivo', 'error');
+            return false;
+        }
+    };
+    
+    utils.exportarCSV = function(nome, dados, cabecalhos) {
+        let csv = '';
+        
+        if (cabecalhos && cabecalhos.length > 0) {
+            csv += cabecalhos.map(h => `"${h}"`).join(',') + '\n';
+        }
+        
+        dados.forEach(linha => {
+            if (Array.isArray(linha)) {
+                csv += linha.map(campo => `"${campo}"`).join(',') + '\n';
+            } else if (typeof linha === 'object') {
+                csv += Object.values(linha).map(valor => `"${valor}"`).join(',') + '\n';
+            }
+        });
+        
+        utils.downloadArquivo(`${nome}.csv`, csv, 'text/csv');
+    };
+    
+    utils.calcularHorasTrabalhadas = function(entrada, saida) {
+        if (!entrada || !saida) return '00:00';
+        
+        try {
+            const entradaDate = new Date(entrada);
+            const saidaDate = new Date(saida);
+            
+            if (saidaDate <= entradaDate) return '00:00';
+            
+            const diffMs = saidaDate - entradaDate;
+            const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return `${diffHoras.toString().padStart(2, '0')}:${diffMinutos.toString().padStart(2, '0')}`;
+            
+        } catch (error) {
+            console.error('❌ Erro ao calcular horas:', error);
+            return '00:00';
+        }
+    };
+    
+    utils.calcularSaldoHoras = function(horasTrabalhadas, horasContratuais) {
+        const [htH, htM] = horasTrabalhadas.split(':').map(Number);
+        const [hcH, hcM] = horasContratuais.split(':').map(Number);
+        
+        const totalHT = htH + (htM / 60);
+        const totalHC = hcH + (hcM / 60);
+        const saldo = totalHT - totalHC;
+        
+        const horas = Math.floor(Math.abs(saldo));
+        const minutos = Math.round((Math.abs(saldo) - horas) * 60);
+        
+        return {
+            saldo: saldo,
+            positivo: saldo > 0,
+            texto: `${saldo >= 0 ? '+' : '-'}${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`
+        };
+    };
+    
+    utils.mostrarLoading = function(mensagem = 'Carregando...') {
+        utils.esconderLoading();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.id = 'loadingOverlay';
+        
+        overlay.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.7);
+                z-index: 99998;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">
+                <div style="
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    text-align: center;
+                    min-width: 200px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                ">
+                    <div style="
+                        width: 40px;
+                        height: 40px;
+                        border: 3px solid #f3f3f3;
+                        border-top: 3px solid #2E8B57;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                        margin: 0 auto 15px;
+                    "></div>
+                    <div style="color: #333; font-weight: 500;">${mensagem}</div>
+                </div>
+            </div>
+        `;
+        
+        if (!document.querySelector('#loading-animation')) {
+            const style = document.createElement('style');
+            style.id = 'loading-animation';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(overlay);
+    };
+    
+    utils.esconderLoading = function() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
+    };
+    
+    utils.criarModal = function(titulo, conteudo, opcoes = {}) {
+        const config = {
+            largura: '500px',
+            fecharAoClicarFora: true,
+            mostrarBotaoFechar: true,
+            ...opcoes
+        };
+        
+        utils.fecharModal();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.id = 'customModal';
+        
+        overlay.innerHTML = `
+            <div class="modal-content" style="
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: ${config.largura};
+                width: 90%;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                border: 1px solid #C8E6C9;
+                animation: slideUp 0.3s ease;
+            ">
+                ${config.mostrarBotaoFechar ? `
+                    <button class="fechar-modal" style="
+                        position: absolute;
+                        top: 15px;
+                        right: 15px;
+                        background: none;
+                        border: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #666;
+                    ">×</button>
+                ` : ''}
+                
+                ${titulo ? `<h3 style="color: #1b5e20; margin-bottom: 20px; margin-top: 0;">${titulo}</h3>` : ''}
+                
+                <div class="modal-body">
+                    ${conteudo}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        const fecharBtn = overlay.querySelector('.fechar-modal');
+        if (fecharBtn) {
+            fecharBtn.addEventListener('click', utils.fecharModal);
+        }
+        
+        if (config.fecharAoClicarFora) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    utils.fecharModal();
+                }
+            });
+        }
+        
+        if (!document.querySelector('#modal-animation')) {
+            const style = document.createElement('style');
+            style.id = 'modal-animation';
+            style.textContent = `
+                @keyframes slideUp {
+                    from { transform: translateY(50px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 99997;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        return overlay;
+    };
+    
+    utils.fecharModal = function() {
+        const modal = document.getElementById('customModal');
+        if (modal && modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    };
+    
+    utils.copiarParaAreaTransferencia = function(texto) {
+        return new Promise((resolve, reject) => {
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                
+                const sucesso = document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                if (sucesso) {
+                    utils.mostrarMensagem('Copiado para a área de transferência!', 'success');
+                    resolve(true);
+                } else {
+                    reject(new Error('Falha ao copiar'));
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    };
+    
+    utils.gerarCorAleatoria = function() {
+        const cores = [
+            '#2E8B57', '#1b5e20', '#388E3C', '#4CAF50',
+            '#2196F3', '#1976D2', '#0097A7', '#00796B',
+            '#7B1FA2', '#512DA8', '#303F9F', '#1976D2'
+        ];
+        return cores[Math.floor(Math.random() * cores.length)];
+    };
+    
+    utils.formatarBytes = function(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+    
+    utils.validarData = function(data) {
+        if (!data) return false;
+        const d = new Date(data);
+        return d instanceof Date && !isNaN(d);
+    };
+    
+    utils.diferencaDias = function(data1, data2) {
+        const d1 = new Date(data1);
+        const d2 = new Date(data2);
+        const diffTime = Math.abs(d2 - d1);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
     
     return utils;
