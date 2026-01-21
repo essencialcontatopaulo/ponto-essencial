@@ -1,26 +1,40 @@
-<!-- Substitua todo o script que está no início do gestor.html por este: -->
+<!-- REMOVA o script antigo e COLE este no início do gestor.html: -->
 <script>
-    // Verificar autenticação antes de carregar a página
+    // Verificação de login - CORRIGIDO
     document.addEventListener('DOMContentLoaded', function() {
-        // Carregar usuário do localStorage
-        const usuario = JSON.parse(localStorage.getItem('ponto_user') || 'null');
+        console.log("👑 Verificando acesso do gestor...");
         
-        if (!usuario) {
+        // Verificar se usuário está logado
+        const usuarioJson = localStorage.getItem('ponto_user');
+        
+        if (!usuarioJson) {
+            console.log("❌ Nenhum usuário logado");
             alert('⚠️ Faça login para acessar esta área!');
             window.location.href = 'index.html?v=' + Date.now();
             return;
         }
         
-        if (usuario.tipo !== 'gestor') {
-            alert('❌ Acesso restrito! Apenas gestores podem acessar esta área.');
+        try {
+            const usuario = JSON.parse(usuarioJson);
+            console.log("📋 Usuário encontrado:", usuario);
+            
+            if (usuario.tipo !== 'gestor') {
+                console.log("❌ Usuário não é gestor:", usuario.tipo);
+                alert('❌ Acesso restrito! Apenas gestores podem acessar esta área.');
+                window.location.href = 'index.html?v=' + Date.now();
+                return;
+            }
+            
+            // Se chegou aqui, é gestor válido
+            console.log(`✅ Gestor autorizado: ${usuario.nome}`);
+            
+            // Remover verificações antigas do localStorage
+            localStorage.removeItem('gestor_logged_in');
+            
+        } catch (error) {
+            console.error("❌ Erro ao verificar usuário:", error);
+            alert('❌ Erro ao verificar acesso. Faça login novamente.');
             window.location.href = 'index.html?v=' + Date.now();
-            return;
         }
-        
-        // Se chegou aqui, é gestor válido
-        console.log(`👑 Gestor logado: ${usuario.nome}`);
-        
-        // Remover a verificação antiga do localStorage
-        localStorage.removeItem('gestor_logged_in');
     });
 </script>
