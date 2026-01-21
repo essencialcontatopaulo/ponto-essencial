@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Funcionário - Essencial Print</title>
+    <title>Login - Essencial Print</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
-        /* MANTENHA TODO O CSS ORIGINAL AQUI */
         * {
             margin: 0;
             padding: 0;
@@ -21,36 +20,52 @@
 
         body {
             background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            color: #333;
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
-        header {
+        .login-container {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .login-body {
+            padding: 40px;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .logo h1 {
+        .logo h2 {
             color: #1a237e;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
         }
 
@@ -59,75 +74,36 @@
             font-weight: 300;
         }
 
-        .user-info {
-            text-align: right;
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .user-info h3 {
+        .form-group label {
+            display: block;
             color: #1a237e;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .user-info p {
-            color: #666;
+            font-weight: 600;
+            margin-bottom: 8px;
             font-size: 14px;
         }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
 
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            color: #1a237e;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e8eaf6;
-        }
-
-        .status-box {
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-        .status-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-        }
-
-        .status-entrada .status-icon {
-            color: #4caf50;
-        }
-
-        .status-saida .status-icon {
-            color: #f44336;
-        }
-
-        .status-text {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .ponto-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
+        .form-control:focus {
+            outline: none;
+            border-color: #3949ab;
+            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.1);
         }
 
         .btn {
-            padding: 15px 30px;
+            width: 100%;
+            padding: 16px;
             border: none;
             border-radius: 10px;
             font-size: 16px;
@@ -135,18 +111,21 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
+            justify-content: center;
             align-items: center;
             gap: 10px;
         }
 
-        .btn-entrada {
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+        .btn-login {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
             color: white;
+            margin-bottom: 15px;
         }
 
-        .btn-saida {
-            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+        .btn-gestor {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
             color: white;
+            margin-bottom: 20px;
         }
 
         .btn:hover {
@@ -154,291 +133,155 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .btn:active {
+            transform: translateY(-1px);
         }
 
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+        .login-footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 30px;
         }
 
-        th {
-            background-color: #e8eaf6;
-            color: #1a237e;
-            font-weight: 600;
+        .login-footer p {
+            color: #666;
+            font-size: 14px;
         }
 
-        tbody tr:hover {
-            background-color: #f5f5f5;
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
         }
 
-        .justificativa-form {
+        .error-message.show {
+            display: block;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .login-type {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .form-group label {
-            color: #1a237e;
-            font-weight: 600;
-        }
-
-        select, input, textarea {
+        .login-type-btn {
+            flex: 1;
             padding: 12px;
             border: 2px solid #e0e0e0;
+            background: white;
             border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #3949ab;
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .btn-enviar {
-            background: linear-gradient(135deg, #3949ab 0%, #1a237e 100%);
-            color: white;
-            padding: 15px;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
             cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            color: #666;
             transition: all 0.3s ease;
         }
 
-        .btn-enviar:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .justificativas-lista {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .justificativa-item {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .justificativa-item:last-child {
-            border-bottom: none;
-        }
-
-        .justificativa-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .justificativa-data {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .justificativa-tipo {
+        .login-type-btn.active {
+            border-color: #3949ab;
             background: #e8eaf6;
-            color: #3949ab;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .justificativa-descricao {
-            color: #444;
-            line-height: 1.5;
-            margin-bottom: 8px;
-        }
-
-        .justificativa-status {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 4px;
-        }
-
-        .status-pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-aprovado {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejeitado {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        footer {
-            text-align: center;
-            color: white;
-            padding: 20px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        .btn-logout {
-            background: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .btn-logout:hover {
-            background: #d32f2f;
-        }
-
-        .hora-atual {
-            font-size: 36px;
-            font-weight: 700;
             color: #1a237e;
-            margin: 15px 0;
         }
 
-        .data-atual {
-            color: #666;
-            font-size: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
+        @media (max-width: 480px) {
+            .login-body {
+                padding: 30px 20px;
             }
             
-            header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .user-info {
-                text-align: center;
-            }
-            
-            .ponto-buttons {
-                flex-direction: column;
+            .login-header {
+                padding: 25px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Essencial Print</h1>
+            <p>Sistema de Controle de Ponto</p>
+        </div>
+        
+        <div class="login-body">
             <div class="logo">
-                <h1>Essencial<span>Print</span></h1>
+                <h2>Área de <span>Acesso</span></h2>
             </div>
-            <div class="user-info">
-                <h3 id="userName">Funcionário</h3>
-                <p id="userCargo">Cargo - Departamento</p>
-                <button class="btn-logout" onclick="logout()">Sair</button>
+            
+            <div class="login-type">
+                <button class="login-type-btn active" onclick="setLoginType('funcionario')">
+                    👤 Funcionário
+                </button>
+                <button class="login-type-btn" onclick="setLoginType('gestor')">
+                    👑 Gestor
+                </button>
             </div>
-        </header>
-
-        <div class="main-content">
-            <div class="card">
-                <h2>Registrar Ponto</h2>
-                <div class="status-box" id="statusBox">
-                    <div class="status-icon">🕐</div>
-                    <div class="hora-atual" id="horaAtual">--:--:--</div>
-                    <div class="data-atual" id="dataAtual">--/--/----</div>
-                    <div class="status-text" id="statusText">Status não disponível</div>
-                    <div class="ponto-buttons">
-                        <button class="btn btn-entrada" onclick="registrarPonto('entrada')">
-                            <span>📥</span> Registrar Entrada
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <form id="loginForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" 
+                           id="email" 
+                           class="form-control" 
+                           placeholder="seu@email.com"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <div class="password-container">
+                        <input type="password" 
+                               id="password" 
+                               class="form-control" 
+                               placeholder="••••••••"
+                               required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            👁️
                         </button>
-                        <button class="btn btn-saida" onclick="registrarPonto('saida')">
-                            <span>📤</span> Registrar Saída
-                        </button>
                     </div>
                 </div>
-            </div>
-
-            <div class="card">
-                <h2>Registros de Hoje</h2>
-                <div class="registros-hoje">
-                    <table id="registrosHoje">
-                        <thead>
-                            <tr>
-                                <th>Horário</th>
-                                <th>Tipo</th>
-                                <th>Localização</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="3" style="text-align: center;">Carregando registros...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Enviar Justificativa</h2>
-                <div class="justificativa-form">
-                    <div class="form-group">
-                        <label for="tipoJustificativa">Tipo de Justificativa:</label>
-                        <select id="tipoJustificativa">
-                            <option value="">Selecione...</option>
-                            <option value="atraso">Atraso</option>
-                            <option value="falta">Falta</option>
-                            <option value="saida_antecipada">Saída Antecipada</option>
-                            <option value="outro">Outro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="dataJustificativa">Data:</label>
-                        <input type="date" id="dataJustificativa" value="">
-                    </div>
-                    <div class="form-group">
-                        <label for="descricaoJustificativa">Descrição:</label>
-                        <textarea id="descricaoJustificativa" placeholder="Descreva o motivo da justificativa..."></textarea>
-                    </div>
-                    <button class="btn-enviar" onclick="enviarJustificativa()">Enviar Justificativa</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Minhas Justificativas</h2>
-                <div class="justificativas-lista" id="justificativasLista">
-                    <div style="text-align: center; padding: 20px; color: #666;">
-                        Carregando justificativas...
-                    </div>
-                </div>
+                
+                <button type="submit" class="btn btn-login" onclick="login()">
+                    <span>🔐</span> Entrar
+                </button>
+                
+                <button type="button" class="btn btn-gestor" onclick="loginGestor()">
+                    <span>👑</span> Acesso Gestor
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Em caso de problemas, entre em contato com o RH</p>
+                <p style="font-size: 12px; margin-top: 10px; color: #999;">
+                    Versão 1.0 | © 2024 Essencial Print
+                </p>
             </div>
         </div>
-
-        <footer>
-            <p>Essencial Print &copy; 2024 - Sistema de Controle de Ponto</p>
-            <p>Em caso de problemas, entre em contato com o RH</p>
-        </footer>
     </div>
 
     <script>
-        // MESMA CONFIGURAÇÃO DO index.html
+        // CONFIGURAÇÃO DO FIREBASE - VERIFIQUE NO CONSOLE QUAL ESTÁ CORRETA!
         const firebaseConfig = {
             apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
             authDomain: "essencial-print-5a753.firebaseapp.com",
@@ -447,314 +290,185 @@
             messagingSenderId: "544082416072",
             appId: "1:544082416072:web:85d3c8549b25158284f0fd"
         };
-        
+
         // Inicializar Firebase
-        let db, auth;
+        let auth, db;
         try {
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
-            db = firebase.firestore();
             auth = firebase.auth();
+            db = firebase.firestore();
+            console.log("Firebase inicializado");
         } catch (error) {
             console.error('Erro Firebase:', error);
         }
 
-        // Verificar autenticação
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Usuário autenticado
-                carregarDadosFuncionario(user.uid);
+        let loginType = 'funcionario';
+
+        function setLoginType(type) {
+            loginType = type;
+            
+            document.querySelectorAll('.login-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (type === 'funcionario') {
+                document.querySelector('.login-type-btn:nth-child(1)').classList.add('active');
+                document.querySelector('.btn-login').innerHTML = '<span>🔐</span> Entrar como Funcionário';
             } else {
-                // Não autenticado - redirecionar
-                alert('Acesso não autorizado!');
-                window.location.href = 'index.html';
-            }
-        });
-
-        async function carregarDadosFuncionario(userId) {
-            try {
-                // Buscar dados do funcionário
-                const userDoc = await db.collection('usuarios').doc(userId).get();
-                
-                if (!userDoc.exists) {
-                    alert('Dados não encontrados!');
-                    logout();
-                    return;
-                }
-                
-                const userData = userDoc.data();
-                
-                // Verificar se é funcionário
-                if (userData.tipo !== 'funcionario') {
-                    alert('Acesso restrito a funcionários!');
-                    logout();
-                    return;
-                }
-                
-                // Configurar interface
-                document.getElementById('userName').textContent = userData.nome;
-                document.getElementById('userCargo').textContent = `${userData.cargo || 'Funcionário'} - ${userData.departamento || 'Não informado'}`;
-                
-                // Salvar para compatibilidade
-                const funcionarioInfo = {
-                    id: userId,
-                    nome: userData.nome,
-                    cpf: userData.cpf || '',
-                    cargo: userData.cargo || 'Funcionário',
-                    departamento: userData.departamento || 'Não informado'
-                };
-                
-                localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
-                
-                // Configurar data atual
-                const hoje = new Date().toISOString().split('T')[0];
-                document.getElementById('dataJustificativa').value = hoje;
-                
-                // Iniciar relógio
-                atualizarRelogio();
-                setInterval(atualizarRelogio, 1000);
-                
-                // Carregar dados
-                carregarRegistrosHoje();
-                carregarMinhasJustificativas();
-                atualizarStatus();
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao carregar dados!');
+                document.querySelector('.login-type-btn:nth-child(2)').classList.add('active');
+                document.querySelector('.btn-login').innerHTML = '<span>👑</span> Entrar como Gestor';
             }
         }
 
-        function atualizarRelogio() {
-            const agora = new Date();
-            document.getElementById('horaAtual').textContent = agora.toLocaleTimeString('pt-BR');
-            document.getElementById('dataAtual').textContent = agora.toLocaleDateString('pt-BR');
-        }
-
-        async function atualizarStatus() {
-            try {
-                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
-                const hoje = new Date().toISOString().split('T')[0];
-                
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', funcionario.id)
-                    .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
-                    .limit(1)
-                    .get();
-                
-                const statusBox = document.getElementById('statusBox');
-                const statusText = document.getElementById('statusText');
-                
-                if (snapshot.empty) {
-                    statusBox.className = 'status-box status-entrada';
-                    statusBox.querySelector('.status-icon').textContent = '📥';
-                    statusText.textContent = 'Aguardando entrada';
-                    return;
-                }
-                
-                const ultimoRegistro = snapshot.docs[0].data();
-                
-                if (ultimoRegistro.tipo === 'entrada') {
-                    statusBox.className = 'status-box status-saida';
-                    statusBox.querySelector('.status-icon').textContent = '📤';
-                    statusText.textContent = 'Entrada às ' + ultimoRegistro.horario;
-                } else {
-                    statusBox.className = 'status-box status-entrada';
-                    statusBox.querySelector('.status-icon').textContent = '📥';
-                    statusText.textContent = 'Saída às ' + ultimoRegistro.horario;
-                }
-                
-            } catch (error) {
-                console.error('Erro status:', error);
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
             }
         }
 
-        async function registrarPonto(tipo) {
-            try {
-                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
-                const agora = new Date();
-                const data = agora.toISOString().split('T')[0];
-                const horario = agora.toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                
-                // Localização
-                let localizacao = { latitude: null, longitude: null };
-                
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        position => {
-                            localizacao = {
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude
-                            };
-                        },
-                        error => {
-                            console.log('Erro localização:', error);
-                        }
-                    );
-                }
-                
-                // Registrar no Firestore
-                await db.collection('pontos').add({
-                    funcionarioId: funcionario.id,
-                    funcionarioNome: funcionario.nome,
-                    funcionarioCpf: funcionario.cpf,
-                    tipo: tipo,
-                    data: data,
-                    horario: horario,
-                    localizacao: localizacao,
-                    timestamp: agora.getTime(),
-                    createdAt: new Date().toISOString()
-                });
-                
-                alert(`✅ ${tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} registrada!`);
-                
-                // Atualizar
-                carregarRegistrosHoje();
-                atualizarStatus();
-                
-            } catch (error) {
-                console.error('Erro registrar:', error);
-                alert('Erro ao registrar!');
-            }
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
         }
-        
-        async function carregarRegistrosHoje() {
-            try {
-                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
-                const hoje = new Date().toISOString().split('T')[0];
-                
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', funcionario.id)
-                    .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
-                    .get();
-                
-                const tbody = document.querySelector('#registrosHoje tbody');
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nenhum registro</td></tr>';
-                    return;
-                }
-                
-                let html = '';
-                snapshot.forEach(doc => {
-                    const registro = doc.data();
-                    html += `
-                        <tr>
-                            <td>${registro.horario}</td>
-                            <td>${registro.tipo === 'entrada' ? 'Entrada' : 'Saída'}</td>
-                            <td>${registro.localizacao.latitude ? '📍 Registrada' : '--'}</td>
-                        </tr>
-                    `;
-                });
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro carregar:', error);
+
+        // Login normal
+        async function login() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showError('Preencha todos os campos.');
+                return;
             }
-        }
-        
-        async function carregarMinhasJustificativas() {
+            
+            const loginBtn = document.querySelector('.btn-login');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<span>⏳</span> Verificando...';
+            loginBtn.disabled = true;
+            
             try {
-                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
                 
-                const snapshot = await db.collection('justificativas')
-                    .where('funcionarioId', '==', funcionario.id)
-                    .orderBy('dataEnvio', 'desc')
-                    .limit(10)
-                    .get();
+                const userDoc = await db.collection('usuarios').doc(user.uid).get();
                 
-                const container = document.getElementById('justificativasLista');
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Nenhuma justificativa</div>';
-                    return;
-                }
-                
-                let html = '';
-                snapshot.forEach(doc => {
-                    const justificativa = doc.data();
-                    const dataBR = new Date(justificativa.data).toLocaleDateString('pt-BR');
-                    const tipoTexto = {
-                        'atraso': 'Atraso',
-                        'falta': 'Falta',
-                        'saida_antecipada': 'Saída Antecipada',
-                        'outro': 'Outro'
-                    }[justificativa.tipo] || justificativa.tipo;
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
                     
-                    html += `
-                        <div class="justificativa-item">
-                            <div class="justificativa-header">
-                                <div class="justificativa-data">${dataBR}</div>
-                                <div class="justificativa-tipo">${tipoTexto}</div>
-                            </div>
-                            <div class="justificativa-descricao">${justificativa.descricao}</div>
-                            <div class="justificativa-status status-${justificativa.status}">
-                                ${justificativa.status === 'pendente' ? '⏳ Pendente' : 
-                                  justificativa.status === 'aprovado' ? '✅ Aprovado' : 
-                                  '❌ Rejeitado'}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro justificativas:', error);
-            }
-        }
-        
-        async function enviarJustificativa() {
-            try {
-                const funcionario = JSON.parse(localStorage.getItem('funcionario_logado'));
-                const tipo = document.getElementById('tipoJustificativa').value;
-                const data = document.getElementById('dataJustificativa').value;
-                const descricao = document.getElementById('descricaoJustificativa').value.trim();
-                
-                if (!tipo || !descricao) {
-                    alert('Preencha todos os campos!');
-                    return;
+                    if (loginType === 'gestor' && userData.tipo !== 'gestor') {
+                        await auth.signOut();
+                        showError('Sem permissão de gestor.');
+                        loginBtn.innerHTML = originalText;
+                        loginBtn.disabled = false;
+                        return;
+                    }
+                    
+                    if (loginType === 'funcionario' && userData.tipo !== 'funcionario') {
+                        await auth.signOut();
+                        showError('Não é funcionário.');
+                        loginBtn.innerHTML = originalText;
+                        loginBtn.disabled = false;
+                        return;
+                    }
+                    
+                    const userInfo = {
+                        id: user.uid,
+                        email: user.email,
+                        nome: userData.nome,
+                        cargo: userData.cargo || 'Funcionário',
+                        departamento: userData.departamento || 'Não informado',
+                        tipo: userData.tipo,
+                        cpf: userData.cpf || ''
+                    };
+                    
+                    localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                    
+                    if (userData.tipo === 'funcionario') {
+                        const funcionarioInfo = {
+                            id: user.uid,
+                            nome: userData.nome,
+                            cpf: userData.cpf || '',
+                            cargo: userData.cargo || 'Funcionário',
+                            departamento: userData.departamento || 'Não informado'
+                        };
+                        localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
+                    }
+                    
+                    if (userData.tipo === 'gestor') {
+                        window.location.href = 'gestor.html';
+                    } else {
+                        window.location.href = 'funcionario.html';
+                    }
+                    
+                } else {
+                    showError('Dados não encontrados.');
+                    await auth.signOut();
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
                 }
                 
-                await db.collection('justificativas').add({
-                    funcionarioId: funcionario.id,
-                    funcionarioNome: funcionario.nome,
-                    tipo: tipo,
-                    data: data,
-                    descricao: descricao,
-                    status: 'pendente',
-                    dataEnvio: new Date().toISOString()
-                });
-                
-                alert('Justificativa enviada!');
-                document.getElementById('descricaoJustificativa').value = '';
-                carregarMinhasJustificativas();
-                
             } catch (error) {
-                console.error('Erro enviar:', error);
-                alert('Erro ao enviar!');
+                console.error('Erro login:', error);
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        showError('Usuário não encontrado.');
+                        break;
+                    case 'auth/wrong-password':
+                        showError('Senha incorreta.');
+                        break;
+                    case 'auth/invalid-email':
+                        showError('E-mail inválido.');
+                        break;
+                    case 'auth/invalid-login-credentials':
+                        showError('Credenciais inválidas.');
+                        break;
+                    default:
+                        showError('Erro ao fazer login.');
+                }
+                
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
             }
         }
-        
-        function logout() {
-            if (confirm('Deseja sair?')) {
-                auth.signOut().then(() => {
-                    localStorage.removeItem('funcionario_logado');
-                    localStorage.removeItem('usuario_logado');
-                    window.location.href = 'index.html';
-                }).catch(error => {
-                    console.error('Erro sair:', error);
-                });
-            }
+
+        // Login gestor
+        function loginGestor() {
+            const email = 'admin@essencialprint.com';
+            const password = 'admin123';
+            
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            
+            setLoginType('gestor');
+            
+            login();
         }
+
+        // Eventos
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginForm').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+            
+            // Não redirecionar automaticamente - evitar loop
+        });
     </script>
 </body>
 </html>
