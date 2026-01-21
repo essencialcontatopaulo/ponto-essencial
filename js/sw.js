@@ -203,3 +203,51 @@ self.addEventListener('notificationclick', event => {
       })
   );
 });
+
+// ============================================
+// SERVICE WORKER COM CONTROLE DE VERSÃO
+// ============================================
+const APP_VERSION = '2.0.1';
+const CACHE_NAME = `ponto-eletronico-${APP_VERSION}`;
+
+// FORÇAR ATUALIZAÇÃO QUANDO VERSÃO MUDAR
+self.addEventListener('install', event => {
+    console.log('🟢 Instalando Service Worker v' + APP_VERSION);
+    
+    // Pular fase de waiting (ativar imediatamente)
+    self.skipWaiting();
+    
+    // Limpar caches antigos
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('🗑️ Removendo cache antigo:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
+
+// Notificar cliente sobre nova versão
+self.addEventListener('activate', event => {
+    console.log('🔵 Service Worker ativado v' + APP_VERSION);
+    
+    // Tomar controle imediato de todas as páginas
+    event.waitUntil(clients.claim());
+    
+    // Notificar todas as páginas abertas
+    event.waitUntil(
+        clients.matchAll().then(clients => {
+            clients.forEach(client => {
+                client.postMessage({
+                    type: 'NEW_VERSION',
+                    version: APP_VERSION
+                });
+            });
+        })
+    );
+});
