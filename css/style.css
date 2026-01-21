@@ -1,6 +1,5 @@
-/*! VERSION: 2.0.1 - DATA: 2024-01-20 - TEMA VERDE */
 /* style.css - Sistema de Ponto Eletrônico - Tema Verde Profissional */
-/* Cores principais: Verde corporativo, tons sóbrios e profissionais */
+/*! VERSION: 2.1.0 - DATA: 2024-01-20 - TEMA VERDE */
 
 * {
     margin: 0;
@@ -10,35 +9,35 @@
 
 :root {
     /* Cores do tema verde */
-    --verde-principal: #2E8B57;        /* Sea Green - Cor principal */
-    --verde-escuro: #1b5e20;           /* Verde escuro para texto */
-    --verde-medio: #388E3C;            /* Verde médio */
-    --verde-claro: #4CAF50;            /* Verde claro */
-    --verde-muito-claro: #81C784;      /* Verde muito claro */
-    --verde-brilhante: #00C853;        /* Verde brilhante para destaques */
+    --verde-principal: #2E8B57;
+    --verde-escuro: #1b5e20;
+    --verde-medio: #388E3C;
+    --verde-claro: #4CAF50;
+    --verde-muito-claro: #81C784;
+    --verde-brilhante: #00C853;
     
     /* Cores de fundo */
-    --fundo-verde-claro: #E8F5E9;      /* Fundo claro */
-    --fundo-verde-suave: #F1F8E9;      /* Fundo suave */
-    --fundo-branco: #FFFFFF;           /* Branco puro */
-    --fundo-cinza-claro: #F5F5F5;      /* Cinza claro */
+    --fundo-verde-claro: #E8F5E9;
+    --fundo-verde-suave: #F1F8E9;
+    --fundo-branco: #FFFFFF;
+    --fundo-cinza-claro: #F5F5F5;
     
     /* Cores de texto */
-    --texto-escuro: #1b5e20;           /* Texto escuro */
-    --texto-medio: #2E8B57;            /* Texto médio */
-    --texto-claro: #4CAF50;            /* Texto claro */
-    --texto-cinza: #666666;            /* Texto cinza */
-    --texto-branco: #FFFFFF;           /* Texto branco */
+    --texto-escuro: #1b5e20;
+    --texto-medio: #2E8B57;
+    --texto-claro: #4CAF50;
+    --texto-cinza: #666666;
+    --texto-branco: #FFFFFF;
     
     /* Cores de borda */
-    --borda-verde: #C8E6C9;            /* Borda verde clara */
-    --borda-cinza: #E0E0E0;            /* Borda cinza */
+    --borda-verde: #C8E6C9;
+    --borda-cinza: #E0E0E0;
     
     /* Cores de estado */
-    --sucesso: #4CAF50;                /* Sucesso - Verde */
-    --alerta: #FF9800;                 /* Alerta - Laranja */
-    --erro: #F44336;                   /* Erro - Vermelho */
-    --info: #2196F3;                   /* Info - Azul */
+    --sucesso: #4CAF50;
+    --alerta: #FF9800;
+    --erro: #F44336;
+    --info: #2196F3;
     
     /* Sombras */
     --sombra-suave: 0 4px 12px rgba(46, 139, 87, 0.1);
@@ -400,105 +399,10 @@ footer p {
     border-color: #BBDEFB;
 }
 
-/* ========== TABELAS ========== */
-.data-table {
-    width: 100%;
-    background: var(--fundo-branco);
-    border-radius: var(--raio-borda-medio);
-    overflow: hidden;
-    box-shadow: var(--sombra-suave);
-    border: 1px solid var(--borda-verde);
-}
-
-.data-table th {
-    background: linear-gradient(135deg, var(--fundo-verde-claro), var(--fundo-verde-suave));
-    padding: 18px 20px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--verde-escuro);
-    border-bottom: 2px solid var(--borda-verde);
-    font-size: 1rem;
-}
-
-.data-table td {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--fundo-verde-claro);
-    color: var(--texto-cinza);
-    font-size: 0.95rem;
-}
-
-.data-table tr:hover {
-    background: var(--fundo-verde-claro);
-}
-
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-/* ========== BADGES ========== */
-.status-badge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: inline-block;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-presente {
-    background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
-    color: var(--verde-escuro);
-    border: 1px solid var(--borda-verde);
-}
-
-.status-ausente {
-    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
-    color: var(--erro);
-    border: 1px solid #FFCDD2;
-}
-
-.status-atrasado {
-    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
-    color: #E65100;
-    border: 1px solid #FFE0B2;
-}
-
-/* ========== MODAIS ========== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease;
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    background: var(--fundo-branco);
-    padding: 40px;
-    border-radius: var(--raio-borda-grande);
-    max-width: 500px;
-    width: 90%;
-    box-shadow: var(--sombra-forte);
-    border: 1px solid var(--borda-verde);
-    animation: slideUp 0.4s ease;
-}
-
 /* ========== ANIMAÇÕES ========== */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideIn {
@@ -528,21 +432,10 @@ footer p {
 }
 
 /* ========== UTILITÁRIOS ========== */
-.hidden {
-    display: none !important;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-left {
-    text-align: left;
-}
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
 
 .mt-10 { margin-top: 10px; }
 .mt-20 { margin-top: 20px; }
@@ -617,15 +510,6 @@ footer p {
     .feature-card {
         padding: 25px 20px;
     }
-    
-    .data-table {
-        font-size: 0.9rem;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 12px 15px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -664,7 +548,7 @@ footer p {
     }
 }
 
-/* ========== ESTADOS ESPECIAIS ========== */
+/* ========== LOADING ========== */
 .loading {
     opacity: 0.6;
     pointer-events: none;
@@ -689,94 +573,4 @@ footer p {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-/* ========== TIPOGRAFIA ADICIONAL ========== */
-h2, h3, h4, h5, h6 {
-    color: var(--verde-escuro);
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-h2 { font-size: 2rem; }
-h3 { font-size: 1.7rem; }
-h4 { font-size: 1.4rem; }
-h5 { font-size: 1.2rem; }
-h6 { font-size: 1.1rem; }
-
-p {
-    margin-bottom: 15px;
-    line-height: 1.7;
-}
-
-a {
-    color: var(--verde-principal);
-    text-decoration: none;
-    transition: color var(--transicao-rapida);
-}
-
-a:hover {
-    color: var(--verde-escuro);
-    text-decoration: underline;
-}
-
-/* ========== ÍCONES ========== */
-.icon {
-    display: inline-block;
-    font-size: 1.2em;
-    vertical-align: middle;
-    margin-right: 8px;
-}
-
-.icon-large {
-    font-size: 2em;
-}
-
-.icon-xlarge {
-    font-size: 3em;
-}
-
-/* ========== SEPARADORES ========== */
-.separator {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--borda-verde), transparent);
-    margin: 30px 0;
-    border: none;
-}
-
-.separator-verde {
-    background: linear-gradient(90deg, transparent, var(--verde-principal), transparent);
-    height: 2px;
-}
-
-/* ========== CARDS ADICIONAIS ========== */
-.card {
-    background: var(--fundo-branco);
-    padding: 25px;
-    border-radius: var(--raio-borda-medio);
-    box-shadow: var(--sombra-suave);
-    border: 1px solid var(--borda-verde);
-    transition: all var(--transicao-media);
-}
-
-.card:hover {
-    box-shadow: var(--sombra-media);
-    transform: translateY(-4px);
-}
-
-.card-header {
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid var(--fundo-verde-claro);
-}
-
-.card-title {
-    color: var(--verde-escuro);
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.card-body {
-    color: var(--texto-cinza);
 }
