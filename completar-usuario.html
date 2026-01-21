@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Completar Usuário</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h2>Completar Dados do Usuário</h2>
+    <button onclick="completarUsuario()">Completar Dados</button>
+    <button onclick="verificarUsuario()">Verificar Dados</button>
+    <div id="resultado"></div>
+
+    <script>
+        // COLE SUA CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...",
+            authDomain: "essencial-print.firebaseapp.com",
+            projectId: "essencial-print",
+            storageBucket: "essencial-print.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const usuarioId = 'LoI3szo9okMADStQYyvc'; // ID do seu documento
+
+        async function completarUsuario() {
+            try {
+                const resultado = document.getElementById('resultado');
+                resultado.innerHTML = '<p>⏳ Completando dados do usuário...</p>';
+                
+                // Atualizar documento com campos faltantes
+                await db.collection('usuarios').doc(usuarioId).update({
+                    email: 'essencial.contatoana@gmail.com',
+                    tipo: 'funcionario',
+                    departamento: 'Administrativo'
+                });
+                
+                resultado.innerHTML = 
+                    '<p style="color: green;">✅ Dados completados com sucesso!</p>' +
+                    '<p>Campos adicionados: email, tipo, departamento</p>';
+                
+            } catch (error) {
+                document.getElementById('resultado').innerHTML = 
+                    '<p style="color: red;">❌ Erro: ' + error.message + '</p>';
+            }
+        }
+
+        async function verificarUsuario() {
+            try {
+                const resultado = document.getElementById('resultado');
+                resultado.innerHTML = '<p>🔍 Verificando dados...</p>';
+                
+                const doc = await db.collection('usuarios').doc(usuarioId).get();
+                
+                if (!doc.exists) {
+                    resultado.innerHTML = '<p style="color: red;">❌ Documento não encontrado</p>';
+                    return;
+                }
+                
+                const data = doc.data();
+                let html = '<h3>📋 Dados do Usuário:</h3>';
+                html += '<ul>';
+                
+                // Listar todos os campos
+                for (const [campo, valor] of Object.entries(data)) {
+                    html += `<li><strong>${campo}:</strong> ${valor}</li>`;
+                }
+                
+                html += '</ul>';
+                
+                // Verificar campos obrigatórios
+                const camposObrigatorios = ['nome', 'email', 'tipo', 'cargo', 'departamento'];
+                const camposFaltantes = camposObrigatorios.filter(campo => !data[campo]);
+                
+                if (camposFaltantes.length > 0) {
+                    html += `<p style="color: orange;">⚠️ Campos faltantes: ${camposFaltantes.join(', ')}</p>`;
+                } else {
+                    html += '<p style="color: green;">✅ Todos os campos obrigatórios estão preenchidos!</p>';
+                }
+                
+                resultado.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('resultado').innerHTML = 
+                    '<p style="color: red;">❌ Erro: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
