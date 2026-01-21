@@ -1,7 +1,7 @@
 {
   "name": "Ponto Eletrônico",
   "short_name": "Ponto",
-  "description": "Sistema de ponto eletrônico com reconhecimento facial",
+  "description": "Sistema de ponto eletrônico por localização",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2E8B57",
@@ -48,5 +48,8 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "permissions": [
+    "geolocation"
   ]
 }
