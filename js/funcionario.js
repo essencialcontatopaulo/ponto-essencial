@@ -3,49 +3,40 @@ window.funcionario = (function() {
     'use strict';
     
     const modulo = {};
-    
-    // Variáveis do sistema
     let usuarioAtual = null;
     let registros = [];
-    let justificativas = [];
     
-    // Inicializar módulo
+    // Coordenadas da empresa (exemplo: São Paulo)
+    const LOCAL_EMPRESA = {
+        latitude: -23.550520,
+        longitude: -46.633308,
+        raioMaximo: 100 // metros
+    };
+    
     modulo.inicializar = function() {
         console.log("👨‍💼 Módulo funcionário inicializado");
         
-        // Carregar usuário atual
         usuarioAtual = window.auth?.getCurrentUser();
         if (!usuarioAtual) {
             window.location.href = 'index.html';
             return false;
         }
         
-        // Carregar dados
         carregarDados();
-        
-        // Configurar eventos
         configurarEventos();
+        atualizarInterface();
+        iniciarRelogio();
         
         return true;
     };
     
-    // Carregar dados do localStorage/Firebase
     function carregarDados() {
-        // Carregar registros de ponto
         registros = JSON.parse(localStorage.getItem('registros_ponto') || '[]');
-        registros = registros.filter(r => r.usuarioId === usuarioAtual.uid);
-        
-        // Ordenar por data (mais recente primeiro)
+        registros = registros.filter(r => r.usuarioId === usuarioAtual.id);
         registros.sort((a, b) => new Date(b.data) - new Date(a.data));
-        
-        // Carregar justificativas
-        justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
-        justificativas = justificativas.filter(j => j.usuarioId === usuarioAtual.uid);
     }
     
-    // Configurar eventos da página
     function configurarEventos() {
-        // Botão de sair
         const btnSair = document.getElementById('sairBtn');
         if (btnSair) {
             btnSair.addEventListener('click', function() {
@@ -55,7 +46,6 @@ window.funcionario = (function() {
             });
         }
         
-        // Botão registrar entrada
         const btnEntrada = document.getElementById('btnEntrada');
         if (btnEntrada) {
             btnEntrada.addEventListener('click', function() {
@@ -63,7 +53,6 @@ window.funcionario = (function() {
             });
         }
         
-        // Botão registrar saída
         const btnSaida = document.getElementById('btnSaida');
         if (btnSaida) {
             btnSaida.addEventListener('click', function() {
@@ -71,7 +60,6 @@ window.funcionario = (function() {
             });
         }
         
-        // Filtro de mês
         const filtroMes = document.getElementById('filtroMes');
         if (filtroMes) {
             filtroMes.addEventListener('change', function() {
@@ -79,7 +67,6 @@ window.funcionario = (function() {
             });
         }
         
-        // Gerar relatório
         const btnRelatorio = document.getElementById('btnGerarRelatorio');
         if (btnRelatorio) {
             btnRelatorio.addEventListener('click', function() {
@@ -87,7 +74,6 @@ window.funcionario = (function() {
             });
         }
         
-        // Formulário de justificativa
         const formJustificativa = document.getElementById('formJustificativa');
         if (formJustificativa) {
             formJustificativa.addEventListener('submit', function(e) {
@@ -96,142 +82,200 @@ window.funcionario = (function() {
             });
         }
         
-        // Inicializar data atual no formulário de justificativa
         const dataJustificativa = document.getElementById('dataJustificativa');
         if (dataJustificativa) {
             dataJustificativa.value = new Date().toISOString().split('T')[0];
         }
     }
     
-    // Registrar entrada
-    modulo.registrarEntrada = function() {
+    function atualizarInterface() {
+        atualizarInformacoesUsuario();
+        atualizarTabelaRegistros();
+        atualizarUltimoRegistro();
+    }
+    
+    function atualizarInformacoesUsuario() {
         if (!usuarioAtual) return;
         
-        if (!confirm('Deseja registrar a entrada agora?\n\nO sistema utilizará reconhecimento facial.')) {
-            return;
+        const nomeElement = document.getElementById('funcionarioNome');
+        const emailElement = document.getElementById('funcionarioEmail');
+        const cargoElement = document.getElementById('funcionarioCargo');
+        
+        if (nomeElement) nomeElement.textContent = usuarioAtual.nome;
+        if (emailElement) emailElement.textContent = usuarioAtual.email;
+        if (cargoElement) cargoElement.textContent = usuarioAtual.cargo || 'Funcionário';
+    }
+    
+    function iniciarRelogio() {
+        function atualizarRelogio() {
+            const agora = new Date();
+            const horaElement = document.getElementById('horaAtual');
+            const dataElement = document.getElementById('dataAtual');
+            
+            if (horaElement) {
+                horaElement.textContent = agora.toLocaleTimeString('pt-BR');
+            }
+            
+            if (dataElement) {
+                dataElement.textContent = agora.toLocaleDateString('pt-BR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
         }
         
-        // Simular reconhecimento facial
-        modulo.simularReconhecimentoFacial('entrada')
-            .then(sucesso => {
-                if (sucesso) {
-                    salvarRegistro('entrada');
-                } else {
-                    window.utils?.mostrarMensagem('Reconhecimento facial falhou. Tente novamente.', 'error');
-                }
-            });
-    };
+        atualizarRelogio();
+        setInterval(atualizarRelogio, 1000);
+    }
     
-    // Registrar saída
-    modulo.registrarSaida = function() {
+    modulo.registrarEntrada = async function() {
         if (!usuarioAtual) return;
         
-        if (!confirm('Deseja registrar a saída agora?')) {
-            return;
-        }
-        
-        salvarRegistro('saida');
-    };
-    
-    // Simular reconhecimento facial
-    modulo.simularReconhecimentoFacial = function(tipo) {
-        return new Promise((resolve) => {
-            // Em produção, aqui você integraria com FaceAPI.js, TensorFlow.js, etc.
+        try {
+            // Obter localização
+            const localizacao = await window.utils?.obterLocalizacao();
             
-            // Mostrar modal de reconhecimento
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content" style="text-align: center; max-width: 400px;">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">📸</div>
-                    <h3 style="color: #1b5e20; margin-bottom: 15px;">Reconhecimento Facial</h3>
-                    <p style="color: #666; margin-bottom: 25px;">Posicione seu rosto na câmera</p>
-                    
-                    <div style="background: #f0f0f0; width: 300px; height: 200px; margin: 0 auto 25px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative;">
-                        <div style="font-size: 3rem;">👤</div>
-                        <div style="position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed #2E8B57; border-radius: 5px;"></div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: center;">
-                        <button id="simularSucesso" style="background: #2E8B57; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer;">
-                            ✅ Simular Sucesso
-                        </button>
-                        <button id="simularFalha" style="background: #f44336; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer;">
-                            ❌ Simular Falha
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Configurar botões
-            document.getElementById('simularSucesso').addEventListener('click', function() {
-                document.body.removeChild(modal);
-                resolve(true);
-            });
-            
-            document.getElementById('simularFalha').addEventListener('click', function() {
-                document.body.removeChild(modal);
-                resolve(false);
-            });
-            
-            // Fechar ao clicar fora
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                    resolve(false);
+            if (!localizacao) {
+                if (confirm('Não foi possível obter sua localização. Deseja registrar mesmo assim?')) {
+                    salvarRegistro('entrada', null);
                 }
-            });
-        });
+                return;
+            }
+            
+            // Verificar proximidade
+            const proximidade = window.utils?.verificarProximidade(
+                localizacao.latitude,
+                localizacao.longitude,
+                LOCAL_EMPRESA.latitude,
+                LOCAL_EMPRESA.longitude,
+                LOCAL_EMPRESA.raioMaximo
+            );
+            
+            if (proximidade.dentroDoRaio) {
+                // Dentro do raio permitido - registrar
+                salvarRegistro('entrada', localizacao);
+                window.utils?.mostrarMensagem(
+                    `✅ Entrada registrada com sucesso! ${proximidade.mensagem}`,
+                    'success'
+                );
+            } else {
+                // Fora do raio - pedir confirmação
+                if (confirm(
+                    `Você está ${proximidade.distancia.formatado} da empresa.\n` +
+                    `Deseja registrar a entrada mesmo assim?`
+                )) {
+                    salvarRegistro('entrada', localizacao);
+                    window.utils?.mostrarMensagem(
+                        `⚠️ Entrada registrada fora do local habitual`,
+                        'warning'
+                    );
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao registrar entrada:', error);
+            
+            if (confirm(`Erro na localização: ${error.message}\nDeseja registrar mesmo assim?`)) {
+                salvarRegistro('entrada', null);
+            }
+        }
     };
     
-    // Salvar registro no sistema
-    function salvarRegistro(tipo) {
+    modulo.registrarSaida = async function() {
+        if (!usuarioAtual) return;
+        
+        try {
+            // Obter localização
+            const localizacao = await window.utils?.obterLocalizacao();
+            
+            if (!localizacao) {
+                if (confirm('Não foi possível obter sua localização. Deseja registrar mesmo assim?')) {
+                    salvarRegistro('saida', null);
+                }
+                return;
+            }
+            
+            // Registrar saída
+            salvarRegistro('saida', localizacao);
+            
+            window.utils?.mostrarMensagem(
+                `✅ Saída registrada com sucesso!`,
+                'success'
+            );
+            
+        } catch (error) {
+            console.error('❌ Erro ao registrar saída:', error);
+            
+            if (confirm(`Erro na localização: ${error.message}\nDeseja registrar mesmo assim?`)) {
+                salvarRegistro('saida', null);
+            }
+        }
+    };
+    
+    function salvarRegistro(tipo, localizacao) {
         const agora = new Date();
         const hoje = agora.toISOString().split('T')[0];
         const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         
-        // Carregar registros existentes
         let todosRegistros = JSON.parse(localStorage.getItem('registros_ponto') || '[]');
         
-        // Buscar registro de hoje
         let registroHoje = todosRegistros.find(r => 
-            r.usuarioId === usuarioAtual.uid && 
+            r.usuarioId === usuarioAtual.id && 
             r.data.split('T')[0] === hoje
         );
         
         if (!registroHoje) {
-            // Criar novo registro para hoje
             registroHoje = {
                 id: 'reg_' + Date.now(),
-                usuarioId: usuarioAtual.uid,
+                usuarioId: usuarioAtual.id,
                 usuarioNome: usuarioAtual.nome,
                 data: agora.toISOString(),
                 entrada: tipo === 'entrada' ? hora : null,
                 saida: tipo === 'saida' ? hora : null,
                 horas: '00:00',
                 status: tipo === 'entrada' ? 'pendente' : 'completo',
-                metodo: 'facial'
+                metodo: 'localizacao',
+                localizacao: localizacao ? {
+                    latitude: localizacao.latitude,
+                    longitude: localizacao.longitude,
+                    precisao: localizacao.precisao,
+                    timestamp: localizacao.timestamp
+                } : null
             };
             todosRegistros.push(registroHoje);
         } else {
-            // Atualizar registro existente
             if (tipo === 'entrada') {
                 registroHoje.entrada = hora;
                 registroHoje.status = 'pendente';
-                registroHoje.metodo = 'facial';
+                registroHoje.metodo = 'localizacao';
+                registroHoje.localizacao = localizacao ? {
+                    latitude: localizacao.latitude,
+                    longitude: localizacao.longitude,
+                    precisao: localizacao.precisao,
+                    timestamp: localizacao.timestamp
+                } : null;
             } else if (tipo === 'saida') {
                 registroHoje.saida = hora;
-                registroHoje.metodo = 'manual';
+                registroHoje.metodo = 'localizacao';
                 
                 if (registroHoje.entrada) {
-                    // Calcular horas trabalhadas
                     const horasTrabalhadas = calcularHorasTrabalhadas(registroHoje.entrada, hora);
                     registroHoje.horas = horasTrabalhadas;
                     registroHoje.status = 'completo';
                 } else {
                     registroHoje.status = 'saida_sem_entrada';
+                }
+                
+                // Adicionar localização da saída
+                if (localizacao) {
+                    registroHoje.localizacaoSaida = {
+                        latitude: localizacao.latitude,
+                        longitude: localizacao.longitude,
+                        precisao: localizacao.precisao,
+                        timestamp: localizacao.timestamp
+                    };
                 }
             }
             
@@ -249,51 +293,33 @@ window.funcionario = (function() {
         carregarDados();
         
         // Atualizar interface
-        modulo.atualizarInterface();
-        
-        // Mostrar mensagem
-        const tipoTexto = tipo === 'entrada' ? 'Entrada' : 'Saída';
-        window.utils?.mostrarMensagem(
-            `${tipoTexto} registrada com sucesso às ${hora}!`,
-            'success'
-        );
-        
-        // Se for entrada, mostrar confirmação de reconhecimento
-        if (tipo === 'entrada') {
-            setTimeout(() => {
-                window.utils?.mostrarMensagem(
-                    'Reconhecimento facial realizado com sucesso! ✅',
-                    'success'
-                );
-            }, 500);
-        }
-        
-        return registroHoje;
+        atualizarInterface();
     }
     
-    // Calcular horas trabalhadas
     function calcularHorasTrabalhadas(entrada, saida) {
         if (!entrada || !saida) return '00:00';
         
-        // Converter strings de hora para objetos Date
-        const hoje = new Date().toISOString().split('T')[0];
-        const entradaDate = new Date(`${hoje} ${entrada}`);
-        const saidaDate = new Date(`${hoje} ${saida}`);
-        
-        // Verificar se a saída é no dia seguinte (após meia-noite)
-        if (saidaDate < entradaDate) {
-            saidaDate.setDate(saidaDate.getDate() + 1);
+        try {
+            const hoje = new Date().toISOString().split('T')[0];
+            const entradaDate = new Date(`${hoje} ${entrada}`);
+            const saidaDate = new Date(`${hoje} ${saida}`);
+            
+            if (saidaDate < entradaDate) {
+                saidaDate.setDate(saidaDate.getDate() + 1);
+            }
+            
+            const diffMs = saidaDate - entradaDate;
+            const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return `${diffHoras.toString().padStart(2, '0')}:${diffMinutos.toString().padStart(2, '0')}`;
+            
+        } catch (error) {
+            console.error('❌ Erro ao calcular horas:', error);
+            return '00:00';
         }
-        
-        // Calcular diferença
-        const diffMs = saidaDate - entradaDate;
-        const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffMinutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        
-        return `${diffHoras.toString().padStart(2, '0')}:${diffMinutos.toString().padStart(2, '0')}`;
     }
     
-    // Filtrar registros por mês
     modulo.filtrarRegistros = function(mes) {
         let registrosFiltrados = [...registros];
         
@@ -304,19 +330,24 @@ window.funcionario = (function() {
             });
         }
         
-        modulo.atualizarTabelaRegistros(registrosFiltrados);
-        window.utils?.mostrarMensagem(`Mostrando registros do mês ${mes === 'todos' ? 'todos' : mes}`, 'info');
+        atualizarTabelaRegistros(registrosFiltrados);
+        
+        if (window.utils) {
+            window.utils.mostrarMensagem(
+                `Mostrando ${registrosFiltrados.length} registros`,
+                'info'
+            );
+        }
     };
     
-    // Atualizar tabela de registros
-    modulo.atualizarTabelaRegistros = function(listaRegistros = registros) {
+    function atualizarTabelaRegistros(listaRegistros = registros) {
         const tbody = document.getElementById('tabelaPontosBody');
         if (!tbody) return;
         
         if (listaRegistros.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color: #888;">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
                         Nenhum registro encontrado.
                     </td>
                 </tr>
@@ -325,18 +356,8 @@ window.funcionario = (function() {
         }
         
         let html = '';
-        let hoje = new Date().toDateString();
-        let ultimoRegistroHoje = null;
         
         listaRegistros.forEach(registro => {
-            const dataRegistro = new Date(registro.data);
-            const hojeRegistro = dataRegistro.toDateString();
-            
-            // Verificar se é de hoje para mostrar no último registro
-            if (hojeRegistro === hoje && !ultimoRegistroHoje) {
-                ultimoRegistroHoje = registro;
-            }
-            
             // Formatar status
             let statusHTML = '';
             if (registro.status === 'completo') {
@@ -347,6 +368,12 @@ window.funcionario = (function() {
                 statusHTML = '<span style="color: #f44336; font-weight: bold;">⚠️ Sem entrada</span>';
             }
             
+            // Adicionar ícone de localização se disponível
+            let localizacaoHTML = '';
+            if (registro.localizacao) {
+                localizacaoHTML = '📍';
+            }
+            
             html += `
                 <tr>
                     <td>${window.utils?.formatarData(registro.data) || '--/--/----'}</td>
@@ -354,24 +381,33 @@ window.funcionario = (function() {
                     <td style="color: #1b5e20; font-weight: bold;">${registro.saida || '--:--'}</td>
                     <td>${registro.horas || '00:00'}</td>
                     <td>${statusHTML}</td>
+                    <td style="text-align: center;">${localizacaoHTML}</td>
                 </tr>
             `;
         });
         
         tbody.innerHTML = html;
-        
-        // Atualizar último registro de hoje
+    }
+    
+    function atualizarUltimoRegistro() {
         const ultimoRegistroElement = document.getElementById('ultimoRegistro');
-        if (ultimoRegistroElement && ultimoRegistroHoje) {
-            const hora = ultimoRegistroHoje.entrada || ultimoRegistroHoje.saida;
-            const tipo = ultimoRegistroHoje.entrada ? 'Entrada' : 'Saída';
+        if (!ultimoRegistroElement) return;
+        
+        const hoje = new Date().toDateString();
+        const registrosHoje = registros.filter(r => 
+            new Date(r.data).toDateString() === hoje
+        );
+        
+        if (registrosHoje.length > 0) {
+            const ultimo = registrosHoje[0];
+            const hora = ultimo.entrada || ultimo.saida;
+            const tipo = ultimo.entrada ? 'Entrada' : 'Saída';
             ultimoRegistroElement.textContent = `${tipo} às ${hora}`;
-        } else if (ultimoRegistroElement) {
+        } else {
             ultimoRegistroElement.textContent = 'Nenhum registro hoje';
         }
-    };
+    }
     
-    // Gerar relatório mensal
     modulo.gerarRelatorioMensal = function() {
         const mes = parseInt(document.getElementById('mesRelatorio')?.value || new Date().getMonth() + 1);
         const ano = parseInt(document.getElementById('anoRelatorio')?.value || new Date().getFullYear());
@@ -387,15 +423,13 @@ window.funcionario = (function() {
         const estatisticas = calcularEstatisticas(registrosMes, mes, ano);
         
         // Exibir resultado
-        modulo.exibirRelatorio(estatisticas, mes, ano);
+        exibirRelatorio(estatisticas, mes, ano);
     };
     
-    // Calcular estatísticas do relatório
     function calcularEstatisticas(registrosMes, mes, ano) {
         let totalHoras = 0;
         let totalMinutos = 0;
         let diasTrabalhados = 0;
-        let diasComHorasNormais = 0;
         let horasExtras = 0;
         let minutosExtras = 0;
         
@@ -412,12 +446,8 @@ window.funcionario = (function() {
                 // Verificar horas extras
                 if (horas > JORNADA_DIARIA) {
                     horasExtras += (horas - JORNADA_DIARIA);
-                    diasComHorasNormais++;
                 } else if (horas === JORNADA_DIARIA && minutos > 0) {
                     minutosExtras += minutos;
-                    diasComHorasNormais++;
-                } else {
-                    diasComHorasNormais++;
                 }
             }
         });
@@ -430,7 +460,7 @@ window.funcionario = (function() {
         horasExtras = Math.floor(horasExtras);
         minutosExtras = minutosExtras % 60;
         
-        // Calcular dias úteis no mês (simulação simples)
+        // Calcular dias úteis no mês
         const diasUteis = calcularDiasUteis(mes, ano);
         
         // Calcular faltas
@@ -443,7 +473,6 @@ window.funcionario = (function() {
             totalHoras: totalHoras,
             totalMinutos: totalMinutos,
             diasTrabalhados: diasTrabalhados,
-            diasComHorasNormais: diasComHorasNormais,
             horasExtras: horasExtras,
             minutosExtras: minutosExtras,
             diasUteis: diasUteis,
@@ -453,15 +482,13 @@ window.funcionario = (function() {
         };
     }
     
-    // Calcular dias úteis no mês (simulação)
     function calcularDiasUteis(mes, ano) {
         // Em produção, calcularia considerando feriados e finais de semana
         // Aqui é uma simulação: 22 dias úteis por mês
         return 22;
     }
     
-    // Exibir relatório na tela
-    modulo.exibirRelatorio = function(estatisticas, mes, ano) {
+    function exibirRelatorio(estatisticas, mes, ano) {
         const resultadoDiv = document.getElementById('relatorioResultado');
         if (!resultadoDiv) return;
         
@@ -549,44 +576,120 @@ window.funcionario = (function() {
             </div>
         `;
         
-        window.utils?.mostrarMensagem(`Relatório ${meses[mes-1]}/${ano} gerado com sucesso!`, 'success');
-    };
+        if (window.utils) {
+            window.utils.mostrarMensagem(`Relatório ${meses[mes-1]}/${ano} gerado com sucesso!`, 'success');
+        }
+    }
     
-    // Exportar relatório para PDF
     modulo.exportarRelatorio = function(mes, ano) {
         const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
         
         const relatorio = `
-            RELATÓRIO DE PONTO ELETRÔNICO
-            ===============================
-            
-            Funcionário: ${usuarioAtual?.nome || 'N/A'}
-            Matrícula: ${usuarioAtual?.matricula || 'N/A'}
-            Mês/Ano: ${meses[mes-1]}/${ano}
-            Data de geração: ${new Date().toLocaleDateString('pt-BR')}
-            
-            RESUMO:
-            - Dias trabalhados: [ver relatório na tela]
-            - Total de horas: [ver relatório na tela]
-            - Faltas: [ver relatório na tela]
-            - Horas extras: [ver relatório na tela]
-            
-            Observação: Este é um relatório de demonstração.
-            Em produção, os dados seriam mais detalhados e precisos.
-            
-            Assinatura:
-            _______________________
-            ${usuarioAtual?.nome || 'Funcionário'}
+RELATÓRIO DE PONTO ELETRÔNICO
+===============================
+
+Funcionário: ${usuarioAtual?.nome || 'N/A'}
+Matrícula: ${usuarioAtual?.matricula || 'N/A'}
+Mês/Ano: ${meses[mes-1]}/${ano}
+Data de geração: ${new Date().toLocaleDateString('pt-BR')}
+
+RESUMO:
+- Dias trabalhados: Ver relatório na tela
+- Total de horas: Ver relatório na tela
+- Faltas: Ver relatório na tela
+- Horas extras: Ver relatório na tela
+
+Observação: Registros realizados por localização GPS.
+Em produção, os dados seriam mais detalhados e precisos.
+
+Assinatura:
+_______________________
+${usuarioAtual?.nome || 'Funcionário'}
         `;
         
-        window.utils?.downloadArquivo(
-            `relatorio_${usuarioAtual?.nome?.replace(/\s+/g, '_')}_${mes}_${ano}.txt`,
-            relatorio
-        );
+        if (window.utils) {
+            window.utils.downloadArquivo(
+                `relatorio_${usuarioAtual?.nome?.replace(/\s+/g, '_')}_${mes}_${ano}.txt`,
+                relatorio
+            );
+        }
     };
     
-    // Exportar para Excel
     modulo.exportarExcel = function(mes, ano) {
         const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'D
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        
+        // Criar CSV
+        let csv = 'Data,Entrada,Saída,Horas,Status,Localização\n';
+        
+        const registrosMes = registros.filter(r => {
+            const dataRegistro = new Date(r.data);
+            return (dataRegistro.getMonth() + 1) === mes && 
+                   dataRegistro.getFullYear() === ano;
+        });
+        
+        registrosMes.forEach(reg => {
+            const localizacao = reg.localizacao ? 'Sim' : 'Não';
+            csv += `"${window.utils?.formatarData(reg.data)}","${reg.entrada || ''}","${reg.saida || ''}","${reg.horas || ''}","${reg.status || ''}","${localizacao}"\n`;
+        });
+        
+        if (window.utils) {
+            window.utils.downloadArquivo(
+                `registros_${usuarioAtual?.nome?.replace(/\s+/g, '_')}_${mes}_${ano}.csv`,
+                csv,
+                'text/csv'
+            );
+        }
+    };
+    
+    modulo.enviarJustificativa = function() {
+        const tipo = document.getElementById('tipoJustificativa').value;
+        const data = document.getElementById('dataJustificativa').value;
+        const descricao = document.getElementById('descricaoJustificativa').value;
+        
+        if (!tipo || !data || !descricao) {
+            if (window.utils) {
+                window.utils.mostrarMensagem('Preencha todos os campos obrigatórios!', 'error');
+            }
+            return;
+        }
+        
+        // Carregar justificativas existentes
+        let justificativas = JSON.parse(localStorage.getItem('justificativas') || '[]');
+        
+        // Adicionar nova justificativa
+        const novaJustificativa = {
+            id: 'just_' + Date.now(),
+            usuarioId: usuarioAtual.id,
+            usuarioNome: usuarioAtual.nome,
+            tipo: tipo,
+            data: data,
+            descricao: descricao,
+            dataEnvio: new Date().toISOString(),
+            status: 'pendente'
+        };
+        
+        justificativas.push(novaJustificativa);
+        localStorage.setItem('justificativas', JSON.stringify(justificativas));
+        
+        // Limpar formulário
+        document.getElementById('formJustificativa').reset();
+        document.getElementById('dataJustificativa').value = new Date().toISOString().split('T')[0];
+        
+        // Mostrar mensagem
+        if (window.utils) {
+            window.utils.mostrarMensagem(
+                'Justificativa enviada com sucesso! Aguarde aprovação do gestor.',
+                'success'
+            );
+        }
+    };
+    
+    // Inicializar automaticamente
+    document.addEventListener('DOMContentLoaded', function() {
+        modulo.inicializar();
+    });
+    
+    return modulo;
+})();
