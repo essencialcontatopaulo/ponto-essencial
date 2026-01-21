@@ -1,317 +1,236 @@
-// auth.js - Sistema de autenticação com usuários pré-cadastrados
-console.log("🔐 Módulo de autenticação carregado!");
-
-// Banco de dados de usuários (simulação) - CORRIGIDO
-const usuariosCadastrados = {
-    // GESTOR - Acesso total (CORRIGIDO: email minúsculo)
-    'admin@empresa.com': {
-        id: 'user_001',
-        nome: 'Administrador Sistema',
-        email: 'admin@empresa.com',
-        senha: 'admin123',
-        tipo: 'gestor',  // ← CORRETO: 'gestor' e não 'admin'
-        cargo: 'Gerente Geral',
-        ativo: true,
-        criadoEm: '2024-01-01'
-    },
+// Sistema de Autenticação atualizado
+window.auth = (function() {
+    'use strict';
     
-    // FUNCIONÁRIOS
-    'joao.silva@empresa.com': {
-        id: 'user_002',
-        nome: 'João Silva',
-        email: 'joao.silva@empresa.com',
-        senha: 'func123',
-        tipo: 'funcionario',
-        cargo: 'Desenvolvedor',
-        ativo: true,
-        criadoEm: '2024-01-15'
-    },
-    
-    'maria.santos@empresa.com': {
-        id: 'user_003',
-        nome: 'Maria Santos',
-        email: 'maria.santos@empresa.com',
-        senha: 'func123',
-        tipo: 'funcionario',
-        cargo: 'Designer',
-        ativo: true,
-        criadoEm: '2024-01-20'
-    },
-    
-    'carlos.oliveira@empresa.com': {
-        id: 'user_004',
-        nome: 'Carlos Oliveira',
-        email: 'carlos.oliveira@empresa.com',
-        senha: 'func123',
-        tipo: 'funcionario',
-        cargo: 'Analista de RH',
-        ativo: true,
-        criadoEm: '2024-02-01'
-    },
-    
-    'ana.costa@empresa.com': {
-        id: 'user_005',
-        nome: 'Ana Costa',
-        email: 'ana.costa@empresa.com',
-        senha: 'func123',
-        tipo: 'funcionario',
-        cargo: 'Assistente Administrativo',
-        ativo: true,
-        criadoEm: '2024-02-10'
-    }
-};
-
-let usuarioLogado = null;
-
-// Funções de autenticação
-const auth = {
-    // Login com email/senha - CORRIGIDO
-    async login(email, senha) {
-        console.log('🔑 Tentando login com:', email);
-        
-        try {
-            // Converter email para minúsculo para garantir match
-            const emailLower = email.toLowerCase().trim();
-            
-            // Verificar se usuário existe
-            const usuario = usuariosCadastrados[emailLower];
-            
-            console.log('👤 Usuário encontrado:', usuario);
-            
-            if (usuario && usuario.senha === senha) {
-                if (!usuario.ativo) {
-                    throw new Error('Usuário inativo. Contate o administrador.');
-                }
-                
-                // Criar sessão (sem senha)
-                const sessaoUsuario = {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    tipo: usuario.tipo,
-                    cargo: usuario.cargo,
-                    logadoEm: new Date().toISOString()
-                };
-                
-                usuarioLogado = sessaoUsuario;
-                localStorage.setItem('usuarioLogado', JSON.stringify(sessaoUsuario));
-                
-                console.log(`✅ Login realizado: ${usuario.nome} (${usuario.tipo})`);
-                return { 
-                    success: true, 
-                    usuario: sessaoUsuario,
-                    message: `Bem-vindo, ${usuario.nome}!`
-                };
-            }
-            
-            throw new Error('Email ou senha incorretos');
-            
-        } catch (error) {
-            console.error('❌ Erro no login:', error.message);
-            return { 
-                success: false, 
-                error: error.message,
-                sugestao: 'Use: admin@empresa.com / admin123'
-            };
-        }
-    },
-    
-    // Logout
-    logout() {
-        const nomeUsuario = usuarioLogado?.nome || 'Usuário';
-        usuarioLogado = null;
-        localStorage.removeItem('usuarioLogado');
-        console.log(`👋 ${nomeUsuario} deslogado`);
-        window.location.href = 'index.html';
-    },
+    const auth = {};
     
     // Verificar se está logado
-    verificarLogin() {
+    auth.getCurrentUser = function() {
         try {
-            const usuarioSalvo = localStorage.getItem('usuarioLogado');
-            if (usuarioSalvo) {
-                usuarioLogado = JSON.parse(usuarioSalvo);
-                console.log('✅ Usuário logado detectado:', usuarioLogado);
-                return usuarioLogado;
+            const userStr = localStorage.getItem('ponto_user');
+            if (userStr) {
+                return JSON.parse(userStr);
             }
         } catch (error) {
-            console.error('❌ Erro ao verificar login:', error);
+            console.error('Erro ao ler usuário:', error);
         }
         return null;
-    },
+    };
     
-    // Registrar novo usuário (apenas gestor)
-    async registrar(novoUsuario) {
-        console.log('📝 Registrando novo usuário:', novoUsuario.nome);
-        
+    // Login
+    auth.login = async function(email, senha) {
         try {
-            // Verificar permissão (apenas gestor)
-            if (usuarioLogado?.tipo !== 'gestor') {
-                throw new Error('Apenas gestores podem registrar novos usuários');
-            }
-            
-            // Validar dados
-            if (!novoUsuario.email || !novoUsuario.nome || !novoUsuario.cargo) {
-                throw new Error('Preencha todos os campos obrigatórios');
-            }
-            
-            // Verificar se email já existe (simulação)
-            if (usuariosCadastrados[novoUsuario.email.toLowerCase()]) {
-                throw new Error('Email já cadastrado no sistema');
-            }
-            
-            // Criar ID único
-            const novoId = 'user_' + Date.now();
-            
-            // Adicionar ao banco simulado
-            usuariosCadastrados[novoUsuario.email.toLowerCase()] = {
-                id: novoId,
-                nome: novoUsuario.nome,
-                email: novoUsuario.email,
-                senha: novoUsuario.senha || 'senha123', // Senha padrão
-                tipo: novoUsuario.tipo || 'funcionario',
-                cargo: novoUsuario.cargo,
-                ativo: true,
-                criadoEm: new Date().toISOString().split('T')[0]
-            };
-            
-            console.log('✅ Usuário registrado com sucesso:', novoId);
-            
-            return {
-                success: true,
-                message: `Usuário ${novoUsuario.nome} registrado com sucesso!`,
-                usuario: {
-                    id: novoId,
-                    nome: novoUsuario.nome,
-                    email: novoUsuario.email,
-                    tipo: novoUsuario.tipo,
-                    cargo: novoUsuario.cargo
+            // Se Firebase estiver disponível, usar autenticação real
+            if (window.firebase && window.firebase.auth) {
+                const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+                
+                const userCredential = await signInWithEmailAndPassword(
+                    window.firebase.auth, 
+                    email, 
+                    senha
+                );
+                
+                // Buscar dados adicionais no Firestore
+                const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const userDoc = await getDoc(doc(window.firebase.db, 'usuarios', userCredential.user.uid));
+                
+                let userData = {
+                    uid: userCredential.user.uid,
+                    email: userCredential.user.email,
+                    nome: userCredential.user.displayName || email.split('@')[0],
+                    tipo: 'funcionario' // default
+                };
+                
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    userData = { ...userData, ...data };
                 }
-            };
+                
+                // Salvar no localStorage
+                localStorage.setItem('ponto_user', JSON.stringify(userData));
+                
+                return {
+                    success: true,
+                    usuario: userData
+                };
+                
+            } else {
+                // Modo simulação para desenvolvimento
+                console.log('🔥 Modo SIMULAÇÃO de login ativo');
+                
+                // Usuários de teste
+                const usuariosTeste = {
+                    'admin@empresa.com': {
+                        uid: 'admin001',
+                        email: 'admin@empresa.com',
+                        nome: 'Administrador',
+                        tipo: 'gestor',
+                        senha: 'admin123'
+                    },
+                    'joao.silva@empresa.com': {
+                        uid: 'func001',
+                        email: 'joao.silva@empresa.com',
+                        nome: 'João Silva',
+                        tipo: 'funcionario',
+                        senha: 'func123'
+                    },
+                    'maria.santos@empresa.com': {
+                        uid: 'func002',
+                        email: 'maria.santos@empresa.com',
+                        nome: 'Maria Santos',
+                        tipo: 'funcionario',
+                        senha: 'func123'
+                    }
+                };
+                
+                if (usuariosTeste[email] && usuariosTeste[email].senha === senha) {
+                    const userData = { ...usuariosTeste[email] };
+                    delete userData.senha;
+                    
+                    localStorage.setItem('ponto_user', JSON.stringify(userData));
+                    
+                    return {
+                        success: true,
+                        usuario: userData
+                    };
+                } else {
+                    return {
+                        success: false,
+                        error: 'Credenciais inválidas'
+                    };
+                }
+            }
             
         } catch (error) {
-            console.error('❌ Erro ao registrar usuário:', error);
+            console.error('Erro no login:', error);
+            return {
+                success: false,
+                error: error.message || 'Erro ao fazer login'
+            };
+        }
+    };
+    
+    // Logout
+    auth.logout = async function() {
+        try {
+            if (window.firebase && window.firebase.auth) {
+                const { signOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+                await signOut(window.firebase.auth);
+            }
+        } catch (error) {
+            console.error('Erro no logout:', error);
+        }
+        
+        localStorage.removeItem('ponto_user');
+        window.location.href = 'index.html';
+    };
+    
+    // Verificar autenticação em páginas protegidas
+    auth.requireAuth = function(tipoRequerido = null) {
+        const user = auth.getCurrentUser();
+        
+        if (!user) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        
+        if (tipoRequerido && user.tipo !== tipoRequerido) {
+            alert(`Acesso restrito para ${tipoRequerido}s`);
+            window.location.href = 'index.html';
+            return false;
+        }
+        
+        return user;
+    };
+    
+    // Cadastrar novo usuário (apenas gestor)
+    auth.cadastrarUsuario = async function(dados) {
+        try {
+            if (window.firebase && window.firebase.auth && window.firebase.db) {
+                const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                // Criar usuário no Authentication
+                const userCredential = await createUserWithEmailAndPassword(
+                    window.firebase.auth,
+                    dados.email,
+                    dados.senha
+                );
+                
+                // Salvar dados adicionais no Firestore
+                const userData = {
+                    nome: dados.nome,
+                    email: dados.email,
+                    tipo: dados.tipo || 'funcionario',
+                    cargo: dados.cargo || '',
+                    departamento: dados.departamento || '',
+                    dataCadastro: new Date().toISOString(),
+                    ativo: true
+                };
+                
+                await setDoc(doc(window.firebase.db, 'usuarios', userCredential.user.uid), userData);
+                
+                return {
+                    success: true,
+                    uid: userCredential.user.uid,
+                    usuario: userData
+                };
+                
+            } else {
+                // Modo simulação
+                console.log('🔥 Modo SIMULAÇÃO de cadastro');
+                
+                // Carregar usuários existentes
+                let usuarios = JSON.parse(localStorage.getItem('ponto_usuarios') || '[]');
+                
+                // Verificar se email já existe
+                if (usuarios.some(u => u.email === dados.email)) {
+                    return {
+                        success: false,
+                        error: 'Este e-mail já está cadastrado'
+                    };
+                }
+                
+                const novoUsuario = {
+                    uid: 'user_' + Date.now(),
+                    nome: dados.nome,
+                    email: dados.email,
+                    tipo: dados.tipo || 'funcionario',
+                    cargo: dados.cargo || '',
+                    departamento: dados.departamento || '',
+                    dataCadastro: new Date().toISOString(),
+                    ativo: true
+                };
+                
+                usuarios.push(novoUsuario);
+                localStorage.setItem('ponto_usuarios', JSON.stringify(usuarios));
+                
+                return {
+                    success: true,
+                    uid: novoUsuario.uid,
+                    usuario: novoUsuario
+                };
+            }
+            
+        } catch (error) {
+            console.error('Erro ao cadastrar usuário:', error);
             return {
                 success: false,
                 error: error.message
             };
         }
-    },
+    };
     
-    // Listar todos usuários (apenas gestor)
-    listarUsuarios() {
-        if (usuarioLogado?.tipo !== 'gestor') {
-            console.warn('⚠️ Acesso não autorizado à lista de usuários');
+    // Listar todos os usuários (apenas gestor)
+    auth.listarUsuarios = function() {
+        try {
+            const usuarios = JSON.parse(localStorage.getItem('ponto_usuarios') || '[]');
+            return usuarios;
+        } catch (error) {
+            console.error('Erro ao listar usuários:', error);
             return [];
         }
-        
-        const lista = Object.values(usuariosCadastrados).map(usuario => ({
-            id: usuario.id,
-            nome: usuario.nome,
-            email: usuario.email,
-            tipo: usuario.tipo,
-            cargo: usuario.cargo,
-            ativo: usuario.ativo,
-            criadoEm: usuario.criadoEm
-        }));
-        
-        console.log(`📋 ${lista.length} usuários encontrados`);
-        return lista;
-    },
+    };
     
-    // Buscar usuário por email
-    buscarUsuario(email) {
-        return usuariosCadastrados[email.toLowerCase()] || null;
-    },
-    
-    // Atualizar usuário
-    async atualizarUsuario(email, dadosAtualizados) {
-        try {
-            if (usuarioLogado?.tipo !== 'gestor') {
-                throw new Error('Apenas gestores podem atualizar usuários');
-            }
-            
-            const emailLower = email.toLowerCase();
-            if (!usuariosCadastrados[emailLower]) {
-                throw new Error('Usuário não encontrado');
-            }
-            
-            // Atualizar dados
-            usuariosCadastrados[emailLower] = {
-                ...usuariosCadastrados[emailLower],
-                ...dadosAtualizados
-            };
-            
-            console.log(`✅ Usuário ${email} atualizado`);
-            return { success: true, message: 'Usuário atualizado com sucesso!' };
-            
-        } catch (error) {
-            console.error('❌ Erro ao atualizar usuário:', error);
-            return { success: false, error: error.message };
-        }
-    },
-    
-    // Reconhecimento facial (simulação)
-    async reconhecimentoFacial(imagemData) {
-        console.log('📸 Processando reconhecimento facial...');
-        
-        // Simulação de processamento
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Lista de rostos "conhecidos" (simulação)
-        const rostosConhecidos = [
-            { nome: 'João Silva', email: 'joao.silva@empresa.com', confidence: 0.95, tipo: 'funcionario' },
-            { nome: 'Maria Santos', email: 'maria.santos@empresa.com', confidence: 0.92, tipo: 'funcionario' },
-            { nome: 'Carlos Oliveira', email: 'carlos.oliveira@empresa.com', confidence: 0.88, tipo: 'funcionario' }
-        ];
-        
-        // Escolher aleatoriamente (simulação)
-        const usuarioReconhecido = rostosConhecidos[Math.floor(Math.random() * rostosConhecidos.length)];
-        
-        return {
-            success: true,
-            usuario: {
-                id: 'user_facial_' + Date.now(),
-                nome: usuarioReconhecido.nome,
-                email: usuarioReconhecido.email,
-                tipo: usuarioReconhecido.tipo
-            },
-            confidence: usuarioReconhecido.confidence,
-            message: `Rosto reconhecido: ${usuarioReconhecido.nome}`
-        };
-    },
-    
-    // Método para DEBUG: Ver todos usuários
-    debugListarUsuarios() {
-        console.log('🔍 DEBUG - Todos usuários cadastrados:');
-        Object.keys(usuariosCadastrados).forEach(email => {
-            console.log(`  ${email}:`, usuariosCadastrados[email]);
-        });
-        return usuariosCadastrados;
-    }
-};
-
-// Inicializar auth
-document.addEventListener('DOMContentLoaded', function() {
-    const usuario = auth.verificarLogin();
-    if (usuario) {
-        console.log(`👤 Usuário já logado: ${usuario.nome} (${usuario.tipo})`);
-        
-        // Se for gestor, mostrar menu especial
-        if (usuario.tipo === 'gestor') {
-            console.log('👔 Modo gestor ativado');
-        }
-    } else {
-        console.log('🔐 Nenhum usuário logado');
-    }
-    
-    // Para debug: mostrar todos usuários
-    console.log('🔍 Usuários disponíveis para login:');
-    Object.keys(usuariosCadastrados).forEach(email => {
-        const user = usuariosCadastrados[email];
-        console.log(`  👤 ${email} - ${user.nome} (${user.tipo}) - Senha: ${user.senha}`);
-    });
-});
-
-// Exportar
-window.auth = auth;
+    return auth;
+})();
