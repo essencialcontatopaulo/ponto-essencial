@@ -7,8 +7,8 @@
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
         * {
@@ -281,25 +281,29 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA COM SEUS DADOS
+        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA COM SEUS DADOS REAIS!
         const firebaseConfig = {
-            apiKey: "AIzaSyB...",
-            authDomain: "essencial-print.firebaseapp.com",
-            projectId: "essencial-print",
-            storageBucket: "essencial-print.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            apiKey: "AIzaSyB...", // SUA API KEY AQUI
+            authDomain: "essencial-print.firebaseapp.com", // SEU DOMÍNIO
+            projectId: "essencial-print", // SEU PROJECT ID
+            storageBucket: "essencial-print.appspot.com", // SEU STORAGE
+            messagingSenderId: "123456789", // SEU SENDER ID
+            appId: "1:123456789:web:abcdef123456" // SEU APP ID
         };
 
         // Inicializar Firebase
         let auth, db;
         try {
-            firebase.initializeApp(firebaseConfig);
+            // Verificar se Firebase já está inicializado
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
             auth = firebase.auth();
             db = firebase.firestore();
-            console.log("Firebase inicializado com sucesso!");
+            console.log("✅ Firebase inicializado com sucesso!");
         } catch (error) {
-            console.error('Erro ao inicializar Firebase:', error);
+            console.error('❌ Erro ao inicializar Firebase:', error);
+            showError('Erro de conexão com o servidor.');
         }
 
         let loginType = 'funcionario';
@@ -355,12 +359,18 @@
                 return;
             }
             
+            // Mostrar loading
+            const loginBtn = document.querySelector('.btn-login');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<span>⏳</span> Verificando...';
+            loginBtn.disabled = true;
+            
             try {
                 // Tentar autenticar no Firebase
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
-                console.log("Usuário autenticado:", user);
+                console.log("✅ Usuário autenticado:", user.email);
                 
                 // Buscar dados do usuário no Firestore
                 const userDoc = await db.collection('usuarios').doc(user.uid).get();
@@ -372,12 +382,16 @@
                     if (loginType === 'gestor' && userData.tipo !== 'gestor') {
                         await auth.signOut();
                         showError('Este usuário não tem permissão de gestor.');
+                        loginBtn.innerHTML = originalText;
+                        loginBtn.disabled = false;
                         return;
                     }
                     
                     if (loginType === 'funcionario' && userData.tipo !== 'funcionario') {
                         await auth.signOut();
                         showError('Este usuário não é um funcionário.');
+                        loginBtn.innerHTML = originalText;
+                        loginBtn.disabled = false;
                         return;
                     }
                     
@@ -388,16 +402,14 @@
                         nome: userData.nome,
                         cargo: userData.cargo || 'Funcionário',
                         departamento: userData.departamento || 'Não informado',
-                        tipo: userData.tipo
+                        tipo: userData.tipo,
+                        cpf: userData.cpf || ''
                     };
                     
                     localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
                     
-                    // Redirecionar conforme o tipo
-                    if (userData.tipo === 'gestor') {
-                        window.location.href = 'gestor.html';
-                    } else {
-                        // Para funcionários, usar o sistema antigo de localStorage
+                    // Para compatibilidade com o sistema antigo
+                    if (userData.tipo === 'funcionario') {
                         const funcionarioInfo = {
                             id: user.uid,
                             nome: userData.nome,
@@ -405,23 +417,30 @@
                             cargo: userData.cargo || 'Funcionário',
                             departamento: userData.departamento || 'Não informado'
                         };
-                        
                         localStorage.setItem('funcionario_logado', JSON.stringify(funcionarioInfo));
+                    }
+                    
+                    // Redirecionar conforme o tipo
+                    if (userData.tipo === 'gestor') {
+                        window.location.href = 'gestor.html';
+                    } else {
                         window.location.href = 'funcionario.html';
                     }
                     
                 } else {
-                    showError('Dados do usuário não encontrados. Contate o administrador.');
+                    showError('Dados do usuário não encontrados no sistema. Contate o administrador.');
                     await auth.signOut();
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
                 }
                 
             } catch (error) {
-                console.error('Erro no login:', error);
+                console.error('❌ Erro no login:', error.code, error.message);
                 
                 // Tratamento de erros específicos
                 switch (error.code) {
                     case 'auth/user-not-found':
-                        showError('Usuário não encontrado.');
+                        showError('Usuário não encontrado. Verifique o e-mail.');
                         break;
                     case 'auth/wrong-password':
                         showError('Senha incorreta.');
@@ -432,9 +451,15 @@
                     case 'auth/user-disabled':
                         showError('Esta conta foi desativada.');
                         break;
+                    case 'auth/network-request-failed':
+                        showError('Erro de conexão. Verifique sua internet.');
+                        break;
                     default:
-                        showError('Erro ao fazer login. Tente novamente.');
+                        showError('Erro ao fazer login: ' + error.message);
                 }
+                
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
             }
         }
 
@@ -456,20 +481,36 @@
 
         // Permitir Enter para login
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("📱 Página de login carregada");
+            
+            // Configurar evento Enter
             document.getElementById('loginForm').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     login();
                 }
             });
             
-            // Verificar se já está logado
-            const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
-            if (usuarioLogado) {
-                if (usuarioLogado.tipo === 'gestor') {
-                    window.location.href = 'gestor.html';
-                } else {
-                    window.location.href = 'funcionario.html';
+            // Verificar se já está logado (com timeout para evitar loop)
+            setTimeout(() => {
+                const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
+                if (usuarioLogado) {
+                    console.log("👤 Usuário já logado detectado:", usuarioLogado.nome);
+                    
+                    // Verificar se a página atual já é a correta
+                    const currentPage = window.location.pathname.split('/').pop();
+                    if (usuarioLogado.tipo === 'gestor' && currentPage !== 'gestor.html') {
+                        window.location.href = 'gestor.html';
+                    } else if (usuarioLogado.tipo === 'funcionario' && currentPage !== 'funcionario.html') {
+                        window.location.href = 'funcionario.html';
+                    }
                 }
+            }, 1000); // Delay de 1 segundo
+            
+            // Testar conexão com Firebase
+            if (auth) {
+                auth.onAuthStateChanged((user) => {
+                    console.log("🔥 Estado da autenticação:", user ? "Logado" : "Deslogado");
+                });
             }
         });
     </script>
