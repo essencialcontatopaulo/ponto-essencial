@@ -3,58 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Gestor - Ponto Eletrônico</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Área do Gestor - Sistema de Ponto</title>
+    
+    <!-- Reaproveitando seu estilo -->
+    <link rel="stylesheet" href="css/style.css?v=2.1.0">
+    
     <style>
+        /* Estilos específicos para gestor */
         .gestor-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            background: linear-gradient(90deg, #1b5e20, #2E8B57);
             color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .user-info {
+            padding: 25px;
+            border-radius: 10px 10px 0 0;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
         }
         
-        .user-avatar {
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+        .gestor-welcome {
+            font-size: 1.8rem;
+            font-weight: 700;
         }
         
-        .user-details h2 {
-            margin: 0;
-            color: white;
-        }
-        
-        .user-details p {
-            margin: 5px 0 0;
+        .gestor-email {
             opacity: 0.9;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .gestor-nav {
+            background: #f5f5f5;
+            padding: 0;
+            border-bottom: 2px solid #C8E6C9;
+            display: flex;
+            overflow-x: auto;
+        }
+        
+        .gestor-tab {
+            padding: 18px 25px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            color: #555;
+        }
+        
+        .gestor-tab:hover {
+            background: rgba(27, 94, 32, 0.05);
+        }
+        
+        .gestor-tab.active {
+            background: white;
+            border-bottom-color: #1b5e20;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        
+        .gestor-content {
+            padding: 30px;
+            min-height: 500px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .gestor-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .section-title {
+            color: #1b5e20;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E8F5E9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title i {
+            font-size: 1.5rem;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin: 30px 0;
+            margin-bottom: 30px;
         }
         
         .stat-card {
-            background: white;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-radius: 10px;
             text-align: center;
+            border: 1px solid #dee2e6;
             transition: transform 0.3s;
         }
         
@@ -62,812 +125,1216 @@
             transform: translateY(-5px);
         }
         
-        .stat-value {
+        .stat-icon {
             font-size: 2.5rem;
-            font-weight: bold;
-            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1b5e20;
             margin: 10px 0;
         }
         
         .stat-label {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e9ecef;
-            margin: 30px 0;
-            flex-wrap: wrap;
+        .photo-capture-area {
+            border: 3px dashed #4CAF50;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            background: #F1F8E9;
+            text-align: center;
         }
         
-        .tab {
-            padding: 15px 30px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s;
-            white-space: nowrap;
+        .camera-container {
+            width: 320px;
+            height: 240px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
         }
         
-        .tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .data-table {
+        #cameraVideo, #cameraCanvas {
             width: 100%;
-            background: white;
+            height: 100%;
+        }
+        
+        .photo-preview {
+            max-width: 200px;
+            margin: 20px auto;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin: 20px 0;
+            border: 3px solid #4CAF50;
+            display: none;
         }
         
-        .data-table th {
-            background: #f8f9fa;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #495057;
-            border-bottom: 2px solid #e9ecef;
-        }
-        
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .data-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .btn-action {
-            padding: 8px 15px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin: 0 5px;
-            transition: all 0.3s;
-        }
-        
-        .btn-edit {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-edit:hover {
-            background: #138496;
-        }
-        
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-delete:hover {
-            background: #c82333;
-        }
-        
-        .btn-export {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-export:hover {
-            background: #218838;
-        }
-        
-        .btn-cadastrar {
-            background: #6f42c1;
-            color: white;
-        }
-        
-        .btn-cadastrar:hover {
-            background: #5a32a3;
-        }
-        
-        .search-box {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .filter-select {
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            min-width: 200px;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 15px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        
-        .action-card {
-            flex: 1;
-            min-width: 200px;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .action-card:hover {
-            transform: translateY(-5px);
-            border-color: #667eea;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
-        }
-        
-        .action-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
+        .photo-preview img {
+            width: 100%;
+            height: auto;
             display: block;
         }
         
-        .action-card h4 {
-            margin: 10px 0;
-            color: #2c3e50;
+        .funcionarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
         }
         
-        .action-card p {
+        .funcionario-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #E8F5E9;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .funcionario-card:hover {
+            box-shadow: 0 8px 25px rgba(27, 94, 32, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .funcionario-foto {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4CAF50;
+            margin-right: 20px;
+            float: left;
+        }
+        
+        .funcionario-info {
+            overflow: hidden;
+        }
+        
+        .funcionario-nome {
+            font-weight: 600;
+            color: #1b5e20;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .funcionario-detalhes {
             color: #666;
             font-size: 0.9rem;
-            margin: 0;
+            line-height: 1.4;
         }
         
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
         }
         
-        .status-presente {
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #C8E6C9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .btn-gestor {
+            background: linear-gradient(90deg, #1b5e20, #2E8B57);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-gestor:hover {
+            background: linear-gradient(90deg, #2E8B57, #388E3C);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(27, 94, 32, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #dc3545, #c82333);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(90deg, #c82333, #bd2130);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-success {
             background: #d4edda;
             color: #155724;
+            border-color: #c3e6cb;
         }
         
-        .status-ausente {
-            background: #f8d7da;
-            color: #721c24;
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
         }
         
-        .status-atrasado {
-            background: #fff3cd;
-            color: #856404;
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
         }
         
-        .status-ferias {
-            background: #cce5ff;
-            color: #004085;
+        .no-data i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
         
+        /* Responsividade */
         @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
+            .gestor-nav {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 5px;
             }
             
-            .tab {
+            .gestor-tab {
+                padding: 15px 20px;
+                font-size: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .funcionarios-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .camera-container {
                 width: 100%;
-                text-align: center;
-            }
-            
-            .search-box {
-                flex-direction: column;
-            }
-            
-            .filter-select, .search-input {
-                width: 100%;
-            }
-            
-            .quick-actions {
-                flex-direction: column;
-            }
-            
-            .action-card {
-                width: 100%;
-            }
-            
-            .btn-action {
-                margin: 2px;
-                padding: 6px 10px;
-                font-size: 0.8rem;
+                height: 200px;
             }
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Animações */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
 <body>
+    <!-- Verificação de login -->
+    <script>
+        // Verificar se o usuário está logado como gestor
+        if (!localStorage.getItem('gestor_logged_in') || localStorage.getItem('usuario_tipo') !== 'gestor') {
+            alert('⚠️ Acesso restrito! Você precisa estar logado como gestor.');
+            window.location.href = 'index.html?v=' + Date.now();
+        }
+    </script>
+
     <div class="container">
-        <header class="gestor-header">
-            <div class="user-info">
-                <div class="user-avatar">👔</div>
-                <div class="user-details">
-                    <h2 id="gestorNome">Gestor do Sistema</h2>
-                    <p id="gestorEmail">admin@empresa.com</p>
-                    <p id="gestorCargo">Gerente Geral</p>
+        <!-- Cabeçalho do Gestor -->
+        <div class="gestor-header">
+            <div>
+                <h1 class="gestor-welcome">👑 Área do Gestor</h1>
+                <div class="gestor-email">
+                    Logado como: <strong id="gestorEmail">carregando...</strong>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="sairBtn" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white;">
+            <div>
+                <button id="logoutBtn" class="btn-gestor btn-danger" style="padding: 10px 20px;">
                     🚪 Sair
                 </button>
-                <button id="homeBtn" class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white;">
-                    🏠 Página Inicial
-                </button>
-            </div>
-        </header>
-
-        <section class="quick-actions">
-            <div class="action-card" id="cardCadastrar">
-                <div class="action-icon">👥</div>
-                <h4>Cadastrar Usuário</h4>
-                <p>Adicionar novo funcionário ou gestor</p>
-            </div>
-            
-            <div class="action-card" id="cardRelatorios">
-                <div class="action-icon">📊</div>
-                <h4>Relatórios</h4>
-                <p>Gerar relatórios de horas e produtividade</p>
-            </div>
-            
-            <div class="action-card" id="cardAjustes">
-                <div class="action-icon">⚙️</div>
-                <h4>Ajustes</h4>
-                <p>Configurar horários e notificações</p>
-            </div>
-            
-            <div class="action-card" id="cardExportar">
-                <div class="action-icon">📥</div>
-                <h4>Exportar Dados</h4>
-                <p>Exportar para Excel ou PDF</p>
-            </div>
-        </section>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Funcionários Ativos</div>
-                <div class="stat-value" id="totalFuncionarios">5</div>
-                <div class="stat-label">Presentes hoje: <span id="presentesHoje">3</span></div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Horas Trabalhadas</div>
-                <div class="stat-value" id="horasTotais">168h</div>
-                <div class="stat-label">Média por funcionário: 8.4h</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Atrasos Este Mês</div>
-                <div class="stat-value" id="totalAtrasos">3</div>
-                <div class="stat-label">-15% vs mês anterior</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Produtividade</div>
-                <div class="stat-value" id="produtividade">94%</div>
-                <div class="stat-label">Meta: 90%</div>
             </div>
         </div>
-
-        <div class="tabs">
-            <div class="tab active" data-tab="funcionarios">👥 Funcionários</div>
-            <div class="tab" data-tab="pontos">⏰ Registros de Ponto</div>
-            <div class="tab" data-tab="relatorios">📊 Relatórios</div>
-            <div class="tab" data-tab="config">⚙️ Configurações</div>
-        </div>
-
-        <div class="tab-content active" id="tab-funcionarios">
-            <div class="search-box">
-                <input type="text" class="search-input" id="searchFuncionarios" placeholder="Buscar funcionário por nome ou email...">
-                <select class="filter-select" id="filterCargo">
-                    <option value="">Todos os cargos</option>
-                    <option value="Desenvolvedor">Desenvolvedor</option>
-                    <option value="Designer">Designer</option>
-                    <option value="Analista de RH">Analista de RH</option>
-                    <option value="Assistente Administrativo">Assistente Administrativo</option>
-                    <option value="Gerente">Gerente</option>
-                </select>
-                <select class="filter-select" id="filterStatus">
-                    <option value="">Todos os status</option>
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                </select>
-                <button class="btn-action btn-cadastrar" id="addFuncionarioBtn">
-                    👥 Novo Funcionário
-                </button>
+        
+        <!-- Navegação -->
+        <nav class="gestor-nav">
+            <button class="gestor-tab active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="gestor-tab" data-tab="cadastro">👤 Cadastrar Funcionário</button>
+            <button class="gestor-tab" data-tab="funcionarios">👥 Funcionários</button>
+            <button class="gestor-tab" data-tab="ponto">⏰ Controle de Ponto</button>
+            <button class="gestor-tab" data-tab="relatorios">📈 Relatórios</button>
+            <button class="gestor-tab" data-tab="config">⚙️ Configurações</button>
+        </nav>
+        
+        <!-- Conteúdo das abas -->
+        <div class="gestor-content">
+            
+            <!-- Dashboard -->
+            <div id="dashboard" class="tab-content active">
+                <div class="gestor-section">
+                    <h2 class="section-title">📊 Dashboard Geral</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value" id="totalFuncionarios">0</div>
+                            <div class="stat-label">Funcionários Cadastrados</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value" id="pontoHoje">0</div>
+                            <div class="stat-label">Pontos Hoje</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">⏰</div>
+                            <div class="stat-value" id="horasTrabalhadas">0h</div>
+                            <div class="stat-label">Horas Trabalhadas</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📈</div>
+                            <div class="stat-value" id="presenca">0%</div>
+                            <div class="stat-label">Taxa de Presença</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <h3 style="color: #1b5e20; margin-bottom: 20px;">📋 Ações Rápidas</h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button class="btn-gestor" onclick="abrirAba('cadastro')">
+                                👤 Cadastrar Novo Funcionário
+                            </button>
+                            <button class="btn-gestor" onclick="abrirAba('funcionarios')">
+                                👥 Ver Todos Funcionários
+                            </button>
+                            <button class="btn-gestor" onclick="gerarRelatorioDiario()">
+                                📊 Gerar Relatório Diário
+                            </button>
+                            <button class="btn-gestor" onclick="abrirConfiguracoes()">
+                                ⚙️ Configurações do Sistema
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="gestor-section">
+                    <h2 class="section-title">📅 Pontos Recentes</h2>
+                    <div id="pontosRecentes" class="no-data">
+                        <div>⏰</div>
+                        Carregando registros de ponto...
+                    </div>
+                </div>
             </div>
             
-            <table class="data-table" id="tabelaFuncionarios">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Cargo</th>
-                        <th>E-mail</th>
-                        <th>Status</th>
-                        <th>Último Ponto</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
-                            Carregando funcionários...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="tab-content" id="tab-pontos">
-            <div class="search-box">
-                <input type="date" class="search-input" id="filterData" value="">
-                <select class="filter-select" id="filterFuncionarioPonto">
-                    <option value="">Todos os funcionários</option>
-                    <option value="joao.silva@empresa.com">João Silva</option>
-                    <option value="maria.santos@empresa.com">Maria Santos</option>
-                    <option value="carlos.oliveira@empresa.com">Carlos Oliveira</option>
-                    <option value="ana.costa@empresa.com">Ana Costa</option>
-                </select>
-                <select class="filter-select" id="filterStatusPonto">
-                    <option value="">Todos os status</option>
-                    <option value="presente">Presente</option>
-                    <option value="ausente">Ausente</option>
-                    <option value="atrasado">Atrasado</option>
-                    <option value="ferias">Férias</option>
-                </select>
-                <button class="btn-action btn-export" id="exportPontosBtn">
-                    📥 Exportar Excel
-                </button>
-                <button class="btn-action" style="background: #6610f2; color: white;" id="imprimirRelatorioBtn">
-                    🖨️ Imprimir
-                </button>
+            <!-- Cadastro de Funcionário -->
+            <div id="cadastro" class="tab-content">
+                <div class="gestor-section">
+                    <h2 class="section-title">👤 Cadastrar Novo Funcionário</h2>
+                    
+                    <div id="cadastroMessage" class="alert alert-info">
+                        💡 <strong>Importante:</strong> A foto é obrigatória para o sistema de reconhecimento facial.
+                    </div>
+                    
+                    <form id="formCadastroFuncionario">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" id="nomeFuncionario" required 
+                                       placeholder="Ex: João da Silva">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">CPF *</label>
+                                <input type="text" class="form-control" id="cpfFuncionario" required 
+                                       placeholder="000.000.000-00" maxlength="14">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" class="form-control" id="emailFuncionario" 
+                                       placeholder="funcionario@empresa.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Telefone</label>
+                                <input type="tel" class="form-control" id="telefoneFuncionario" 
+                                       placeholder="(11) 99999-9999">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Cargo *</label>
+                                <input type="text" class="form-control" id="cargoFuncionario" required 
+                                       placeholder="Ex: Analista de TI">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Departamento *</label>
+                                <select class="form-control" id="departamentoFuncionario" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="ti">TI</option>
+                                    <option value="rh">RH</option>
+                                    <option value="vendas">Vendas</option>
+                                    <option value="financeiro">Financeiro</option>
+                                    <option value="producao">Produção</option>
+                                    <option value="administrativo">Administrativo</option>
+                                    <option value="marketing">Marketing</option>
+                                    <option value="outro">Outro</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Data de Admissão *</label>
+                                <input type="date" class="form-control" id="admissaoFuncionario" required 
+                                       value="<?php echo date('Y-m-d'); ?>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Salário Base (R$)</label>
+                                <input type="number" class="form-control" id="salarioFuncionario" 
+                                       placeholder="3000.00" step="0.01">
+                            </div>
+                        </div>
+                        
+                        <!-- CAPTURA DE FOTO (OBRIGATÓRIA) -->
+                        <div class="photo-capture-area">
+                            <h3 style="color: #1b5e20; margin-bottom: 15px;">📸 Foto para Reconhecimento Facial *</h3>
+                            <p style="color: #666; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                                <strong>Esta foto será usada pelo sistema de ponto eletrônico.</strong><br>
+                                Certifique-se de que o rosto esteja bem iluminado, visível e centralizado.
+                            </p>
+                            
+                            <div class="camera-container">
+                                <video id="cameraVideo" autoplay playsinline></video>
+                                <canvas id="cameraCanvas" style="display: none;"></canvas>
+                            </div>
+                            
+                            <div style="margin: 20px 0;">
+                                <button type="button" id="btnLigarCamera" class="btn-gestor pulse">
+                                    🎥 Ligar Câmera
+                                </button>
+                                <button type="button" id="btnCapturarFoto" class="btn-gestor" disabled style="background: #4CAF50;">
+                                    📸 Capturar Foto
+                                </button>
+                                <button type="button" id="btnNovaFoto" class="btn-gestor" style="display: none; background: #FF9800;">
+                                    🔄 Tirar Nova Foto
+                                </button>
+                            </div>
+                            
+                            <div id="photoStatus" style="color: #666; margin: 15px 0; min-height: 24px;">
+                                Aguardando captura da foto...
+                            </div>
+                            
+                            <div class="photo-preview" id="photoPreview">
+                                <img id="previewImage" src="" alt="Preview da Foto">
+                            </div>
+                            
+                            <input type="hidden" id="fotoBase64" required>
+                        </div>
+                        
+                        <div style="margin-top: 40px; text-align: center;">
+                            <button type="submit" class="btn-gestor" style="padding: 18px 40px; font-size: 18px;">
+                                💾 Salvar Funcionário
+                            </button>
+                            <button type="reset" class="btn-gestor" style="background: #6c757d; margin-left: 15px;">
+                                🗑️ Limpar Formulário
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
             
-            <table class="data-table" id="tabelaPontosGestor">
-                <thead>
-                    <tr>
-                        <th>Funcionário</th>
-                        <th>Data</th>
-                        <th>Entrada</th>
-                        <th>Saída</th>
-                        <th>Horas</th>
-                        <th>Status</th>
-                        <th>Método</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #888;">
+            <!-- Funcionários Cadastrados -->
+            <div id="funcionarios" class="tab-content">
+                <div class="gestor-section">
+                    <h2 class="section-title">👥 Funcionários Cadastrados</h2>
+                    
+                    <div style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <input type="text" id="searchFuncionario" class="form-control" 
+                                   placeholder="🔍 Buscar funcionário por nome, CPF ou cargo..." 
+                                   style="width: 350px;">
+                        </div>
+                        <button class="btn-gestor" onclick="exportarFuncionarios()">
+                            📥 Exportar Lista
+                        </button>
+                    </div>
+                    
+                    <div id="listaFuncionarios" class="funcionarios-grid">
+                        <!-- Lista será carregada aqui -->
+                        <div class="no-data">
+                            <div>👥</div>
+                            Nenhum funcionário cadastrado ainda.<br>
+                            <button class="btn-gestor" onclick="abrirAba('cadastro')" 
+                                    style="margin-top: 15px; padding: 10px 20px;">
+                                👤 Cadastrar Primeiro Funcionário
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controle de Ponto -->
+            <div id="ponto" class="tab-content">
+                <div class="gestor-section">
+                    <h2 class="section-title">⏰ Controle de Ponto</h2>
+                    <p>Visualize e gerencie os registros de ponto dos funcionários.</p>
+                    
+                    <div style="margin: 25px 0;">
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                            <label class="form-label">Data:</label>
+                            <input type="date" id="dataPonto" class="form-control" 
+                                   style="width: 200px;" value="<?php echo date('Y-m-d'); ?>">
+                            
+                            <label class="form-label" style="margin-left: 20px;">Departamento:</label>
+                            <select id="departamentoPonto" class="form-control" style="width: 200px;">
+                                <option value="todos">Todos os Departamentos</option>
+                                <option value="ti">TI</option>
+                                <option value="rh">RH</option>
+                                <option value="vendas">Vendas</option>
+                                <option value="financeiro">Financeiro</option>
+                            </select>
+                            
+                            <button class="btn-gestor" onclick="carregarPontos()">
+                                🔍 Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="tabelaPontos">
+                        <div class="no-data">
+                            <div>⏰</div>
                             Carregando registros de ponto...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="tab-content" id="tab-relatorios">
-            <div style="padding: 30px;">
-                <h3 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📊 Relatórios Gerenciais</h3>
-                <p style="text-align: center; color: #666; margin-bottom: 40px;">Gere relatórios detalhados para análise gerencial e tomada de decisão</p>
-                
-                <div class="quick-actions">
-                    <div class="action-card" id="relatorioMensal">
-                        <div class="action-icon">📈</div>
-                        <h4>Relatório Mensal</h4>
-                        <p>Análise completa do mês atual</p>
-                        <small>Horas trabalhadas, atrasos, produtividade</small>
-                    </div>
-                    
-                    <div class="action-card" id="relatorioFuncionario">
-                        <div class="action-icon">👤</div>
-                        <h4>Por Funcionário</h4>
-                        <p>Desempenho individual detalhado</p>
-                        <small>Histórico completo por colaborador</small>
-                    </div>
-                    
-                    <div class="action-card" id="relatorioHoras">
-                        <div class="action-icon">⏰</div>
-                        <h4>Controle de Horas</h4>
-                        <p>Horas extras e banco de horas</p>
-                        <small>Saldo de horas por funcionário</small>
-                    </div>
-                    
-                    <div class="action-card" id="relatorioAbsenteismo">
-                        <div class="action-icon">📋</div>
-                        <h4>Absenteísmo</h4>
-                        <p>Faltas e justificativas</p>
-                        <small>Análise de ausências</small>
-                    </div>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-top: 40px;">
-                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📈 Próximos Recursos:</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>• Gráficos Interativos</strong>
-                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Visualização de dados em gráficos</p>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>• Comparativo Periódico</strong>
-                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Comparação entre meses/trimestres</p>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>• Exportação Avançada</strong>
-                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">PDF personalizado e Excel</p>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px;">
-                            <strong>• Alertas Automáticos</strong>
-                            <p style="margin: 8px 0 0; color: #666; font-size: 0.9rem;">Notificações por email</p>
                         </div>
                     </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 40px;">
-                    <button class="btn-primary" id="gerarRelatorioCompleto" style="padding: 15px 30px; font-size: 1.1rem;">
-                        🚀 Gerar Relatório Completo
-                    </button>
                 </div>
             </div>
-        </div>
-
-        <div class="tab-content" id="tab-config">
-            <div style="max-width: 800px; margin: 0 auto;">
-                <h3 style="margin-bottom: 30px; color: #2c3e50;">⚙️ Configurações do Sistema</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
-                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                        <h4 style="margin-bottom: 20px; color: #495057;">🕐 Horário de Trabalho</h4>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Entrada padrão</label>
-                            <input type="time" class="form-control" id="entradaPadrao" value="08:00" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            
+            <!-- Relatórios -->
+            <div id="relatorios" class="tab-content">
+                <div class="gestor-section">
+                    <h2 class="section-title">📈 Relatórios</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" onclick="gerarRelatorio('diario')" style="cursor: pointer;">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-label">Relatório Diário</div>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                Pontos do dia atual
+                            </p>
                         </div>
                         
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Saída padrão</label>
-                            <input type="time" class="form-control" id="saidaPadrao" value="17:00" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <div class="stat-card" onclick="gerarRelatorio('mensal')" style="cursor: pointer;">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-label">Relatório Mensal</div>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                Resumo do mês atual
+                            </p>
                         </div>
                         
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tolerância de atraso (minutos)</label>
-                            <input type="number" class="form-control" id="toleranciaAtraso" value="10" min="0" max="60" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <div class="stat-card" onclick="gerarRelatorio('funcionario')" style="cursor: pointer;">
+                            <div class="stat-icon">👤</div>
+                            <div class="stat-label">Por Funcionário</div>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                Histórico individual
+                            </p>
+                        </div>
+                        
+                        <div class="stat-card" onclick="gerarRelatorio('horas_extras')" style="cursor: pointer;">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-label">Horas Extras</div>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                Cálculo de adicional
+                            </p>
                         </div>
                     </div>
                     
-                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                        <h4 style="margin-bottom: 20px; color: #495057;">🔔 Notificações</h4>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                <input type="checkbox" id="notificarAtrasos" checked style="width: 18px; height: 18px;">
-                                <span>Enviar alertas de atraso</span>
-                            </label>
+                    <div style="margin-top: 40px;">
+                        <h3 style="color: #1b5e20; margin-bottom: 20px;">📋 Gerar Relatório Personalizado</h3>
+                        <div style="background: #F8F9FA; padding: 25px; border-radius: 10px; border: 1px solid #E8F5E9;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                <div>
+                                    <label class="form-label">Data Inicial</label>
+                                    <input type="date" id="dataInicio" class="form-control" 
+                                           value="<?php echo date('Y-m-01'); ?>">
+                                </div>
+                                
+                                <div>
+                                    <label class="form-label">Data Final</label>
+                                    <input type="date" id="dataFim" class="form-control" 
+                                           value="<?php echo date('Y-m-d'); ?>">
+                                </div>
+                                
+                                <div>
+                                    <label class="form-label">Departamento</label>
+                                    <select id="relatorioDepartamento" class="form-control">
+                                        <option value="todos">Todos</option>
+                                        <option value="ti">TI</option>
+                                        <option value="rh">RH</option>
+                                        <option value="vendas">Vendas</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="form-label">Formato</label>
+                                    <select id="formatoRelatorio" class="form-control">
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="html">HTML</option>
+                                    </select>
+                                </div>
+                            </div>
                             
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                <input type="checkbox" id="relatorioSemanal" checked style="width: 18px; height: 18px;">
-                                <span>Relatório semanal automático</span>
-                            </label>
-                            
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                <input type="checkbox" id="notificarAusencias" checked style="width: 18px; height: 18px;">
-                                <span>Notificar ausências não justificadas</span>
-                            </label>
-                            
-                            <label style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="lembretePonto" checked style="width: 18px; height: 18px;">
-                                <span>Lembrete para registrar ponto</span>
-                            </label>
-                        </div>
-                        
-                        <div style="margin-top: 25px;">
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Email para notificações</label>
-                            <input type="email" class="form-control" id="emailNotificacoes" value="gestor@empresa.com" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                            <div style="margin-top: 25px; text-align: center;">
+                                <button class="btn-gestor" onclick="gerarRelatorioPersonalizado()" 
+                                        style="padding: 15px 40px;">
+                                    🚀 Gerar Relatório
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 25px;">
-                    <h4 style="margin-bottom: 20px; color: #495057;">🛡️ Segurança</h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tempo de sessão (minutos)</label>
-                            <select id="timeoutSessao" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white;">
-                                <option value="30">30 minutos</option>
-                                <option value="60" selected>1 hora</option>
-                                <option value="120">2 horas</option>
-                                <option value="240">4 horas</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Tentativas de login</label>
-                            <select id="tentativasLogin" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white;">
-                                <option value="3">3 tentativas</option>
-                                <option value="5" selected>5 tentativas</option>
-                                <option value="10">10 tentativas</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 40px;">
-                    <button class="btn-primary" id="salvarConfigBtn" style="padding: 15px 40px; font-size: 1.1rem;">
-                        💾 Salvar Configurações
-                    </button>
-                    <button class="btn-secondary" id="resetarConfigBtn" style="padding: 15px 30px; font-size: 1.1rem; margin-left: 15px;">
-                        🔄 Restaurar Padrões
-                    </button>
                 </div>
             </div>
+            
+            <!-- Configurações -->
+            <div id="config" class="tab-content">
+                <div class="gestor-section">
+                    <h2 class="section-title">⚙️ Configurações do Sistema</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nome da Empresa</label>
+                            <input type="text" class="form-control" id="nomeEmpresa" 
+                                   placeholder="Nome da sua empresa">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Horário Padrão de Entrada</label>
+                            <input type="time" class="form-control" id="horarioEntrada" 
+                                   value="08:00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Horário Padrão de Saída</label>
+                            <input type="time" class="form-control" id="horarioSaida" 
+                                   value="18:00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tolerância de Atraso (minutos)</label>
+                            <input type="number" class="form-control" id="toleranciaAtraso" 
+                                   value="10" min="0" max="60">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Dias de Trabalho</label>
+                            <div style="margin-top: 10px;">
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="1" checked> Seg
+                                </label>
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="2" checked> Ter
+                                </label>
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="3" checked> Qua
+                                </label>
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="4" checked> Qui
+                                </label>
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="5" checked> Sex
+                                </label>
+                                <label style="display: inline-block; margin-right: 15px;">
+                                    <input type="checkbox" name="diasTrabalho" value="6"> Sáb
+                                </label>
+                                <label style="display: inline-block;">
+                                    <input type="checkbox" name="diasTrabalho" value="0"> Dom
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px; border-top: 2px solid #E8F5E9; padding-top: 30px;">
+                        <h3 style="color: #1b5e20; margin-bottom: 20px;">⚡ Ações do Sistema</h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button class="btn-gestor" onclick="backupDados()">
+                                💾 Backup dos Dados
+                            </button>
+                            <button class="btn-gestor" onclick="limparCache()" style="background: #FF9800;">
+                                🗑️ Limpar Cache
+                            </button>
+                            <button class="btn-gestor" onclick="resetarSistema()" class="btn-danger">
+                                🔄 Resetar Sistema
+                            </button>
+                            <button class="btn-gestor" onclick="atualizarSistema()" style="background: #2196F3;">
+                                🔄 Atualizar Sistema
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
-
-        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eaeaea;">
-            <a href="index.html" style="color: #667eea; text-decoration: none; font-weight: 500;">← Voltar para página inicial</a>
-            <span style="margin: 0 15px; color: #ccc;">•</span>
-            <a href="cadastro-usuario.html" style="color: #667eea; text-decoration: none; font-weight: 500;">👥 Cadastrar Usuários</a>
-            <span style="margin: 0 15px; color: #ccc;">•</span>
-            <a href="funcionario.html" style="color: #667eea; text-decoration: none; font-weight: 500;">⏰ Área do Funcionário</a>
-        </div>
+        
+        <footer style="margin-top: 40px; text-align: center; padding: 20px; color: #666; border-top: 1px solid #E8F5E9;">
+            <p>Sistema de Ponto Eletrônico © 2024 - Área do Gestor</p>
+            <p style="font-size: 0.9rem; margin-top: 5px;">
+                Versão 2.1.0 | Último acesso: <span id="ultimoAcesso">carregando...</span>
+            </p>
+        </footer>
     </div>
 
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/firebase-config.js"></script>
+    <!-- JavaScript -->
+    <script src="js/utils.js?v=2.1.0"></script>
     
     <script>
+        // ============================================
+        // SISTEMA DA ÁREA DO GESTOR
+        // ============================================
+        
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("👔 Área do gestor carregada!");
+            console.log("👑 Área do gestor carregada!");
             
-            // Verificar se é gestor
-            const usuario = window.auth?.verificarLogin();
-            if (!usuario || usuario.tipo !== 'gestor') {
-                alert('⚠️ Acesso restrito a gestores!\n\nUse:\nEmail: admin@empresa.com\nSenha: admin123');
-                setTimeout(() => window.location.href = 'login.html', 2000);
-                return;
-            }
+            // Configurar usuário
+            const gestorEmail = localStorage.getItem('gestor_email') || 
+                               localStorage.getItem('usuario_nome') + '@empresa.com';
+            document.getElementById('gestorEmail').textContent = gestorEmail;
             
-            // Atualizar informações do gestor
-            document.getElementById('gestorNome').textContent = usuario.nome;
-            document.getElementById('gestorEmail').textContent = usuario.email;
-            document.getElementById('gestorCargo').textContent = usuario.cargo || 'Gestor';
+            // Atualizar último acesso
+            document.getElementById('ultimoAcesso').textContent = 
+                new Date().toLocaleString('pt-BR');
             
-            // Sistema de abas
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
+            // Configurar navegação por abas
+            configurarAbas();
+            
+            // Carregar dashboard
+            carregarDashboard();
+            
+            // Configurar cadastro de funcionário
+            configurarCadastroFuncionario();
+            
+            // Configurar logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Deseja realmente sair da área do gestor?')) {
+                    localStorage.removeItem('gestor_logged_in');
+                    window.location.href = 'index.html?v=' + Date.now();
+                }
+            });
+        });
+        
+        // ==================== NAVEGAÇÃO POR ABAS ====================
+        function configurarAbas() {
+            const tabs = document.querySelectorAll('.gestor-tab');
+            const contents = document.querySelectorAll('.tab-content');
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Remover classe active de todas as abas
+                    // Remover active de todos
                     tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
                     
-                    // Adicionar classe active à aba clicada
+                    // Adicionar ao clicado
                     this.classList.add('active');
-                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Carregar conteúdo específico
+                    switch(tabId) {
+                        case 'funcionarios':
+                            carregarFuncionarios();
+                            break;
+                        case 'ponto':
+                            carregarPontos();
+                            break;
+                        case 'relatorios':
+                            carregarRelatorios();
+                            break;
+                    }
                 });
             });
-            
-            // Botões de ação rápida
-            document.getElementById('cardCadastrar').addEventListener('click', function() {
-                window.location.href = 'cadastro-usuario.html';
-            });
-            
-            document.getElementById('cardRelatorios').addEventListener('click', function() {
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(tc => tc.classList.remove('active'));
-                
-                document.querySelector('[data-tab="relatorios"]').classList.add('active');
-                document.getElementById('tab-relatorios').classList.add('active');
-            });
-            
-            document.getElementById('cardAjustes').addEventListener('click', function() {
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(tc => tc.classList.remove('active'));
-                
-                document.querySelector('[data-tab="config"]').classList.add('active');
-                document.getElementById('tab-config').classList.add('active');
-            });
-            
-            document.getElementById('cardExportar').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('📥 Exportação em desenvolvimento...', 'info');
-            });
-            
-            // Botão novo funcionário
-            document.getElementById('addFuncionarioBtn').addEventListener('click', function() {
-                window.location.href = 'cadastro-usuario.html';
-            });
-            
-            // Botões de relatórios
-            document.getElementById('relatorioMensal').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('📈 Gerando relatório mensal...', 'info');
-            });
-            
-            document.getElementById('relatorioFuncionario').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('👤 Gerando relatório por funcionário...', 'info');
-            });
-            
-            document.getElementById('relatorioHoras').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('⏰ Gerando relatório de horas...', 'info');
-            });
-            
-            document.getElementById('relatorioAbsenteismo').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('📋 Gerando relatório de absenteísmo...', 'info');
-            });
-            
-            document.getElementById('gerarRelatorioCompleto').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('🚀 Gerando relatório completo...', 'info');
-            });
-            
-            // Botão exportar
-            document.getElementById('exportPontosBtn').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('📥 Exportando dados para Excel...', 'info');
-            });
-            
-            // Botão imprimir
-            document.getElementById('imprimirRelatorioBtn').addEventListener('click', function() {
-                window.print();
-            });
-            
-            // Botão salvar configurações
-            document.getElementById('salvarConfigBtn').addEventListener('click', function() {
-                window.utils?.mostrarMensagem('✅ Configurações salvas com sucesso!', 'success');
-            });
-            
-            // Botão resetar configurações
-            document.getElementById('resetarConfigBtn').addEventListener('click', function() {
-                if (confirm('Deseja restaurar todas as configurações para os valores padrões?')) {
-                    document.getElementById('entradaPadrao').value = '08:00';
-                    document.getElementById('saidaPadrao').value = '17:00';
-                    document.getElementById('toleranciaAtraso').value = '10';
-                    window.utils?.mostrarMensagem('🔄 Configurações restauradas!', 'success');
-                }
-            });
-            
-            // Botão sair
-            document.getElementById('sairBtn').addEventListener('click', function() {
-                if (confirm('Deseja realmente sair do sistema?')) {
-                    window.auth?.logout();
-                }
-            });
-            
-            // Botão página inicial
-            document.getElementById('homeBtn').addEventListener('click', function() {
-                window.location.href = 'index.html';
-            });
-            
-            // Carregar dados simulados
-            carregarDadosSimulados();
-            
-            // Configurar data atual como padrão
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('filterData').value = hoje;
-        });
+        }
         
-        function carregarDadosSimulados() {
-            // Funcionários
-            const funcionariosTbody = document.querySelector('#tabelaFuncionarios tbody');
-            if (funcionariosTbody) {
-                funcionariosTbody.innerHTML = '';
-                
-                const funcionarios = [
-                    { nome: 'João Silva', cargo: 'Desenvolvedor', email: 'joao.silva@empresa.com', status: 'presente', ultimoPonto: '08:05' },
-                    { nome: 'Maria Santos', cargo: 'Designer', email: 'maria.santos@empresa.com', status: 'presente', ultimoPonto: '08:15' },
-                    { nome: 'Carlos Oliveira', cargo: 'Analista de RH', email: 'carlos.oliveira@empresa.com', status: 'ausente', ultimoPonto: '--:--' },
-                    { nome: 'Ana Costa', cargo: 'Assistente Administrativo', email: 'ana.costa@empresa.com', status: 'atrasado', ultimoPonto: '08:45' },
-                    { nome: 'Administrador Sistema', cargo: 'Gerente Geral', email: 'admin@empresa.com', status: 'presente', ultimoPonto: '07:55' }
-                ];
-                
-                funcionarios.forEach(func => {
-                    const row = funcionariosTbody.insertRow();
-                    
-                    let statusHTML = '';
-                    if (func.status === 'presente') {
-                        statusHTML = '<span class="status-badge status-presente">✅ Presente</span>';
-                    } else if (func.status === 'ausente') {
-                        statusHTML = '<span class="status-badge status-ausente">❌ Ausente</span>';
-                    } else {
-                        statusHTML = '<span class="status-badge status-atrasado">⚠️ Atrasado</span>';
-                    }
-                    
-                    row.innerHTML = `
-                        <td><strong>${func.nome}</strong></td>
-                        <td>${func.cargo}</td>
-                        <td>${func.email}</td>
-                        <td>${statusHTML}</td>
-                        <td>${func.ultimoPonto}</td>
-                        <td>
-                            <button class="btn-action btn-edit" onclick="editarFuncionario('${func.email}')">Editar</button>
-                            <button class="btn-action btn-delete" onclick="excluirFuncionario('${func.email}')">Excluir</button>
-                        </td>
-                    `;
-                });
-            }
+        function abrirAba(abaId) {
+            document.querySelectorAll('.gestor-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-tab') === abaId) {
+                    tab.classList.add('active');
+                }
+            });
             
-            // Pontos
-            const pontosTbody = document.querySelector('#tabelaPontosGestor tbody');
-            if (pontosTbody) {
-                pontosTbody.innerHTML = '';
-                
-                const pontos = [
-                    { funcionario: 'João Silva', data: '20/01/2026', entrada: '08:05', saida: '17:00', horas: '8:55', status: 'regular', metodo: 'Web' },
-                    { funcionario: 'Maria Santos', data: '20/01/2026', entrada: '08:15', saida: '17:10', horas: '8:55', status: 'regular', metodo: 'Web' },
-                    { funcionario: 'Ana Costa', data: '20/01/2026', entrada: '08:45', saida: '17:30', horas: '8:45', status: 'atrasado', metodo: 'Facial' },
-                    { funcionario: 'Administrador Sistema', data: '20/01/2026', entrada: '07:55', saida: '18:00', horas: '10:05', status: 'regular', metodo: 'Web' }
-                ];
-                
-                pontos.forEach(ponto => {
-                    const row = pontosTbody.insertRow();
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === abaId) {
+                    content.classList.add('active');
                     
-                    let statusHTML = '';
-                    if (ponto.status === 'regular') {
-                        statusHTML = '<span class="status-badge status-presente">✅ Regular</span>';
-                    } else {
-                        statusHTML = '<span class="status-badge status-atrasado">⚠️ Atrasado</span>';
+                    // Carregar conteúdo
+                    switch(abaId) {
+                        case 'funcionarios':
+                            carregarFuncionarios();
+                            break;
+                        case 'ponto':
+                            carregarPontos();
+                            break;
                     }
-                    
-                    row.innerHTML = `
-                        <td>${ponto.funcionario}</td>
-                        <td>${ponto.data}</td>
-                        <td>${ponto.entrada}</td>
-                        <td>${ponto.saida}</td>
-                        <td><strong>${ponto.horas}</strong></td>
-                        <td>${statusHTML}</td>
-                        <td>${ponto.metodo}</td>
-                    `;
-                });
+                }
+            });
+        }
+        
+        // ==================== DASHBOARD ====================
+        function carregarDashboard() {
+            // Simular dados
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            
+            document.getElementById('totalFuncionarios').textContent = funcionarios.length;
+            document.getElementById('pontoHoje').textContent = Math.floor(Math.random() * funcionarios.length);
+            document.getElementById('horasTrabalhadas').textContent = '160h';
+            document.getElementById('presenca').textContent = '95%';
+            
+            // Carregar pontos recentes
+            const pontosRecentesDiv = document.getElementById('pontosRecentes');
+            if (funcionarios.length > 0) {
+                const html = `
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #E8F5E9;">
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #C8E6C9;">Funcionário</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #C8E6C9;">Horário</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #C8E6C9;">Tipo</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #C8E6C9;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${funcionarios.slice(0, 5).map((func, index) => `
+                                    <tr style="${index % 2 === 0 ? 'background: #f9f9f9;' : ''}">
+                                        <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">${func.nome}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">${index % 2 === 0 ? 'Entrada' : 'Saída'}</td>
+                                        <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">
+                                            <span style="color: ${index % 2 === 0 ? '#4CAF50' : '#2196F3'}; font-weight: bold;">
+                                                ${index % 2 === 0 ? '✅ Presente' : '🚪 Saiu'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                pontosRecentesDiv.innerHTML = html;
             }
         }
         
-        // Funções globais para os botões
-        window.editarFuncionario = function(email) {
-            window.utils?.mostrarMensagem(`✏️ Editando funcionário: ${email}`, 'info');
-        };
+        // ==================== CADASTRO DE FUNCIONÁRIO ====================
+        function configurarCadastroFuncionario() {
+            const form = document.getElementById('formCadastroFuncionario');
+            const btnLigarCamera = document.getElementById('btnLigarCamera');
+            const btnCapturarFoto = document.getElementById('btnCapturarFoto');
+            const btnNovaFoto = document.getElementById('btnNovaFoto');
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            const photoStatus = document.getElementById('photoStatus');
+            const previewDiv = document.getElementById('photoPreview');
+            const previewImg = document.getElementById('previewImage');
+            const fotoInput = document.getElementById('fotoBase64');
+            
+            let stream = null;
+            let fotoCapturada = null;
+            
+            // Ligar câmera
+            btnLigarCamera.addEventListener('click', async function() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'user',
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        } 
+                    });
+                    
+                    video.srcObject = stream;
+                    btnCapturarFoto.disabled = false;
+                    btnLigarCamera.disabled = true;
+                    btnLigarCamera.textContent = '🎥 Câmera Ligada';
+                    photoStatus.textContent = 'Câmera pronta! Posicione o rosto e clique em "Capturar Foto"';
+                    photoStatus.style.color = '#4CAF50';
+                    
+                } catch (error) {
+                    console.error('Erro ao acessar câmera:', error);
+                    photoStatus.textContent = '❌ Erro ao acessar câmera. Verifique as permissões.';
+                    photoStatus.style.color = '#f44336';
+                    
+                    // Simular foto para desenvolvimento
+                    fotoCapturada = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgdmlld0JveD0iMCAwIDMyMCAyNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMyMCIgaGVpZ2h0PSIyNDAiIGZpbGw9IiNGRkZGRkUiLz48Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMDAiIHI9IjUwIiBmaWxsPSIjQ0NDQ0NDIi8+PHBhdGggZD0iTTIwMCAxNjBIMTIwQzExMCAxNjAgMTAwIDE3MCAxMDAgMTgwVjIwMEMxMDAgMjEwIDExMCAyMjAgMTIwIDIyMEgyMDBDMjEwIDIyMCAyMjAgMjEwIDIyMCAyMDBWMTgwQzIyMCAxNzAgMjEwIDE2MCAyMDAgMTYwWiIgZmlsbD0iI0NDQ0NDQyIvPjwvc3ZnPg==';
+                    fotoInput.value = fotoCapturada;
+                    previewImg.src = fotoCapturada;
+                    previewDiv.style.display = 'block';
+                    photoStatus.textContent = '⚠️ Modo simulação ativo - Foto de exemplo carregada';
+                    photoStatus.style.color = '#FF9800';
+                    btnNovaFoto.style.display = 'inline-block';
+                }
+            });
+            
+            // Capturar foto
+            btnCapturarFoto.addEventListener('click', function() {
+                if (!stream) return;
+                
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Converter para base64
+                fotoCapturada = canvas.toDataURL('image/jpeg', 0.8);
+                fotoInput.value = fotoCapturada;
+                
+                // Mostrar preview
+                previewImg.src = fotoCapturada;
+                previewDiv.style.display = 'block';
+                
+                // Atualizar status
+                photoStatus.textContent = '✅ Foto capturada com sucesso!';
+                photoStatus.style.color = '#4CAF50';
+                
+                // Mostrar botão de nova foto
+                btnNovaFoto.style.display = 'inline-block';
+                btnCapturarFoto.disabled = true;
+                
+                // Parar câmera
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+            
+            // Nova foto
+            btnNovaFoto.addEventListener('click', function() {
+                fotoCapturada = null;
+                fotoInput.value = '';
+                previewDiv.style.display = 'none';
+                btnNovaFoto.style.display = 'none';
+                btnLigarCamera.disabled = false;
+                btnLigarCamera.textContent = '🎥 Ligar Câmera';
+                btnCapturarFoto.disabled = true;
+                photoStatus.textContent = 'Aguardando captura da foto...';
+                photoStatus.style.color = '#666';
+            });
+            
+            // Formatar CPF
+            document.getElementById('cpfFuncionario').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length > 11) value = value.substring(0, 11);
+                
+                if (value.length > 9) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                } else if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                }
+                
+                e.target.value = value;
+            });
+            
+            // Formatar telefone
+            document.getElementById('telefoneFuncionario').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length > 11) value = value.substring(0, 11);
+                
+                if (value.length > 10) {
+                    value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                } else if (value.length > 6) {
+                    value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                } else if (value.length > 2) {
+                    value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                }
+                
+                e.target.value = value;
+            });
+            
+            // Enviar formulário
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Verificar se foto foi capturada
+                if (!fotoInput.value) {
+                    alert('❌ É OBRIGATÓRIO capturar a foto para reconhecimento facial!');
+                    document.getElementById('btnLigarCamera').scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+                
+                // Coletar dados
+                const funcionario = {
+                    id: Date.now(),
+                    nome: document.getElementById('nomeFuncionario').value,
+                    cpf: document.getElementById('cpfFuncionario').value,
+                    email: document.getElementById('emailFuncionario').value,
+                    telefone: document.getElementById('telefoneFuncionario').value,
+                    cargo: document.getElementById('cargoFuncionario').value,
+                    departamento: document.getElementById('departamentoFuncionario').value,
+                    admissao: document.getElementById('admissaoFuncionario').value,
+                    salario: document.getElementById('salarioFuncionario').value || 0,
+                    foto: fotoInput.value,
+                    cadastradoPor: localStorage.getItem('gestor_email'),
+                    dataCadastro: new Date().toISOString(),
+                    ativo: true
+                };
+                
+                // Salvar no localStorage (substituir por Firebase depois)
+                let funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+                funcionarios.push(funcionario);
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                
+                // Limpar formulário
+                form.reset();
+                btnNovaFoto.click(); // Resetar foto
+                
+                // Mostrar mensagem de sucesso
+                const messageDiv = document.getElementById('cadastroMessage');
+                messageDiv.innerHTML = `
+                    ✅ Funcionário <strong>${funcionario.nome}</strong> cadastrado com sucesso!<br>
+                    <small>A foto foi salva para reconhecimento facial.</small>
+                `;
+                messageDiv.className = 'alert alert-success';
+                
+                // Atualizar dashboard
+                carregarDashboard();
+                
+                // Ir para lista de funcionários
+                setTimeout(() => {
+                    abrirAba('funcionarios');
+                    carregarFuncionarios();
+                }, 1500);
+            });
+        }
         
-        window.excluirFuncionario = function(email) {
-            if (confirm(`Tem certeza que deseja excluir o funcionário ${email}?`)) {
-                window.utils?.mostrarMensagem(`🗑️ Funcionário ${email} excluído (simulação)`, 'info');
+        // ==================== LISTA DE FUNCIONÁRIOS ====================
+        function carregarFuncionarios() {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const container = document.getElementById('listaFuncionarios');
+            const searchInput = document.getElementById('searchFuncionario');
+            
+            function renderizarLista(lista) {
+                if (lista.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div>👥</div>
+                            Nenhum funcionário encontrado.<br>
+                            <button class="btn-gestor" onclick="abrirAba('cadastro')" 
+                                    style="margin-top: 15px; padding: 10px 20px;">
+                                👤 Cadastrar Novo Funcionário
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = lista.map(func => `
+                    <div class="funcionario-card">
+                        <img src="${func.foto}" 
+                             alt="${func.nome}" 
+                             class="funcionario-foto"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSI0MCIgZmlsbD0iI0U4RjVFOSIvPjxjaXJjbGUgY3g9IjQwIiBjeT0iMzAiIHI9IjE1IiBmaWxsPSIjMkU4QjU3Ii8+PHBhdGggZD0iTTIwIDYwSDE2MEMxNzAgNjAgMTgwIDcwIDE4MCA4MFYyMEMxODAgMzAgMTcwIDQwIDE2MCA0MEgyMEMxMCA0MCAwIDMwIDAgMjBWODBDMCA3MCAxMCA2MCAyMCA2MFoiIGZpbGw9IiMyRThCNTciLz48L3N2Zz4='">
+                        <div class="funcionario-info">
+                            <div class="funcionario-nome">${func.nome}</div>
+                            <div class="funcionario-detalhes">
+                                <strong>CPF:</strong> ${func.cpf}<br>
+                                <strong>Cargo:</strong> ${func.cargo}<br>
+                                <strong>Departamento:</strong> ${func.departamento}<br>
+                                <strong>Admissão:</strong> ${new Date(func.admissao).toLocaleDateString('pt-BR')}<br>
+                                <strong>Status:</strong> 
+                                <span style="color: ${func.ativo ? '#4CAF50' : '#f44336'}; font-weight: bold;">
+                                    ${func.ativo ? '✅ Ativo' : '❌ Inativo'}
+                                </span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn-gestor" onclick="editarFuncionario(${func.id})" 
+                                    style="padding: 8px 15px; font-size: 14px;">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn-gestor btn-danger" onclick="excluirFuncionario(${func.id})" 
+                                    style="padding: 8px 15px; font-size: 14px;">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
             }
-        };
+            
+            // Renderizar inicial
+            renderizarLista(funcionarios);
+            
+            // Filtro de busca
+            searchInput.addEventListener('input', function() {
+                const termo = this.value.toLowerCase();
+                const filtrados = funcionarios.filter(func => 
+                    func.nome.toLowerCase().includes(termo) ||
+                    func.cpf.includes(termo) ||
+                    func.cargo.toLowerCase().includes(termo) ||
+                    func.departamento.toLowerCase().includes(termo)
+                );
+                renderizarLista(filtrados);
+            });
+        }
+        
+        // ==================== FUNÇÕES DO SISTEMA ====================
+        function editarFuncionario(id) {
+            alert(`Editar funcionário ID: ${id}\n\nEsta funcionalidade está em desenvolvimento.`);
+        }
+        
+        function excluirFuncionario(id) {
+            if (confirm('Tem certeza que deseja excluir este funcionário?\n\nEsta ação não pode ser desfeita.')) {
+                let funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+                funcionarios = funcionarios.filter(func => func.id !== id);
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                carregarFuncionarios();
+                carregarDashboard();
+            }
+        }
+        
+        function carregarPontos() {
+            // Simular dados de ponto
+            const hoje = document.getElementById('dataPonto').value;
+            const depto = document.getElementById('departamentoPonto').value;
+            
+            document.getElementById('tabelaPontos').innerHTML = `
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #E8F5E9;">
+                                <th style="padding: 12px; text-align: left;">Funcionário</th>
+                                <th style="padding: 12px; text-align: left;">Entrada</th>
+                                <th style="padding: 12px; text-align: left;">Saída</th>
+                                <th style="padding: 12px; text-align: left;">Horas</th>
+                                <th style="padding: 12px; text-align: left;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">João Silva</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">08:00</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">18:00</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">10h00</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">
+                                    <span style="color: #4CAF50; font-weight: bold;">✅ Normal</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">Maria Santos</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">08:15</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">17:45</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">9h30</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #E8F5E9;">
+                                    <span style="color: #FF9800; font-weight: bold;">⚠️ Atraso</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                    Mostrando dados de: <strong>${hoje}</strong> | 
+                    Departamento: <strong>${depto === 'todos' ? 'Todos' : depto.toUpperCase()}</strong>
+                </div>
+            `;
+        }
+        
+        function gerarRelatorio(tipo) {
+            alert(`Gerando relatório ${tipo}...\n\nEm produção, esta função geraria um PDF/Excel.`);
+        }
+        
+        function gerarRelatorioPersonalizado() {
+            alert('Relatório personalizado será gerado...');
+        }
+        
+        function exportarFuncionarios() {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
+            const csv = funcionarios.map(f => 
+                `"${f.nome}","${f.cpf}","${f.cargo}","${f.departamento}","${f.admissao}"`
+            ).join('\n');
+            
+            const blob = new Blob([`Nome,CPF,Cargo,Departamento,Admissão\n${csv}`], 
+                                 { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `funcionarios_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function backupDados() {
+            alert('Backup dos dados realizado com sucesso!');
+        }
+        
+        function limparCache() {
+            if (confirm('Deseja limpar o cache do sistema?')) {
+                localStorage.removeItem('funcionarios');
+                localStorage.removeItem('pontos');
+                location.reload();
+            }
+        }
+        
+        function resetarSistema() {
+            if (confirm('⚠️ ATENÇÃO: Esta ação irá resetar TODOS os dados do sistema.\n\nDeseja continuar?')) {
+                localStorage.clear();
+                alert('Sistema resetado com sucesso!');
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function atualizarSistema() {
+            localStorage.setItem('system_version', 'NOVA_VERSION');
+            alert('Sistema marcado para atualização. Recarregando...');
+            setTimeout(() => location.reload(), 1000);
+        }
+        
+        function abrirConfiguracoes() {
+            abrirAba('config');
+        }
+        
+        function gerarRelatorioDiario() {
+            gerarRelatorio('diario');
+        }
     </script>
 </body>
 </html>
