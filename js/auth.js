@@ -48,7 +48,6 @@ window.auth = (function() {
             const userStr = localStorage.getItem('ponto_user');
             if (userStr) {
                 const usuario = JSON.parse(userStr);
-                console.log("👤 Usuário atual:", usuario.nome);
                 return usuario;
             }
         } catch (error) {
@@ -62,7 +61,6 @@ window.auth = (function() {
         
         try {
             if (window.firebase && window.firebase.auth) {
-                console.log("🔥 Usando Firebase Auth");
                 const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
                 
                 const userCredential = await signInWithEmailAndPassword(
@@ -95,15 +93,11 @@ window.auth = (function() {
                 };
                 
             } else {
-                console.log("🎭 Modo SIMULAÇÃO de login ativo");
-                
                 if (USUARIOS_TESTE[email] && USUARIOS_TESTE[email].senha === senha) {
                     const userData = { ...USUARIOS_TESTE[email] };
                     delete userData.senha;
                     
                     localStorage.setItem('ponto_user', JSON.stringify(userData));
-                    
-                    console.log("✅ Login simulado bem-sucedido:", userData.nome);
                     
                     return {
                         success: true,
@@ -111,7 +105,6 @@ window.auth = (function() {
                         message: 'Login realizado com sucesso!'
                     };
                 } else {
-                    console.log("❌ Credenciais inválidas");
                     return {
                         success: false,
                         error: 'E-mail ou senha incorretos'
@@ -199,7 +192,6 @@ window.auth = (function() {
         
         try {
             if (window.firebase && window.firebase.auth && window.firebase.db) {
-                console.log("🔥 Cadastrando no Firebase");
                 const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
                 const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
                 
@@ -235,8 +227,6 @@ window.auth = (function() {
                 };
                 
             } else {
-                console.log("🎭 Cadastro em modo simulação");
-                
                 if (USUARIOS_TESTE[dados.email]) {
                     return {
                         success: false,
@@ -309,8 +299,6 @@ window.auth = (function() {
     };
     
     auth.atualizarUsuario = async function(usuarioId, dados) {
-        console.log("✏️ Atualizando usuário:", usuarioId);
-        
         try {
             if (window.firebase && window.firebase.db) {
                 const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
@@ -355,7 +343,6 @@ window.auth = (function() {
             }
             
             localStorage.setItem('ponto_usuarios', JSON.stringify(usuarios));
-            console.log("💾 Usuário salvo localmente:", usuario.nome);
             
         } catch (error) {
             console.error('❌ Erro ao salvar usuário localmente:', error);
@@ -370,7 +357,6 @@ window.auth = (function() {
             if (index !== -1) {
                 usuarios[index] = { ...usuarios[index], ...dados };
                 localStorage.setItem('ponto_usuarios', JSON.stringify(usuarios));
-                console.log("💾 Usuário atualizado localmente:", usuarioId);
             }
             
         } catch (error) {
@@ -390,7 +376,6 @@ window.auth = (function() {
                 });
                 
                 localStorage.setItem('ponto_usuarios', JSON.stringify(usuariosParaSalvar));
-                console.log("✅ Dados de teste inicializados");
             }
             
         } catch (error) {
@@ -399,7 +384,6 @@ window.auth = (function() {
     }
     
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("🔧 Inicializando módulo de autenticação");
         inicializarDadosTeste();
     });
     
