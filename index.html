@@ -15,8 +15,8 @@
     <link rel="manifest" href="manifest.json">
     
     <!-- Ícones -->
-    <link rel="icon" href="icon-192x192.png">
-    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <link rel="icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -119,8 +119,8 @@
                 <button id="funcionarioBtn" class="btn-secondary">
                     👨‍💼 Área do Funcionário
                 </button>
-                <button id="gestorBtn" class="btn-secondary">
-                    👔 Área do Gestor
+                <button id="gestorBtn" class="btn-secondary" style="background: #2c3e50; color: white; border-color: #2c3e50;">
+                    👑 Acesso Gestor
                 </button>
             </section>
         </main>
@@ -168,16 +168,195 @@
             });
             
             document.getElementById('gestorBtn').addEventListener('click', function() {
-                window.location.href = 'gestor.html';
+                mostrarAcessoGestor();
             });
             
             // Verificar se já está logado
             const usuario = window.auth?.verificarLogin();
             if (usuario) {
-                console.log(`👤 Usuário logado: ${usuario.nome}`);
-                document.getElementById('loginBtn').innerHTML = '👤 Minha Conta';
+                console.log(`👤 Usuário logado: ${usuario.nome} (${usuario.tipo})`);
+                
+                // Atualizar botões baseado no tipo
+                if (usuario.tipo === 'gestor') {
+                    document.getElementById('loginBtn').innerHTML = '👑 Minha Conta (Gestor)';
+                    document.getElementById('gestorBtn').style.background = '#28a745';
+                } else {
+                    document.getElementById('loginBtn').innerHTML = '👤 Minha Conta';
+                }
             }
         });
+        
+        // Função para mostrar acesso do gestor
+        function mostrarAcessoGestor() {
+            // Verificar se já está logado como gestor
+            const usuario = window.auth?.verificarLogin();
+            
+            if (usuario && usuario.tipo === 'gestor') {
+                // Já é gestor logado, redireciona direto
+                window.location.href = 'gestor.html';
+                return;
+            }
+            
+            // Criar modal de acesso gestor
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.85);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s;
+            `;
+            
+            // Criar modal
+            overlay.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 15px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">👑</div>
+                        <h2 style="color: #2c3e50; margin-bottom: 10px;">Acesso Gestor</h2>
+                        <p style="color: #666; line-height: 1.5;">
+                            Área restrita para gestores e administradores do sistema.
+                            Faça login com suas credenciais de gestor.
+                        </p>
+                    </div>
+                    
+                    <div id="gestorError" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none;"></div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">E-mail do Gestor</label>
+                        <input type="email" id="gestorEmail" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" 
+                               placeholder="gestor@empresa.com" value="admin@empresa.com">
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Senha</label>
+                        <input type="password" id="gestorSenha" style="width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" 
+                               placeholder="••••••••" value="admin123">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                        <button id="gestorLoginBtn" style="flex: 1; padding: 16px; background: #2c3e50; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
+                            🔑 Entrar como Gestor
+                        </button>
+                        <button id="gestorCancelBtn" style="padding: 16px 24px; background: #f8f9fa; color: #495057; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background 0.3s;">
+                            Cancelar
+                        </button>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #e9ecef;">
+                        <h4 style="margin: 0 0 10px 0; color: #495057; font-size: 0.95rem;">👑 Credenciais de Teste (Gestor)</h4>
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9em; color: #666;">
+                            <div><strong>E-mail:</strong></div>
+                            <div>admin@empresa.com</div>
+                            <div><strong>Senha:</strong></div>
+                            <div>admin123</div>
+                        </div>
+                        <p style="margin: 10px 0 0; font-size: 0.85em; color: #888;">
+                            Use estas credenciais para testar a área do gestor.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Fechar modal
+            document.getElementById('gestorCancelBtn').addEventListener('click', function() {
+                document.body.removeChild(overlay);
+            });
+            
+            // Fechar ao clicar fora
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
+            
+            // Login do gestor
+            document.getElementById('gestorLoginBtn').addEventListener('click', async function() {
+                const email = document.getElementById('gestorEmail').value;
+                const senha = document.getElementById('gestorSenha').value;
+                const errorDiv = document.getElementById('gestorError');
+                
+                // Limpar erro anterior
+                errorDiv.style.display = 'none';
+                
+                if (!email || !senha) {
+                    errorDiv.textContent = 'Por favor, preencha todos os campos';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Mostrar loading
+                const btn = this;
+                const originalText = btn.textContent;
+                btn.textContent = '🔄 Verificando...';
+                btn.disabled = true;
+                btn.style.background = '#6c757d';
+                
+                try {
+                    // Fazer login
+                    const resultado = await window.auth?.login(email, senha);
+                    
+                    if (resultado?.success) {
+                        // Verificar se é gestor
+                        if (resultado.usuario.tipo === 'gestor') {
+                            // Remover modal
+                            document.body.removeChild(overlay);
+                            
+                            // Mostrar mensagem de sucesso
+                            if (window.utils?.mostrarMensagem) {
+                                window.utils.mostrarMensagem(`👑 Bem-vindo, ${resultado.usuario.nome}!`, 'success');
+                            } else {
+                                alert(`✅ Login realizado! Bem-vindo, ${resultado.usuario.nome}`);
+                            }
+                            
+                            // Redirecionar para área do gestor
+                            setTimeout(() => {
+                                window.location.href = 'gestor.html';
+                            }, 1000);
+                            
+                        } else {
+                            errorDiv.textContent = '❌ Este usuário não tem permissão de gestor. Apenas gestores podem acessar esta área.';
+                            errorDiv.style.display = 'block';
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                            btn.style.background = '#2c3e50';
+                        }
+                    } else {
+                        errorDiv.textContent = `❌ ${resultado?.error || 'E-mail ou senha incorretos'}`;
+                        errorDiv.style.display = 'block';
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        btn.style.background = '#2c3e50';
+                    }
+                    
+                } catch (error) {
+                    errorDiv.textContent = `❌ Erro: ${error.message}`;
+                    errorDiv.style.display = 'block';
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    btn.style.background = '#2c3e50';
+                }
+            });
+            
+            // Permitir Enter para login
+            document.getElementById('gestorSenha').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('gestorLoginBtn').click();
+                }
+            });
+            
+            // Foco no campo de email
+            setTimeout(() => {
+                document.getElementById('gestorEmail').focus();
+            }, 100);
+        }
         
         // PWA Service Worker
         if ('serviceWorker' in navigator) {
@@ -187,6 +366,30 @@
                     .catch(err => console.log('❌ Service Worker erro:', err));
             });
         }
+        
+        // Estilo para animação
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            #gestorLoginBtn:hover {
+                background: #1a252f !important;
+            }
+            
+            #gestorCancelBtn:hover {
+                background: #e9ecef !important;
+            }
+            
+            input:focus {
+                border-color: #2c3e50 !important;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
