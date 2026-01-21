@@ -4,288 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ponto Eletrônico v2.0</title>
-    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
             background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 100%);
-            color: white;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
         
-        .container {
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
+        .login-container {
+            background: white;
+            border-radius: 15px;
             padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
         }
         
         .logo {
-            font-size: 4rem;
+            font-size: 48px;
             margin-bottom: 20px;
+            color: #1b5e20;
         }
         
         h1 {
-            font-size: 2.8rem;
+            color: #1b5e20;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .subtitle {
-            font-size: 1.4rem;
+            color: #666;
             margin-bottom: 30px;
-            opacity: 0.9;
-        }
-        
-        .status {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 12px 25px;
-            border-radius: 50px;
-            margin-bottom: 50px;
-            display: inline-block;
-            font-weight: 600;
-            font-size: 1.1rem;
         }
         
         .login-options {
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            max-width: 400px;
-            margin: 0 auto;
+            gap: 15px;
+            margin-top: 30px;
         }
         
         .login-btn {
-            background: white;
-            color: #1b5e20;
+            background: #1b5e20;
+            color: white;
             border: none;
-            padding: 22px;
-            border-radius: 15px;
-            font-size: 1.3rem;
-            font-weight: 600;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s;
         }
         
         .login-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            background: #E8F5E9;
+            background: #2E8B57;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-        }
-        
-        .modal h2 {
-            color: #1b5e20;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .modal input {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 2px solid #C8E6C9;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
+        .credentials {
             margin-top: 20px;
-        }
-        
-        .modal-btn {
-            flex: 1;
             padding: 15px;
-            border: none;
+            background: #f0f0f0;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
         }
         
-        .btn-primary {
-            background: #1b5e20;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #666;
-            color: white;
-        }
-        
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .login-btn {
-                padding: 18px;
-                font-size: 1.1rem;
-            }
-            
-            .container {
-                padding: 20px;
-            }
+        .credentials h3 {
+            color: #1b5e20;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <div class="logo">⏰</div>
         <h1>Ponto Eletrônico v2.0</h1>
         <div class="subtitle">Sistema de Controle de Ponto</div>
-        <div class="status">✅ Sistema 100% Funcional</div>
         
         <div class="login-options">
-            <button class="login-btn" onclick="abrirLogin('funcionario')">
+            <button class="login-btn" onclick="login('funcionario')">
                 Área do Funcionário
             </button>
-            <button class="login-btn" onclick="abrirLogin('gestor')">
+            <button class="login-btn" onclick="login('gestor')">
                 Acesso Gestor
             </button>
         </div>
-    </div>
-    
-    <!-- Modal de Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <h2 id="modalTitle">Login</h2>
-            <input type="text" id="loginUsuario" placeholder="Usuário/CPF">
-            <input type="password" id="loginSenha" placeholder="Senha">
-            <div class="modal-buttons">
-                <button class="modal-btn btn-primary" onclick="fazerLogin()">Entrar</button>
-                <button class="modal-btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-            </div>
+        
+        <div class="credentials">
+            <h3>Credenciais para Teste:</h3>
+            <p><strong>Gestor:</strong> admin / admin123</p>
+            <p><strong>Funcionário:</strong> 123.456.789-00 / senha123</p>
         </div>
     </div>
 
     <script>
-        // Dados iniciais
-        const usuarios = {
-            gestor: [
-                { usuario: "admin", senha: "admin123", nome: "Administrador", tipo: "gestor" },
-                { usuario: "gestor", senha: "gestor123", nome: "Gestor", tipo: "gestor" }
-            ]
-        };
-        
-        let tipoLoginAtual = '';
-        
-        // Inicializar dados se não existirem
-        if (!localStorage.getItem('funcionarios')) {
-            localStorage.setItem('funcionarios', JSON.stringify([]));
+        // Inicializar dados básicos
+        function inicializarSistema() {
+            // Criar dados iniciais se não existirem
+            if (!localStorage.getItem('sistema_inicializado')) {
+                // Dados do gestor
+                localStorage.setItem('gestor', JSON.stringify({
+                    usuario: 'admin',
+                    senha: 'admin123',
+                    nome: 'Administrador'
+                }));
+                
+                // Dados de funcionários de exemplo
+                const funcionarios = [
+                    {
+                        id: 1,
+                        nome: 'João Silva',
+                        cpf: '123.456.789-00',
+                        email: 'joao@empresa.com',
+                        senha: 'senha123',
+                        cargo: 'Analista de TI',
+                        departamento: 'TI',
+                        ativo: true
+                    },
+                    {
+                        id: 2,
+                        nome: 'Maria Santos',
+                        cpf: '987.654.321-00',
+                        email: 'maria@empresa.com',
+                        senha: 'senha123',
+                        cargo: 'Analista de RH',
+                        departamento: 'RH',
+                        ativo: true
+                    }
+                ];
+                
+                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
+                localStorage.setItem('pontos', JSON.stringify([]));
+                localStorage.setItem('justificativas', JSON.stringify([]));
+                localStorage.setItem('sistema_inicializado', 'true');
+                
+                console.log('Sistema inicializado com dados de exemplo');
+            }
         }
-        if (!localStorage.getItem('pontos')) {
-            localStorage.setItem('pontos', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('justificativas')) {
-            localStorage.setItem('justificativas', JSON.stringify([]));
-        }
         
-        function abrirLogin(tipo) {
-            tipoLoginAtual = tipo;
-            const modal = document.getElementById('loginModal');
-            const title = document.getElementById('modalTitle');
-            
+        // Função de login simplificada
+        function login(tipo) {
             if (tipo === 'gestor') {
-                title.textContent = 'Acesso Gestor';
-                document.getElementById('loginUsuario').value = 'admin';
-                document.getElementById('loginSenha').value = 'admin123';
+                // Login direto como gestor
+                localStorage.setItem('usuario_logado', JSON.stringify({
+                    tipo: 'gestor',
+                    nome: 'Administrador',
+                    usuario: 'admin'
+                }));
+                window.location.href = 'gestor.html';
             } else {
-                title.textContent = 'Área do Funcionário';
-                document.getElementById('loginUsuario').value = '';
-                document.getElementById('loginSenha').value = '';
-            }
-            
-            modal.style.display = 'flex';
-        }
-        
-        function fecharModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-        
-        function fazerLogin() {
-            const usuario = document.getElementById('loginUsuario').value.trim();
-            const senha = document.getElementById('loginSenha').value;
-            
-            if (tipoLoginAtual === 'gestor') {
-                // Login para gestor
-                const gestor = usuarios.gestor.find(g => 
-                    g.usuario === usuario && g.senha === senha
-                );
-                
-                if (gestor) {
-                    localStorage.setItem('usuario_logado', JSON.stringify(gestor));
-                    window.location.href = 'gestor.html';
-                } else {
-                    alert('Usuário ou senha incorretos!');
-                }
-            } else {
-                // Login para funcionário
-                const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
-                const funcionario = funcionarios.find(f => 
-                    (f.cpf === usuario || f.email === usuario) && f.senha === senha && f.ativo
-                );
-                
-                if (funcionario) {
-                    localStorage.setItem('usuario_logado', JSON.stringify({
-                        id: funcionario.id,
-                        nome: funcionario.nome,
-                        tipo: 'funcionario',
-                        cpf: funcionario.cpf,
-                        cargo: funcionario.cargo
-                    }));
-                    window.location.href = 'funcionario.html';
-                } else {
-                    alert('Funcionário não encontrado ou credenciais inválidas!');
-                }
+                // Para funcionário, vamos direto (sem senha por enquanto)
+                localStorage.setItem('usuario_logado', JSON.stringify({
+                    tipo: 'funcionario',
+                    nome: 'Funcionário Teste',
+                    id: 1
+                }));
+                window.location.href = 'funcionario.html';
             }
         }
         
-        // Fechar modal com ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') fecharModal();
-        });
+        // Inicializar sistema ao carregar
+        document.addEventListener('DOMContentLoaded', inicializarSistema);
     </script>
 </body>
 </html>
