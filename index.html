@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponto Eletrônico v2.0</title>
+    <title>Essencial Print - Sistema de Ponto</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
@@ -25,155 +31,538 @@
             background: white;
             border-radius: 15px;
             padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             text-align: center;
-            max-width: 400px;
             width: 100%;
+            max-width: 450px;
         }
         
         .logo {
             font-size: 48px;
-            margin-bottom: 20px;
             color: #1b5e20;
+            margin-bottom: 15px;
         }
         
         h1 {
             color: #1b5e20;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 28px;
         }
         
         .subtitle {
             color: #666;
             margin-bottom: 30px;
+            font-size: 16px;
         }
         
-        .login-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .login-form {
             margin-top: 30px;
         }
         
-        .login-btn {
-            background: #1b5e20;
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .input-with-format {
+            position: relative;
+        }
+        
+        .cpf-input {
+            width: 100%;
+            padding: 15px;
+            padding-left: 130px;
+            border: 2px solid #C8E6C9;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 1px;
+            transition: border-color 0.3s;
+        }
+        
+        .cpf-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .cpf-format {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #1b5e20, #2E8B57);
             color: white;
             border: none;
-            padding: 15px;
+            padding: 16px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
         
-        .login-btn:hover {
-            background: #2E8B57;
+        .btn-login:hover {
+            background: linear-gradient(135deg, #2E8B57, #388E3C);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(27, 94, 32, 0.3);
         }
         
-        .credentials {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f0f0;
+        .login-options {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .option-btn {
+            flex: 1;
+            background: #f8f9fa;
+            border: 2px solid #E8F5E9;
+            padding: 12px;
             border-radius: 8px;
+            cursor: pointer;
+            color: #1b5e20;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover {
+            background: #E8F5E9;
+            transform: translateY(-2px);
+        }
+        
+        .system-info {
+            margin-top: 30px;
+            padding: 15px;
+            background: #F1F8E9;
+            border-radius: 8px;
+            border: 1px solid #C8E6C9;
             font-size: 14px;
             text-align: left;
         }
         
-        .credentials h3 {
-            color: #1b5e20;
-            margin-bottom: 10px;
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #F8D7DA;
+            color: #721C24;
+            border: 1px solid #F5C6CB;
+            display: block;
+        }
+        
+        .alert-success {
+            background: #D4EDDA;
+            color: #155724;
+            border: 1px solid #C3E6CB;
+            display: block;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .cpf-input {
+                padding-left: 110px;
+                font-size: 16px;
+            }
+            
+            .cpf-format {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">⏰</div>
-        <h1>Ponto Eletrônico v2.0</h1>
+        <h1>Essencial Print</h1>
         <div class="subtitle">Sistema de Controle de Ponto</div>
         
-        <div class="login-options">
-            <button class="login-btn" onclick="login('funcionario')">
-                Área do Funcionário
-            </button>
-            <button class="login-btn" onclick="login('gestor')">
-                Acesso Gestor
+        <div id="loginAlert" class="alert"></div>
+        
+        <div class="login-form">
+            <div class="form-group">
+                <label>CPF do Funcionário</label>
+                <div class="input-with-format">
+                    <div class="cpf-format">000.000.000-</div>
+                    <input type="text" 
+                           class="cpf-input" 
+                           id="cpfInput" 
+                           placeholder="00"
+                           maxlength="2"
+                           oninput="formatarCPF()">
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    Digite os dois últimos dígitos do CPF
+                </div>
+            </div>
+            
+            <button class="btn-login" onclick="loginFuncionario()">
+                Acessar Área do Funcionário
             </button>
         </div>
         
-        <div class="credentials">
-            <h3>Credenciais para Teste:</h3>
-            <p><strong>Gestor:</strong> admin / admin123</p>
-            <p><strong>Funcionário:</strong> 123.456.789-00 / senha123</p>
+        <div class="login-options">
+            <button class="option-btn" onclick="acessoGestor()">
+                Acesso Gestor
+            </button>
+            <button class="option-btn" onclick="primeiroAcesso()">
+                Primeiro Acesso
+            </button>
+        </div>
+        
+        <div class="system-info">
+            <strong>Informações do Sistema:</strong>
+            <p>• Sistema com persistência em nuvem (Firebase)</p>
+            <p>• Controle completo de ponto com localização</p>
+            <p>• Relatórios mensais automáticos</p>
+            <p>• Justificativas online</p>
+        </div>
+    </div>
+    
+    <!-- Modal para Primeiro Acesso/Gestor -->
+    <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 40px; border-radius: 15px; max-width: 400px; width: 90%;">
+            <h2 id="modalTitle" style="color: #1b5e20; margin-bottom: 20px;"></h2>
+            
+            <div id="primeiroAcessoForm" style="display: none;">
+                <p style="margin-bottom: 20px; color: #666;">Configure o acesso do gestor para usar o sistema:</p>
+                <input type="text" id="adminEmail" placeholder="E-mail do gestor" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #C8E6C9; border-radius: 8px;">
+                <input type="password" id="adminSenha" placeholder="Senha (mínimo 6 caracteres)" style="width: 100%; padding: 12px; margin-bottom: 25px; border: 2px solid #C8E6C9; border-radius: 8px;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="criarContaGestor()" style="flex: 1; padding: 12px; background: #1b5e20; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Criar Conta
+                    </button>
+                    <button onclick="fecharModal()" style="flex: 1; padding: 12px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+            
+            <div id="loginGestorForm" style="display: none;">
+                <p style="margin-bottom: 20px; color: #666;">Faça login como gestor:</p>
+                <input type="email" id="gestorEmail" placeholder="E-mail" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #C8E6C9; border-radius: 8px;">
+                <input type="password" id="gestorSenha" placeholder="Senha" style="width: 100%; padding: 12px; margin-bottom: 25px; border: 2px solid #C8E6C9; border-radius: 8px;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="loginGestor()" style="flex: 1; padding: 12px; background: #1b5e20; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Entrar
+                    </button>
+                    <button onclick="fecharModal()" style="flex: 1; padding: 12px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Configuração do Firebase -->
     <script>
-        // Inicializar dados básicos
-        function inicializarSistema() {
-            // Criar dados iniciais se não existirem
-            if (!localStorage.getItem('sistema_inicializado')) {
-                // Dados do gestor
-                localStorage.setItem('gestor', JSON.stringify({
-                    usuario: 'admin',
-                    senha: 'admin123',
-                    nome: 'Administrador'
-                }));
-                
-                // Dados de funcionários de exemplo
-                const funcionarios = [
-                    {
-                        id: 1,
-                        nome: 'João Silva',
-                        cpf: '123.456.789-00',
-                        email: 'joao@empresa.com',
-                        senha: 'senha123',
-                        cargo: 'Analista de TI',
-                        departamento: 'TI',
-                        ativo: true
-                    },
-                    {
-                        id: 2,
-                        nome: 'Maria Santos',
-                        cpf: '987.654.321-00',
-                        email: 'maria@empresa.com',
-                        senha: 'senha123',
-                        cargo: 'Analista de RH',
-                        departamento: 'RH',
-                        ativo: true
-                    }
-                ];
-                
-                localStorage.setItem('funcionarios', JSON.stringify(funcionarios));
-                localStorage.setItem('pontos', JSON.stringify([]));
-                localStorage.setItem('justificativas', JSON.stringify([]));
-                localStorage.setItem('sistema_inicializado', 'true');
-                
-                console.log('Sistema inicializado com dados de exemplo');
-            }
+        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA COM SUAS CREDENCIAIS
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJETO_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+        
+        // Inicializar Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+            
+            console.log('Firebase inicializado com sucesso!');
+            
+            // Verificar se já existe um gestor cadastrado
+            verificarGestorCadastrado();
+            
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            mostrarAlerta('⚠️ Erro na conexão com o banco de dados. Usando modo local.', 'error');
         }
         
-        // Função de login simplificada
-        function login(tipo) {
-            if (tipo === 'gestor') {
-                // Login direto como gestor
-                localStorage.setItem('usuario_logado', JSON.stringify({
-                    tipo: 'gestor',
-                    nome: 'Administrador',
-                    usuario: 'admin'
-                }));
-                window.location.href = 'gestor.html';
-            } else {
-                // Para funcionário, vamos direto (sem senha por enquanto)
-                localStorage.setItem('usuario_logado', JSON.stringify({
-                    tipo: 'funcionario',
-                    nome: 'Funcionário Teste',
-                    id: 1
-                }));
+        // Formatar CPF
+        function formatarCPF() {
+            const input = document.getElementById('cpfInput');
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 2) {
+                value = value.substring(0, 2);
+            }
+            
+            input.value = value;
+        }
+        
+        // Login do funcionário
+        async function loginFuncionario() {
+            const cpfInput = document.getElementById('cpfInput').value;
+            
+            if (cpfInput.length !== 2) {
+                mostrarAlerta('Digite os dois últimos dígitos do CPF', 'error');
+                return;
+            }
+            
+            // CPF completo (com máscara)
+            const cpfCompleto = `000.000.000-${cpfInput.padStart(2, '0')}`;
+            
+            try {
+                // Buscar funcionário no Firestore
+                const funcionariosRef = db.collection('funcionarios');
+                const snapshot = await funcionariosRef
+                    .where('cpf', '==', cpfCompleto)
+                    .where('ativo', '==', true)
+                    .limit(1)
+                    .get();
+                
+                if (snapshot.empty) {
+                    mostrarAlerta('Funcionário não encontrado ou inativo!', 'error');
+                    return;
+                }
+                
+                // Obter dados do funcionário
+                const funcionarioDoc = snapshot.docs[0];
+                const funcionario = {
+                    id: funcionarioDoc.id,
+                    ...funcionarioDoc.data()
+                };
+                
+                // Salvar em localStorage para uso na sessão
+                localStorage.setItem('funcionario_logado', JSON.stringify(funcionario));
+                
+                // Redirecionar para área do funcionário
                 window.location.href = 'funcionario.html';
+                
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                mostrarAlerta('Erro ao fazer login. Tente novamente.', 'error');
             }
         }
         
-        // Inicializar sistema ao carregar
-        document.addEventListener('DOMContentLoaded', inicializarSistema);
+        // Acesso gestor
+        function acessoGestor() {
+            // Verificar se já existe gestor cadastrado
+            db.collection('gestores').limit(1).get()
+                .then(snapshot => {
+                    const modal = document.getElementById('adminModal');
+                    const title = document.getElementById('modalTitle');
+                    
+                    if (snapshot.empty) {
+                        // Primeiro acesso - criar conta
+                        title.textContent = 'Primeiro Acesso - Configurar Gestor';
+                        document.getElementById('primeiroAcessoForm').style.display = 'block';
+                        document.getElementById('loginGestorForm').style.display = 'none';
+                    } else {
+                        // Login normal
+                        title.textContent = 'Acesso Gestor';
+                        document.getElementById('primeiroAcessoForm').style.display = 'none';
+                        document.getElementById('loginGestorForm').style.display = 'block';
+                    }
+                    
+                    modal.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Erro ao verificar gestores:', error);
+                    mostrarAlerta('Erro ao acessar sistema de gestão', 'error');
+                });
+        }
+        
+        // Primeiro acesso
+        function primeiroAcesso() {
+            const modal = document.getElementById('adminModal');
+            const title = document.getElementById('modalTitle');
+            
+            title.textContent = 'Primeiro Acesso - Configurar Gestor';
+            document.getElementById('primeiroAcessoForm').style.display = 'block';
+            document.getElementById('loginGestorForm').style.display = 'none';
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Criar conta do gestor
+        async function criarContaGestor() {
+            const email = document.getElementById('adminEmail').value.trim();
+            const senha = document.getElementById('adminSenha').value;
+            
+            if (!email || !senha) {
+                mostrarAlerta('Preencha todos os campos!', 'error');
+                return;
+            }
+            
+            if (senha.length < 6) {
+                mostrarAlerta('A senha deve ter no mínimo 6 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                // Criar usuário no Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                const user = userCredential.user;
+                
+                // Salvar dados do gestor no Firestore
+                await db.collection('gestores').doc(user.uid).set({
+                    email: email,
+                    nome: 'Administrador',
+                    tipo: 'gestor',
+                    dataCriacao: new Date().toISOString(),
+                    ativo: true
+                });
+                
+                // Criar configurações iniciais do sistema
+                await db.collection('configuracoes').doc('sistema').set({
+                    nomeEmpresa: 'Essencial Print',
+                    horarioEntrada: '08:00',
+                    horarioSaida: '18:00',
+                    toleranciaAtraso: 10,
+                    diasTrabalho: ['seg', 'ter', 'qua', 'qui', 'sex']
+                });
+                
+                mostrarAlerta('✅ Conta do gestor criada com sucesso!', 'success');
+                fecharModal();
+                
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    mostrarAlerta('Este e-mail já está em uso!', 'error');
+                } else if (error.code === 'auth/invalid-email') {
+                    mostrarAlerta('E-mail inválido!', 'error');
+                } else if (error.code === 'auth/weak-password') {
+                    mostrarAlerta('Senha muito fraca!', 'error');
+                } else {
+                    mostrarAlerta('Erro ao criar conta: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Login do gestor
+        async function loginGestor() {
+            const email = document.getElementById('gestorEmail').value.trim();
+            const senha = document.getElementById('gestorSenha').value;
+            
+            if (!email || !senha) {
+                mostrarAlerta('Preencha todos os campos!', 'error');
+                return;
+            }
+            
+            try {
+                // Fazer login no Authentication
+                const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+                const user = userCredential.user;
+                
+                // Verificar se é gestor
+                const gestorDoc = await db.collection('gestores').doc(user.uid).get();
+                
+                if (!gestorDoc.exists) {
+                    mostrarAlerta('Acesso não autorizado!', 'error');
+                    await auth.signOut();
+                    return;
+                }
+                
+                const gestorData = gestorDoc.data();
+                
+                // Salvar dados do gestor
+                localStorage.setItem('gestor_logado', JSON.stringify({
+                    uid: user.uid,
+                    email: gestorData.email,
+                    nome: gestorData.nome,
+                    tipo: 'gestor'
+                }));
+                
+                // Redirecionar para área do gestor
+                window.location.href = 'gestor.html';
+                
+            } catch (error) {
+                console.error('Erro no login:', error);
+                
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    mostrarAlerta('E-mail ou senha incorretos!', 'error');
+                } else if (error.code === 'auth/too-many-requests') {
+                    mostrarAlerta('Muitas tentativas. Tente novamente mais tarde.', 'error');
+                } else {
+                    mostrarAlerta('Erro ao fazer login: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Fechar modal
+        function fecharModal() {
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('adminEmail').value = '';
+            document.getElementById('adminSenha').value = '';
+            document.getElementById('gestorEmail').value = '';
+            document.getElementById('gestorSenha').value = '';
+        }
+        
+        // Verificar se já tem gestor cadastrado
+        async function verificarGestorCadastrado() {
+            try {
+                const snapshot = await db.collection('gestores').limit(1).get();
+                if (snapshot.empty) {
+                    console.log('Nenhum gestor cadastrado. Sistema precisa de configuração inicial.');
+                } else {
+                    console.log('Sistema já tem gestor cadastrado.');
+                }
+            } catch (error) {
+                console.error('Erro ao verificar gestores:', error);
+            }
+        }
+        
+        // Mostrar alerta
+        function mostrarAlerta(mensagem, tipo) {
+            const alertDiv = document.getElementById('loginAlert');
+            alertDiv.textContent = mensagem;
+            alertDiv.className = `alert alert-${tipo}`;
+            
+            setTimeout(() => {
+                alertDiv.textContent = '';
+                alertDiv.className = 'alert';
+            }, 5000);
+        }
+        
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') fecharModal();
+        });
+        
+        // Carregar dados iniciais se Firebase falhar
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                    mostrarAlerta('⚠️ Modo local ativado. Dados serão salvos apenas no navegador.', 'error');
+                    
+                    // Inicializar dados locais
+                    if (!localStorage.getItem('sistema_local')) {
+                        localStorage.setItem('funcionarios', JSON.stringify([]));
+                        localStorage.setItem('pontos', JSON.stringify([]));
+                        localStorage.setItem('justificativas', JSON.stringify([]));
+                        localStorage.setItem('sistema_local', 'true');
+                    }
+                }
+            }, 2000);
+        });
     </script>
 </body>
 </html>
