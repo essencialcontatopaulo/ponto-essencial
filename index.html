@@ -18,8 +18,8 @@
     <link rel="icon" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <!-- CSS com anti-cache -->
+    <link rel="stylesheet" href="css/style.css?v=2.1.0">
     
     <!-- Firebase 9 -->
     <script type="module">
@@ -99,13 +99,42 @@
             background: #2E8B57 !important;
             border-color: #2E8B57 !important;
         }
+        
+        .footer-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+            color: #2E8B57;
+        }
+        
+        .credenciais-info {
+            background: #F1F8E9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #2E8B57;
+            border: 1px solid #C8E6C9;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="hero-icon">⏰</div>
-            <h1><span class="system-name">Ponto Eletrônico</span> <span class="version-badge">v2.0</span></h1>
+            <h1><span class="system-name">Ponto Eletrônico</span> <span class="version-badge">v2.1</span></h1>
             <p class="subtitle">Sistema com Reconhecimento Facial</p>
             <p class="debug-hint">Sistema 100% funcional - Modo simulação ativo</p>
         </header>
@@ -161,28 +190,74 @@
                 </button>
             </section>
             
-            <div style="text-align: center; margin-top: 40px; color: #4caf50; font-size: 0.9rem;">
+            <div class="credenciais-info">
                 <p><strong>Credenciais de teste disponíveis:</strong></p>
-                <p>Gestor: admin@empresa.com / admin123 | Funcionário: joao.silva@empresa.com / func123</p>
+                <p>👑 <strong>Gestor:</strong> admin@empresa.com / admin123</p>
+                <p>👨‍💼 <strong>Funcionário:</strong> joao.silva@empresa.com / func123</p>
             </div>
         </main>
 
         <footer>
             <p>Sistema de Ponto Eletrônico © 2024 - Todos os direitos reservados</p>
             <p class="debug-info">Para suporte técnico, verifique o console do navegador (F12)</p>
+            
+            <div class="footer-links">
+                <a href="login.html">🔐 Login</a>
+                <span style="color: #C8E6C9;">•</span>
+                <a href="funcionario.html">👨‍💼 Funcionário</a>
+                <span style="color: #C8E6C9;">•</span>
+                <a href="gestor.html">👑 Gestor</a>
+                <span style="color: #C8E6C9;">•</span>
+                <a href="cadastro-usuario.html">👥 Cadastrar Usuários</a>
+                <span style="color: #C8E6C9;">•</span>
+                <a href="atualizar.html" style="color: #FF9800;">🔄 Atualizar Sistema</a>
+            </div>
         </footer>
     </div>
 
-    <!-- JavaScripts -->
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/script.js"></script>
+    <!-- JavaScripts com anti-cache -->
+    <script src="js/utils.js?v=2.1.0"></script>
+    <script src="js/auth.js?v=2.1.0"></script>
+    <script src="js/firebase-config.js?v=2.1.0"></script>
+    <script src="js/script.js?v=2.1.0"></script>
 
     <script>
+        // ============================================
+        // SISTEMA ANTI-CACHE
+        // ============================================
+        const SYSTEM_VERSION = '2.1.0';
+        
+        // Verificar versão anterior
+        const lastVersion = localStorage.getItem('system_version');
+        if (lastVersion !== SYSTEM_VERSION) {
+            console.log('🚀 Nova versão detectada! Limpando cache...');
+            
+            // Limpar Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister();
+                        console.log('🗑️ Service Worker removido:', registration.scope);
+                    });
+                });
+            }
+            
+            // Salvar nova versão
+            localStorage.setItem('system_version', SYSTEM_VERSION);
+            localStorage.setItem('last_update', new Date().toISOString());
+            
+            // Recarregar se for nova versão
+            if (lastVersion) {
+                setTimeout(() => {
+                    window.location.href = window.location.pathname + '?v=' + Date.now();
+                }, 1000);
+            }
+        }
+        
         // Configuração inicial
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("🌐 Página principal carregada!");
+            console.log("🌐 Página principal carregada! Versão:", SYSTEM_VERSION);
+            console.log("🕐 Última atualização:", localStorage.getItem('last_update'));
             
             // Status do Firebase
             document.addEventListener('firebaseReady', function() {
@@ -194,7 +269,7 @@
             
             // Botões de navegação
             document.getElementById('loginBtn').addEventListener('click', function() {
-                window.location.href = 'login.html';
+                window.location.href = 'login.html?v=' + Date.now();
             });
             
             document.getElementById('facialBtn').addEventListener('click', function() {
@@ -206,7 +281,7 @@
             });
             
             document.getElementById('funcionarioBtn').addEventListener('click', function() {
-                window.location.href = 'funcionario.html';
+                window.location.href = 'funcionario.html?v=' + Date.now();
             });
             
             document.getElementById('gestorBtn').addEventListener('click', function() {
@@ -235,36 +310,50 @@
             
             if (usuario && usuario.tipo === 'gestor') {
                 // Já é gestor logado, redireciona direto
-                window.location.href = 'gestor.html';
+                window.location.href = 'gestor.html?v=' + Date.now();
                 return;
             }
             
             // Criar modal de acesso gestor
             const overlay = document.createElement('div');
             overlay.className = 'modal-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+                backdrop-filter: blur(5px);
+            `;
             
             // Criar modal
             overlay.innerHTML = `
-                <div class="modal-content">
+                <div style="background: white; padding: 40px; border-radius: 16px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); border: 1px solid #C8E6C9;">
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="font-size: 3rem; margin-bottom: 15px; color: #2E8B57;">👑</div>
                         <h2 style="color: #1b5e20; margin-bottom: 10px;">Acesso Gestor</h2>
-                        <p style="color: #4caf50; line-height: 1.5;">
+                        <p style="color: #4CAF50; line-height: 1.5;">
                             Área administrativa restrita para gestores do sistema.
                         </p>
                     </div>
                     
-                    <div id="gestorError" class="mensagem error" style="display: none;"></div>
+                    <div id="gestorError" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; border: 1px solid #f5c6cb;"></div>
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">E-mail do Gestor</label>
-                        <input type="email" id="gestorEmail" class="form-control" 
+                        <input type="email" id="gestorEmail" style="width: 100%; padding: 14px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px; color: #1b5e20;" 
                                placeholder="gestor@empresa.com" value="admin@empresa.com">
                     </div>
                     
                     <div style="margin-bottom: 25px;">
                         <label style="display: block; margin-bottom: 8px; color: #555; font-weight: 500;">Senha</label>
-                        <input type="password" id="gestorSenha" class="form-control" 
+                        <input type="password" id="gestorSenha" style="width: 100%; padding: 14px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px; color: #1b5e20;" 
                                placeholder="••••••••" value="admin123">
                     </div>
                     
@@ -277,7 +366,7 @@
                         </button>
                     </div>
                     
-                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; border: 1px solid #c8e6c9;">
+                    <div style="background: #E8F5E9; padding: 20px; border-radius: 10px; border: 1px solid #C8E6C9;">
                         <h4 style="margin: 0 0 10px 0; color: #1b5e20; font-size: 0.95rem;">👑 Credenciais de Teste</h4>
                         <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; font-size: 0.9em; color: #2E8B57;">
                             <div><strong>E-mail:</strong></div>
@@ -297,102 +386,4 @@
             });
             
             // Fechar ao clicar fora
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    document.body.removeChild(overlay);
-                }
-            });
-            
-            // Login do gestor
-            document.getElementById('gestorLoginBtn').addEventListener('click', async function() {
-                const email = document.getElementById('gestorEmail').value;
-                const senha = document.getElementById('gestorSenha').value;
-                const errorDiv = document.getElementById('gestorError');
-                
-                // Limpar erro anterior
-                errorDiv.style.display = 'none';
-                
-                if (!email || !senha) {
-                    errorDiv.textContent = 'Por favor, preencha todos os campos';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-                
-                // Mostrar loading
-                const btn = this;
-                const originalText = btn.textContent;
-                btn.textContent = '🔄 Verificando...';
-                btn.disabled = true;
-                btn.style.background = '#81c784';
-                
-                try {
-                    // Fazer login
-                    const resultado = await window.auth?.login(email, senha);
-                    
-                    if (resultado?.success) {
-                        // Verificar se é gestor
-                        if (resultado.usuario.tipo === 'gestor') {
-                            // Remover modal
-                            document.body.removeChild(overlay);
-                            
-                            // Mostrar mensagem de sucesso
-                            if (window.utils?.mostrarMensagem) {
-                                window.utils.mostrarMensagem(`👑 Bem-vindo, ${resultado.usuario.nome}!`, 'success');
-                            }
-                            
-                            // Redirecionar para área do gestor
-                            setTimeout(() => {
-                                window.location.href = 'gestor.html';
-                            }, 1000);
-                            
-                        } else {
-                            errorDiv.textContent = '❌ Apenas gestores podem acessar esta área.';
-                            errorDiv.style.display = 'block';
-                            btn.textContent = originalText;
-                            btn.disabled = false;
-                            btn.style.background = '#1b5e20';
-                        }
-                    } else {
-                        errorDiv.textContent = `❌ ${resultado?.error || 'Credenciais inválidas'}`;
-                        errorDiv.style.display = 'block';
-                        btn.textContent = originalText;
-                        btn.disabled = false;
-                        btn.style.background = '#1b5e20';
-                    }
-                    
-                } catch (error) {
-                    errorDiv.textContent = `❌ Erro: ${error.message}`;
-                    errorDiv.style.display = 'block';
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.style.background = '#1b5e20';
-                }
-            });
-            
-            // Permitir Enter para login
-            document.getElementById('gestorSenha').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('gestorLoginBtn').click();
-                }
-            });
-            
-            // Foco no campo de email
-            setTimeout(() => {
-                document.getElementById('gestorEmail').focus();
-            }, 100);
-        }
-        
-        // PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
-                    .catch(err => console.log('❌ Service Worker erro:', err));
-            });
-        }
-        
-        // DEBUG: Testar auth
-        setTimeout(() => {
-            console.log('=== DEBUG SISTEMA ===');
-            console.log('Auth carregado:', window.auth ? '✅ SIM' : '❌ NÃO');
-            console.log('Usuário logado:', window
+           
