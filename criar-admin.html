@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Admin - Essencial Print</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Criar Usuário Administrador</h2>
+    
+    <script>
+        // Use a MESMA configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...",
+            authDomain: "essencial-print.firebaseapp.com",
+            projectId: "essencial-print",
+            storageBucket: "essencial-print.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Criar usuário admin
+        async function criarAdmin() {
+            const email = 'admin@essencialprint.com';
+            const password = 'admin123';
+            
+            try {
+                // Criar usuário no Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Criar documento do usuário no Firestore
+                await db.collection('usuarios').doc(user.uid).set({
+                    nome: 'Administrador',
+                    email: email,
+                    tipo: 'gestor',
+                    cargo: 'Administrador',
+                    departamento: 'TI',
+                    dataCriacao: new Date().toISOString()
+                });
+                
+                alert('✅ Administrador criado com sucesso!');
+                console.log('Admin criado:', user.uid);
+                
+            } catch (error) {
+                console.error('Erro ao criar admin:', error);
+                alert('Erro: ' + error.message);
+            }
+        }
+        
+        // Executar automaticamente ao carregar a página
+        window.onload = criarAdmin;
+    </script>
+</body>
+</html>
