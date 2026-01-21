@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <h2>Teste Firebase Authentication</h2>
+    <button onclick="criarUsuario()">1. Criar Usuário no Auth</button>
+    <button onclick="fazerLogin()">2. Fazer Login</button>
+    <button onclick="verificarAuth()">3. Verificar Estado</button>
+    <div id="resultado"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // SUA CONFIG
+            authDomain: "essencial-print.firebaseapp.com",
+            projectId: "essencial-print",
+            storageBucket: "essencial-print.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        async function criarUsuario() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>⏳ Criando usuário...</p>';
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(
+                    'essencial.contatona@gmail.com',
+                    '202610Ana@'
+                );
+                
+                resultado.innerHTML = 
+                    `<p style="color: green;">✅ Usuário criado no Authentication!</p>
+                     <p>UID: ${userCredential.user.uid}</p>
+                     <p>Email: ${userCredential.user.email}</p>`;
+                     
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    resultado.innerHTML = '<p style="color: orange;">ℹ️ Usuário já existe no Auth</p>';
+                } else {
+                    resultado.innerHTML = `<p style="color: red;">❌ Erro: ${error.message}</p>`;
+                }
+            }
+        }
+
+        async function fazerLogin() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>🔐 Tentando login...</p>';
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(
+                    'essencial.contatona@gmail.com',
+                    '202610Ana@'
+                );
+                
+                resultado.innerHTML = 
+                    `<p style="color: green;">✅ LOGIN BEM-SUCEDIDO!</p>
+                     <p>UID: ${userCredential.user.uid}</p>
+                     <p>Email verificado: ${userCredential.user.emailVerified}</p>
+                     <p>Token disponível: ${await userCredential.user.getIdToken() ? 'Sim' : 'Não'}</p>`;
+                     
+            } catch (error) {
+                resultado.innerHTML = `<p style="color: red;">❌ Erro no login: ${error.message}</p>
+                                      <p>Código: ${error.code}</p>`;
+            }
+        }
+
+        function verificarAuth() {
+            const user = auth.currentUser;
+            const resultado = document.getElementById('resultado');
+            
+            if (user) {
+                resultado.innerHTML = 
+                    `<p style="color: green;">✅ Usuário autenticado:</p>
+                     <p>Email: ${user.email}</p>
+                     <p>UID: ${user.uid}</p>
+                     <p>Provider: ${user.providerId}</p>`;
+            } else {
+                resultado.innerHTML = '<p style="color: orange;">⚠️ Nenhum usuário autenticado</p>';
+            }
+        }
+
+        // Monitorar estado da autenticação
+        auth.onAuthStateChanged((user) => {
+            console.log('Estado da Auth:', user ? 'Logado' : 'Deslogado');
+            if (user) console.log('Usuário:', user.email);
+        });
+    </script>
+</body>
+</html>
