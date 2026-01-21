@@ -1,39 +1,73 @@
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_DOMAIN",
-    projectId: "SEU_PROJECT_ID",
-    storageBucket: "SEU_STORAGE",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID"
-  };
-  
-  firebase.initializeApp(firebaseConfig);
-  
-  async function criarGestor() {
-    try {
-      const user = await firebase.auth().createUserWithEmailAndPassword(
-        'admin@essencialprint.com',
-        'admin123'
-      );
-      
-      await firebase.firestore().collection('usuarios').doc(user.user.uid).set({
-        nome: 'Administrador',
-        email: 'admin@essencialprint.com',
-        tipo: 'gestor',
-        cargo: 'Administrador',
-        departamento: 'TI',
-        dataCriacao: new Date().toISOString()
-      });
-      
-      alert('Gestor criado com sucesso!');
-    } catch (error) {
-      alert('Erro: ' + error.message);
-    }
-  }
-  
-  criarGestor();
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Gestor</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h2>Criar Usuário Gestor</h2>
+    <button onclick="criarGestor()">Criar Gestor</button>
+    <div id="resultado"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        async function criarGestor() {
+            const email = 'gestor@essencialprint.com';
+            const password = 'Gestor123@';
+            const nome = 'Administrador Gestor';
+            
+            try {
+                // 1. Criar no Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userId = userCredential.user.uid;
+                
+                // 2. Criar no Firestore
+                await db.collection('usuarios').doc(userId).set({
+                    nome: nome,
+                    email: email,
+                    tipo: 'gestor',
+                    cargo: 'Gestor',
+                    departamento: 'Administração',
+                    dataCriacao: new Date().toISOString(),
+                    status: 'ativo'
+                });
+                
+                document.getElementById('resultado').innerHTML = 
+                    '<p style="color: green;">✅ GESTOR CRIADO COM SUCESSO!</p>' +
+                    '<p><strong>Email:</strong> ' + email + '</p>' +
+                    '<p><strong>Senha:</strong> ' + password + '</p>' +
+                    '<p><strong>Nome:</strong> ' + nome + '</p>' +
+                    '<p><strong>UID:</strong> ' + userId + '</p>' +
+                    '<p><strong>Use estas credenciais para fazer login como gestor.</strong></p>';
+                
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    document.getElementById('resultado').innerHTML = 
+                        '<p style="color: orange;">⚠️ Gestor já existe!</p>' +
+                        '<p>Email: ' + email + '</p>' +
+                        '<p>Tente fazer login com estas credenciais.</p>';
+                } else {
+                    document.getElementById('resultado').innerHTML = 
+                        '<p style="color: red;">❌ Erro: ' + error.message + '</p>';
+                }
+            }
+        }
+        
+        criarGestor(); // Executar automaticamente
+    </script>
+</body>
+</html>
