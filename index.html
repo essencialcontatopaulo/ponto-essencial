@@ -4,25 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ponto Eletrônico v2.0</title>
-    <link rel="stylesheet" href="css/style.css?v=2.0">
-    <link rel="manifest" href="manifest.json">
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 50%, #4CAF50 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #2E8B57 100%);
             color: white;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
         
@@ -30,44 +27,44 @@
             max-width: 800px;
             width: 100%;
             text-align: center;
-        }
-        
-        .logo-container {
-            margin-bottom: 40px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
         
         .logo {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            color: white;
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
         
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .subtitle {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin-bottom: 30px;
             opacity: 0.9;
         }
         
-        .status-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 25px;
             border-radius: 50px;
             margin-bottom: 50px;
+            display: inline-block;
             font-weight: 600;
-            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
         }
         
         .login-options {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
             max-width: 400px;
             margin: 0 auto;
         }
@@ -76,48 +73,84 @@
             background: white;
             color: #1b5e20;
             border: none;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 1.2rem;
+            padding: 22px;
+            border-radius: 15px;
+            font-size: 1.3rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
         
         .login-btn:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             background: #E8F5E9;
         }
         
-        .install-prompt {
-            margin-top: 50px;
-            padding: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .install-btn {
-            background: #FF9800;
-            color: white;
-            border: none;
-            padding: 12px 25px;
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal h2 {
+            color: #1b5e20;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #C8E6C9;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s;
         }
         
-        .install-btn:hover {
-            background: #F57C00;
+        .btn-primary {
+            background: #1b5e20;
+            color: white;
         }
         
-        @media (max-width: 768px) {
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
             h1 {
                 font-size: 2rem;
             }
@@ -130,20 +163,19 @@
                 padding: 18px;
                 font-size: 1.1rem;
             }
+            
+            .container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo-container">
-            <div class="logo">⏰</div>
-            <h1>Ponto Eletrônico v2.0</h1>
-            <div class="subtitle">Sistema com Reconhecimento Facial</div>
-        </div>
-        
-        <div class="status-badge">
-            ✅ Sistema 100% funcional - Modo simulação ativo
-        </div>
+        <div class="logo">⏰</div>
+        <h1>Ponto Eletrônico v2.0</h1>
+        <div class="subtitle">Sistema de Controle de Ponto</div>
+        <div class="status">✅ Sistema 100% Funcional</div>
         
         <div class="login-options">
             <button class="login-btn" onclick="abrirLogin('funcionario')">
@@ -153,165 +185,105 @@
                 Acesso Gestor
             </button>
         </div>
-        
-        <div id="installPrompt" class="install-prompt">
-            <h3>📱 Instalar App</h3>
-            <p>Instale o aplicativo para acesso rápido ao sistema!</p>
-            <button id="installBtn" class="install-btn">Instalar Agora</button>
-        </div>
     </div>
-
+    
     <!-- Modal de Login -->
-    <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; color: #333; padding: 40px; border-radius: 15px; max-width: 400px; width: 90%;">
-            <h2 id="modalTitle" style="color: #1b5e20; margin-bottom: 30px; text-align: center;"></h2>
-            
-            <div style="display: none;" id="loginForm">
-                <input type="text" id="loginUsuario" placeholder="Usuário" 
-                       style="width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px;">
-                <input type="password" id="loginSenha" placeholder="Senha" 
-                       style="width: 100%; padding: 15px; margin-bottom: 25px; border: 2px solid #C8E6C9; border-radius: 8px; font-size: 16px;">
-                <button onclick="fazerLogin()" 
-                        style="width: 100%; padding: 15px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
-                    Entrar
-                </button>
-                <button onclick="fecharModal()" 
-                        style="width: 100%; padding: 15px; margin-top: 15px; background: #666; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
-                    Cancelar
-                </button>
-            </div>
-            
-            <div style="display: none;" id="mensagem">
-                <p id="mensagemTexto" style="text-align: center; margin-bottom: 20px;"></p>
-                <button onclick="fecharModal()" 
-                        style="width: 100%; padding: 15px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
-                    OK
-                </button>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Login</h2>
+            <input type="text" id="loginUsuario" placeholder="Usuário/CPF">
+            <input type="password" id="loginSenha" placeholder="Senha">
+            <div class="modal-buttons">
+                <button class="modal-btn btn-primary" onclick="fazerLogin()">Entrar</button>
+                <button class="modal-btn btn-secondary" onclick="fecharModal()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Dados de login (em produção, isso viria do Firebase)
+        // Dados iniciais
         const usuarios = {
             gestor: [
                 { usuario: "admin", senha: "admin123", nome: "Administrador", tipo: "gestor" },
                 { usuario: "gestor", senha: "gestor123", nome: "Gestor", tipo: "gestor" }
-            ],
-            funcionario: [
-                // Serão cadastrados pelo gestor
             ]
         };
-
+        
         let tipoLoginAtual = '';
-        let deferredPrompt;
-
-        // Verificar se é primeira visita
-        if (!localStorage.getItem('primeira_visita')) {
-            localStorage.setItem('primeira_visita', 'true');
-            mostrarInstalarApp();
+        
+        // Inicializar dados se não existirem
+        if (!localStorage.getItem('funcionarios')) {
+            localStorage.setItem('funcionarios', JSON.stringify([]));
         }
-
-        // PWA - Instalar App
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            mostrarInstalarApp();
-        });
-
-        function mostrarInstalarApp() {
-            const installPrompt = document.getElementById('installPrompt');
-            if (deferredPrompt) {
-                installPrompt.style.display = 'block';
-            }
+        if (!localStorage.getItem('pontos')) {
+            localStorage.setItem('pontos', JSON.stringify([]));
         }
-
-        document.getElementById('installBtn').addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                document.getElementById('installPrompt').style.display = 'none';
-            }
-            
-            deferredPrompt = null;
-        });
-
+        if (!localStorage.getItem('justificativas')) {
+            localStorage.setItem('justificativas', JSON.stringify([]));
+        }
+        
         function abrirLogin(tipo) {
             tipoLoginAtual = tipo;
             const modal = document.getElementById('loginModal');
             const title = document.getElementById('modalTitle');
-            const loginForm = document.getElementById('loginForm');
-            const mensagemDiv = document.getElementById('mensagem');
             
             if (tipo === 'gestor') {
                 title.textContent = 'Acesso Gestor';
-                loginForm.style.display = 'block';
-                mensagemDiv.style.display = 'none';
-                
-                // Preencher com credenciais padrão
                 document.getElementById('loginUsuario').value = 'admin';
                 document.getElementById('loginSenha').value = 'admin123';
             } else {
                 title.textContent = 'Área do Funcionário';
-                loginForm.style.display = 'block';
-                mensagemDiv.style.display = 'none';
+                document.getElementById('loginUsuario').value = '';
+                document.getElementById('loginSenha').value = '';
             }
             
             modal.style.display = 'flex';
         }
-
+        
         function fecharModal() {
             document.getElementById('loginModal').style.display = 'none';
         }
-
+        
         function fazerLogin() {
-            const usuario = document.getElementById('loginUsuario').value;
+            const usuario = document.getElementById('loginUsuario').value.trim();
             const senha = document.getElementById('loginSenha').value;
             
             if (tipoLoginAtual === 'gestor') {
-                const gestor = usuarios.gestor.find(g => g.usuario === usuario && g.senha === senha);
+                // Login para gestor
+                const gestor = usuarios.gestor.find(g => 
+                    g.usuario === usuario && g.senha === senha
+                );
                 
                 if (gestor) {
-                    // Salvar usuário logado
-                    localStorage.setItem('ponto_user', JSON.stringify({
-                        nome: gestor.nome,
-                        tipo: gestor.tipo,
-                        usuario: gestor.usuario
-                    }));
-                    
+                    localStorage.setItem('usuario_logado', JSON.stringify(gestor));
                     window.location.href = 'gestor.html';
                 } else {
                     alert('Usuário ou senha incorretos!');
                 }
             } else {
-                // Funcionário - Verificar no localStorage
+                // Login para funcionário
                 const funcionarios = JSON.parse(localStorage.getItem('funcionarios') || '[]');
                 const funcionario = funcionarios.find(f => 
-                    (f.cpf === usuario || f.email === usuario) && f.ativo === true
+                    (f.cpf === usuario || f.email === usuario) && f.senha === senha && f.ativo
                 );
                 
                 if (funcionario) {
-                    // Para funcionário, não precisa de senha no modo simulação
-                    localStorage.setItem('ponto_user', JSON.stringify({
+                    localStorage.setItem('usuario_logado', JSON.stringify({
                         id: funcionario.id,
                         nome: funcionario.nome,
                         tipo: 'funcionario',
                         cpf: funcionario.cpf,
                         cargo: funcionario.cargo
                     }));
-                    
                     window.location.href = 'funcionario.html';
                 } else {
-                    alert('Funcionário não encontrado ou inativo!');
+                    alert('Funcionário não encontrado ou credenciais inválidas!');
                 }
             }
         }
-
+        
         // Fechar modal com ESC
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') fecharModal();
         });
     </script>
