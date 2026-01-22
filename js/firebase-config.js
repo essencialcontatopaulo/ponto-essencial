@@ -2,6 +2,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
     authDomain: "essencial-print-5a753.firebaseapp.com",
+    databaseURL: "https://essencial-print-5a753-default-rtdb.firebaseio.com",
     projectId: "essencial-print-5a753",
     storageBucket: "essencial-print-5a753.firebasestorage.app",
     messagingSenderId: "544082416072",
