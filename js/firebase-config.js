@@ -3,12 +3,12 @@
 
 // ⚠️ SUBSTITUA ESTES VALORES COM OS DA NOVA CONFIGURAÇÃO ⚠️
 const firebaseConfig = {
-    apiKey: "SUA_NOVA_API_KEY_AQUI",  // ← OBRIGATÓRIO: Nova API Key
-    authDomain: "essencial-print-5a753.firebaseapp.com",
-    projectId: "essencial-print-5a753",
-    storageBucket: "essencial-print-5a753.appspot.com",
-    messagingSenderId: "544082416072",
-    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+  apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+  authDomain: "essencial-print-5a753.firebaseapp.com",
+  projectId: "essencial-print-5a753",
+  storageBucket: "essencial-print-5a753.firebasestorage.app",
+  messagingSenderId: "544082416072",
+  appId: "1:544082416072:web:85d3c8549b25158284f0fd"
 };
 
 // Função para inicializar Firebase com fallback
