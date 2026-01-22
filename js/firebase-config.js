@@ -1,60 +1,9 @@
-// firebase-config.js
+// js/firebase-config.js
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY_AQUI",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO_ID",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID"
+    apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+    authDomain: "essencial-print-5a753.firebaseapp.com",
+    projectId: "essencial-print-5a753",
+    storageBucket: "essencial-print-5a753.firebasestorage.app",
+    messagingSenderId: "544082416072",
+    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
 };
-
-// Inicializar Firebase
-let firebaseApp;
-let db;
-let auth;
-const firebaseConfig = {
-    apiKey: "AIzaSyB...",  // ← SEU apiKey AQUI
-    authDomain: "essencial-print.firebaseapp.com",  // ← SEU authDomain
-    projectId: "essencial-print",  // ← SEU projectId
-    storageBucket: "essencial-print.appspot.com",  // ← SEU storageBucket
-    messagingSenderId: "123456789",  // ← SEU messagingSenderId
-    appId: "1:123456789:web:abcdef123456"  // ← SEU appId
-};
-
-// Funções utilitárias
-function getCurrentUser() {
-    return auth.currentUser;
-}
-
-async function isGestor(userId) {
-    try {
-        const gestorDoc = await db.collection('gestores').doc(userId).get();
-        return gestorDoc.exists;
-    } catch (error) {
-        console.error('Erro ao verificar gestor:', error);
-        return false;
-    }
-}
-
-async function getFuncionarioByCpf(cpf) {
-    try {
-        const snapshot = await db.collection('funcionarios')
-            .where('cpf', '==', cpf)
-            .where('ativo', '==', true)
-            .limit(1)
-            .get();
-        
-        if (snapshot.empty) return null;
-        
-        const doc = snapshot.docs[0];
-        return {
-            id: doc.id,
-            ...doc.data()
-        };
-    } catch (error) {
-        console.error('Erro ao buscar funcionário:', error);
-        return null;
-    }
-}
-
-export { firebaseApp, db, auth, getCurrentUser, isGestor, getFuncionarioByCpf };
