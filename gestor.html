@@ -7,18 +7,237 @@
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuração Firebase -->
+    <script src="js/firebase-config.js" defer></script>
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
     
-    <!-- Scripts -->
-    <script src="js/firebase-config.js"></script>
+    <!-- Script do Gestor -->
     <script src="js/gestor.js" defer></script>
     
     <style>
-        /* ESTILOS ESPECÍFICOS DO GESTOR (adicione ao seu style.css depois) */
+        /* ESTILOS EM TONS DE VERDE - NOVO TEMA */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .logo h1 {
+            color: #1b5e20;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #388e3c;
+            font-weight: 300;
+        }
+
+        .user-info h3 {
+            color: #1b5e20;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            background: #d32f2f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #b71c1c;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4caf50;
+        }
+
+        .card h2 {
+            color: #1b5e20;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #c8e6c9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #1b5e20;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1b5e20;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #e8f5e8;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Badges de status */
         .status-badge {
             padding: 4px 8px;
             border-radius: 4px;
@@ -27,8 +246,8 @@
         }
 
         .status-presente {
-            background: #d4edda;
-            color: #155724;
+            background: #c8e6c9;
+            color: #1b5e20;
         }
 
         .status-atrasado {
@@ -46,6 +265,7 @@
             color: #495057;
         }
 
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -67,6 +287,7 @@
             max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
+            border-top: 5px solid #4caf50;
         }
 
         .modal-header {
@@ -77,7 +298,7 @@
         }
 
         .modal-header h3 {
-            color: #1a237e;
+            color: #1b5e20;
             margin: 0;
         }
 
@@ -89,17 +310,22 @@
             color: #666;
         }
 
+        .close-modal:hover {
+            color: #f44336;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
 
+        /* Tabs */
         .tab-navigation {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e8eaf6;
+            border-bottom: 2px solid #c8e6c9;
         }
 
         .tab-btn {
@@ -113,8 +339,8 @@
         }
 
         .tab-btn.active {
-            color: #1a237e;
-            border-bottom: 3px solid #1a237e;
+            color: #1b5e20;
+            border-bottom: 3px solid #1b5e20;
         }
 
         .tab-content {
@@ -123,6 +349,53 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* Search */
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        footer p:first-child {
+            font-weight: 600;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                text-align: center;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -142,7 +415,7 @@
         <div class="dashboard">
             <!-- Estatísticas -->
             <div class="card">
-                <h2>📊 Estatísticas Gerais</h2>
+                <h2>Estatísticas Gerais</h2>
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
                         <div class="stat-number">0</div>
@@ -158,16 +431,16 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">0</div>
-                        <div class="stat-label">Atrasos/Mês</div>
+                        <div class="stat-label">Ajustes/Mês</div>
                     </div>
                 </div>
             </div>
 
             <!-- Funcionários Ativos -->
             <div class="card">
-                <h2>👥 Funcionários 
+                <h2>Funcionários 
                     <button class="btn btn-success" onclick="openModal('novoFuncionario')">+ Novo</button>
-                    <button class="btn btn-primary" onclick="carregarFuncionarios()" title="Atualizar">↻</button>
+                    <button class="btn btn-primary" onclick="carregarFuncionarios()" title="Atualizar">Atualizar</button>
                 </h2>
                 <div class="search-box">
                     <input type="text" id="searchFuncionarios" placeholder="Buscar funcionário..." onkeyup="filtrarFuncionarios()">
@@ -192,15 +465,15 @@
 
             <!-- Ajuste de Horas -->
             <div class="card">
-                <h2>⏰ Ajuste de Horas 
+                <h2>Ajuste de Horas 
                     <button class="btn btn-primary" onclick="openModal('ajusteHoras')">
-                        <span>+</span> Novo Ajuste
+                        Novo Ajuste
                     </button>
                 </h2>
                 <p style="color: #666; margin-bottom: 15px;">Ajuste horas trabalhadas externamente</p>
                 
                 <div style="background: #f0f8ff; padding: 15px; border-radius: 10px;">
-                    <h4 style="color: #1a237e; margin-bottom: 10px;">📋 Últimos Ajustes</h4>
+                    <h4 style="color: #1b5e20; margin-bottom: 10px;">Últimos Ajustes</h4>
                     <div style="max-height: 200px; overflow-y: auto;">
                         <table>
                             <thead>
@@ -221,7 +494,7 @@
 
             <!-- Registros do Dia -->
             <div class="card">
-                <h2>📅 Registros de Hoje</h2>
+                <h2>Registros de Hoje</h2>
                 <div style="max-height: 400px; overflow-y: auto;">
                     <table id="tabelaRegistros">
                         <thead>
@@ -242,7 +515,7 @@
 
         <!-- Relatórios -->
         <div class="card" style="margin-bottom: 25px;">
-            <h2>📈 Relatórios</h2>
+            <h2>Relatórios</h2>
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="openTab('relatorioMensal')">Mensal</button>
                 <button class="tab-btn" onclick="openTab('relatorioFuncionario')">Por Funcionário</button>
@@ -296,7 +569,7 @@
     <div id="modalNovoFuncionario" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ Cadastrar Novo Funcionário</h3>
+                <h3>Cadastrar Novo Funcionário</h3>
                 <button class="close-modal" onclick="closeModal('novoFuncionario')">×</button>
             </div>
             <form id="formNovoFuncionario" onsubmit="return false;">
@@ -375,10 +648,10 @@
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn btn-success" onclick="cadastrarFuncionario()" style="flex: 1;">
-                        ✓ Cadastrar
+                        Cadastrar
                     </button>
                     <button type="button" class="btn btn-danger" onclick="closeModal('novoFuncionario')" style="flex: 1;">
-                        × Cancelar
+                        Cancelar
                     </button>
                 </div>
             </form>
@@ -389,7 +662,7 @@
     <div id="modalAjusteHoras" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>⏰ Ajuste de Horas Trabalhadas</h3>
+                <h3>Ajuste de Horas Trabalhadas</h3>
                 <button class="close-modal" onclick="closeModal('ajusteHoras')">×</button>
             </div>
             <form id="formAjusteHoras" onsubmit="return false;">
@@ -442,7 +715,7 @@
                 </div>
                 
                 <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h4 style="color: #2e7d32; margin-bottom: 10px;">📋 Horários Registrados para esta data:</h4>
+                    <h4 style="color: #2e7d32; margin-bottom: 10px;">Horários Registrados para esta data:</h4>
                     <div id="horariosExistentes">
                         <p style="color: #666;">Selecione um funcionário e data para ver os horários</p>
                     </div>
@@ -450,13 +723,13 @@
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn btn-success" onclick="salvarAjusteHoras()" style="flex: 1;">
-                        💾 Salvar Ajuste
+                        Salvar Ajuste
                     </button>
                     <button type="button" class="btn btn-primary" onclick="calcularHoras()" style="flex: 1;">
-                        🧮 Calcular Horas
+                        Calcular Horas
                     </button>
                     <button type="button" class="btn btn-danger" onclick="closeModal('ajusteHoras')" style="flex: 1;">
-                        × Cancelar
+                        Cancelar
                     </button>
                 </div>
             </form>
@@ -467,7 +740,7 @@
     <div id="modalEditarFuncionario" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>✏️ Editar Funcionário</h3>
+                <h3>Editar Funcionário</h3>
                 <button class="close-modal" onclick="closeModal('editarFuncionario')">×</button>
             </div>
             <form id="formEditarFuncionario" onsubmit="return false;">
@@ -515,10 +788,10 @@
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn btn-success" onclick="atualizarFuncionario()" style="flex: 1;">
-                        💾 Salvar Alterações
+                        Salvar Alterações
                     </button>
                     <button type="button" class="btn btn-danger" onclick="closeModal('editarFuncionario')" style="flex: 1;">
-                        × Cancelar
+                        Cancelar
                     </button>
                 </div>
             </form>
@@ -526,46 +799,11 @@
     </div>
 
     <script>
-        // Inicialização básica
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar data atual nos inputs
-            const hoje = new Date().toISOString().split('T')[0];
-            const mesAtual = new Date().toISOString().slice(0, 7);
-            
-            if (document.getElementById('mesRelatorio')) {
-                document.getElementById('mesRelatorio').value = mesAtual;
-                document.getElementById('periodoRelatorio').value = mesAtual;
-                document.getElementById('periodoAjustes').value = mesAtual;
-            }
-            
-            if (document.getElementById('dataAdmissao')) {
-                document.getElementById('dataAdmissao').value = hoje;
-            }
-            
-            if (document.getElementById('dataAjuste')) {
-                document.getElementById('dataAjuste').value = hoje;
-            }
-            
-            // Configurar cálculo automático de horas
-            const entradaInput = document.getElementById('horaEntradaAjuste');
-            const saidaInput = document.getElementById('horaSaidaAjuste');
-            
-            if (entradaInput && saidaInput) {
-                entradaInput.addEventListener('change', calcularHoras);
-                saidaInput.addEventListener('change', calcularHoras);
-            }
-        });
-
-        // Funções auxiliares de interface
+        // Funções básicas de interface
         function openModal(modalName) {
             const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
             if (modalElement) {
                 modalElement.style.display = 'flex';
-                
-                // Carregar dados se for modal de ajuste
-                if (modalName === 'ajusteHoras') {
-                    carregarFuncionariosParaAjuste();
-                }
             }
         }
 
@@ -580,6 +818,7 @@
                 }
                 if (modalName === 'ajusteHoras') {
                     document.getElementById('formAjusteHoras').reset();
+                    document.getElementById('totalHorasAjuste').value = '';
                     document.getElementById('horariosExistentes').innerHTML = 
                         '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
                 }
@@ -616,14 +855,12 @@
                 return;
             }
             
-            // Converter para objetos Date
             const [h1, m1] = entrada.split(':').map(Number);
             const [h2, m2] = saida.split(':').map(Number);
             
             const entradaDate = new Date(0, 0, 0, h1, m1);
             const saidaDate = new Date(0, 0, 0, h2, m2);
             
-            // Calcular diferença
             const diffMs = saidaDate - entradaDate;
             const diffMinutes = Math.floor(diffMs / 60000);
             
@@ -647,7 +884,8 @@
 
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                // A função logout() será implementada no gestor.js
+                localStorage.removeItem('usuario_logado');
+                localStorage.removeItem('funcionario_logado');
                 window.location.href = 'index.html';
             }
         }
