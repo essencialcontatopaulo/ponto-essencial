@@ -1,31 +1,48 @@
-// js/gestor.js
+// js/gestor.js - VERSÃO CORRIGIDA
 // Script principal do painel do gestor
 
 // Variáveis globais
-let db, auth;
+let db = null;
+let auth = null;
 let funcionarioEditandoId = null;
 
 // Inicialização quando o DOM carrega
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se é gestor e carregar dados
-    verificarPermissaoGestor();
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM carregado, verificando Firebase...');
     
-    // Configurar data atual
-    const hoje = new Date().toISOString().split('T')[0];
-    const mesAtual = new Date().toISOString().slice(0, 7);
+    // Verificar se Firebase está disponível
+    if (typeof firebase === 'undefined') {
+        console.error('Firebase não carregado!');
+        alert('Erro: Firebase não foi carregado. Verifique sua conexão.');
+        return;
+    }
     
-    if (document.getElementById('mesRelatorio')) {
-        document.getElementById('mesRelatorio').value = mesAtual;
-        document.getElementById('periodoRelatorio').value = mesAtual;
-        document.getElementById('periodoAjustes').value = mesAtual;
-        gerarRelatorioMensal();
+    try {
+        // Inicializar Firebase se ainda não estiver
+        if (!firebase.apps.length) {
+            console.log('Inicializando Firebase...');
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Obter instâncias
+        db = firebase.firestore();
+        auth = firebase.auth();
+        
+        console.log('Firebase inicializado com sucesso');
+        
+        // Verificar autenticação
+        verificarPermissaoGestor();
+        
+    } catch (error) {
+        console.error('Erro ao inicializar Firebase:', error);
+        alert('Erro ao conectar com o servidor: ' + error.message);
     }
 });
 
 // ============ VERIFICAÇÃO DE PERMISSÃO ============
 async function verificarPermissaoGestor() {
     try {
-        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado'));
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
         
         if (!usuarioLogado || usuarioLogado.tipo !== 'gestor') {
             alert('Acesso restrito a gestores!');
@@ -33,41 +50,66 @@ async function verificarPermissaoGestor() {
             return;
         }
         
-        // Configurar Firebase
-        if (typeof firebase !== 'undefined') {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+        // Configurar dados do gestor
+        document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
+        document.getElementById('userCargo').textContent = `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
+        
+        // Aguardar Firebase estar pronto
+        if (!db || !auth) {
+            setTimeout(verificarPermissaoGestor, 500);
+            return;
+        }
+        
+        // Verificar autenticação atual
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                // Se não estiver autenticado, redirecionar para login
+                alert('Sessão expirada! Faça login novamente.');
+                window.location.href = 'index.html';
+                return;
             }
-            db = firebase.firestore();
-            auth = firebase.auth();
             
-            // Configurar dados do gestor
-            document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
-            document.getElementById('userCargo').textContent = `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
-            
-            // Carregar dados
+            // Carregar dados do sistema
             carregarFuncionarios();
             carregarRegistrosHoje();
             carregarAjustesRecentes();
             carregarEstatisticas();
             carregarSelectFuncionarios();
-        }
+            
+            // Configurar data atual
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            if (document.getElementById('mesRelatorio')) {
+                document.getElementById('mesRelatorio').value = mesAtual;
+                document.getElementById('periodoRelatorio').value = mesAtual;
+                document.getElementById('periodoAjustes').value = mesAtual;
+                gerarRelatorioMensal();
+            }
+        });
         
     } catch (error) {
-        console.error('Erro verificação:', error);
-        alert('Erro ao verificar permissões!');
+        console.error('Erro na verificação de permissão:', error);
+        alert('Erro ao verificar permissões: ' + error.message);
     }
 }
 
 // ============ FUNÇÕES DE FUNCIONÁRIOS ============
 async function carregarFuncionarios() {
     try {
+        if (!db) {
+            console.error('Firestore não inicializado');
+            return;
+        }
+        
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
             .orderBy('nome')
             .get();
         
         const tbody = document.querySelector('#tabelaFuncionarios tbody');
+        if (!tbody) return;
+        
         let html = '';
         
         if (snapshot.empty) {
@@ -96,9 +138,11 @@ async function carregarFuncionarios() {
         tbody.innerHTML = html;
         
     } catch (error) {
-        console.error('Erro carregar funcionários:', error);
-        document.querySelector('#tabelaFuncionarios tbody').innerHTML = 
-            '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar funcionários</td></tr>';
+        console.error('Erro ao carregar funcionários:', error);
+        const tbody = document.querySelector('#tabelaFuncionarios tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar funcionários</td></tr>';
+        }
     }
 }
 
@@ -125,10 +169,19 @@ async function cadastrarFuncionario() {
         return;
     }
     
+    if (!auth) {
+        alert('Erro: Sistema de autenticação não disponível');
+        return;
+    }
+    
     try {
+        console.log('Iniciando cadastro de funcionário...');
+        
         // 1. Criar usuário no Authentication
         const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
         const userId = userCredential.user.uid;
+        
+        console.log('Usuário criado no Auth:', userId);
         
         // 2. Criar no Firestore
         await db.collection('usuarios').doc(userId).set({
@@ -147,6 +200,8 @@ async function cadastrarFuncionario() {
             criadoPor: auth.currentUser ? auth.currentUser.uid : null
         });
         
+        console.log('Funcionário salvo no Firestore');
+        
         alert('✅ Funcionário cadastrado com sucesso!');
         closeModal('novoFuncionario');
         
@@ -156,12 +211,16 @@ async function cadastrarFuncionario() {
         carregarEstatisticas();
         
     } catch (error) {
-        console.error('Erro cadastrar:', error);
+        console.error('Erro ao cadastrar funcionário:', error);
         
         if (error.code === 'auth/email-already-in-use') {
             alert('Este e-mail já está cadastrado!');
         } else if (error.code === 'auth/weak-password') {
             alert('A senha deve ter pelo menos 6 caracteres!');
+        } else if (error.code === 'auth/invalid-email') {
+            alert('E-mail inválido!');
+        } else if (error.code === 'auth/network-request-failed') {
+            alert('Erro de conexão. Verifique sua internet!');
         } else {
             alert('Erro ao cadastrar funcionário: ' + error.message);
         }
@@ -170,6 +229,11 @@ async function cadastrarFuncionario() {
 
 async function abrirEditarFuncionario(funcionarioId) {
     try {
+        if (!db) {
+            alert('Banco de dados não disponível');
+            return;
+        }
+        
         const doc = await db.collection('usuarios').doc(funcionarioId).get();
         
         if (!doc.exists) {
@@ -196,8 +260,8 @@ async function abrirEditarFuncionario(funcionarioId) {
         openModal('editarFuncionario');
         
     } catch (error) {
-        console.error('Erro abrir edição:', error);
-        alert('Erro ao carregar dados do funcionário');
+        console.error('Erro ao abrir edição:', error);
+        alert('Erro ao carregar dados do funcionário: ' + error.message);
     }
 }
 
@@ -212,6 +276,11 @@ async function atualizarFuncionario() {
     
     if (!nome || !email || !cpf || !cargo || !departamento) {
         alert('Preencha todos os campos obrigatórios!');
+        return;
+    }
+    
+    if (!db) {
+        alert('Banco de dados não disponível');
         return;
     }
     
@@ -233,7 +302,7 @@ async function atualizarFuncionario() {
         carregarEstatisticas();
         
     } catch (error) {
-        console.error('Erro atualizar:', error);
+        console.error('Erro ao atualizar funcionário:', error);
         alert('Erro ao atualizar funcionário: ' + error.message);
     }
 }
@@ -247,13 +316,18 @@ async function excluirFuncionario(funcionarioId) {
         return;
     }
     
+    if (!db) {
+        alert('Banco de dados não disponível');
+        return;
+    }
+    
     try {
         if (funcionarioId === funcionarioEditandoId) {
-            // Exclusão permanente (apenas para usuários de teste)
+            // Exclusão permanente
             await db.collection('usuarios').doc(funcionarioId).delete();
             alert('✅ Funcionário excluído permanentemente!');
         } else {
-            // Marcar como inativo (recomendado)
+            // Marcar como inativo
             await db.collection('usuarios').doc(funcionarioId).update({
                 status: 'inativo',
                 dataDesativacao: new Date().toISOString()
@@ -266,7 +340,7 @@ async function excluirFuncionario(funcionarioId) {
         carregarSelectFuncionarios();
         
     } catch (error) {
-        console.error('Erro excluir:', error);
+        console.error('Erro ao excluir funcionário:', error);
         alert('Erro ao processar funcionário: ' + error.message);
     }
 }
@@ -274,6 +348,11 @@ async function excluirFuncionario(funcionarioId) {
 // ============ FUNÇÕES DE AJUSTE DE HORAS ============
 async function carregarFuncionariosParaAjuste() {
     try {
+        if (!db) {
+            console.error('Firestore não inicializado');
+            return;
+        }
+        
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
             .where('status', '!=', 'inativo')
@@ -281,6 +360,8 @@ async function carregarFuncionariosParaAjuste() {
             .get();
         
         const select = document.getElementById('funcionarioAjuste');
+        if (!select) return;
+        
         let html = '<option value="">Selecione um funcionário</option>';
         
         snapshot.forEach(doc => {
@@ -291,7 +372,7 @@ async function carregarFuncionariosParaAjuste() {
         select.innerHTML = html;
         
     } catch (error) {
-        console.error('Erro carregar funcionários para ajuste:', error);
+        console.error('Erro ao carregar funcionários para ajuste:', error);
     }
 }
 
@@ -299,14 +380,15 @@ async function carregarHorarioAtual() {
     const funcionarioId = document.getElementById('funcionarioAjuste').value;
     const data = document.getElementById('dataAjuste').value;
     
-    if (!funcionarioId || !data) {
-        document.getElementById('horariosExistentes').innerHTML = 
-            '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
+    if (!funcionarioId || !data || !db) {
+        const element = document.getElementById('horariosExistentes');
+        if (element) {
+            element.innerHTML = '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
+        }
         return;
     }
     
     try {
-        // Buscar registros existentes para esta data
         const snapshot = await db.collection('pontos')
             .where('funcionarioId', '==', funcionarioId)
             .where('data', '==', data)
@@ -327,16 +409,29 @@ async function carregarHorarioAtual() {
             html += '</ul>';
         }
         
-        document.getElementById('horariosExistentes').innerHTML = html;
+        const element = document.getElementById('horariosExistentes');
+        if (element) {
+            element.innerHTML = html;
+        }
         
     } catch (error) {
-        console.error('Erro carregar horários:', error);
+        console.error('Erro ao carregar horários:', error);
+        const element = document.getElementById('horariosExistentes');
+        if (element) {
+            element.innerHTML = '<p style="color: red;">Erro ao carregar horários</p>';
+        }
     }
 }
 
 async function salvarAjusteHoras() {
+    if (!db || !auth) {
+        alert('Sistema não inicializado. Tente recarregar a página.');
+        return;
+    }
+    
     const funcionarioId = document.getElementById('funcionarioAjuste').value;
-    const funcionarioNome = document.getElementById('funcionarioAjuste').selectedOptions[0].text.split(' - ')[0];
+    const funcionarioSelect = document.getElementById('funcionarioAjuste').selectedOptions[0];
+    const funcionarioNome = funcionarioSelect ? funcionarioSelect.text.split(' - ')[0] : 'Funcionário';
     const data = document.getElementById('dataAjuste').value;
     const tipoAjuste = document.getElementById('tipoAjuste').value;
     const horaEntrada = document.getElementById('horaEntradaAjuste').value;
@@ -355,10 +450,17 @@ async function salvarAjusteHoras() {
         return;
     }
     
+    if (horaEntrada >= horaSaida) {
+        alert('A hora de entrada deve ser anterior à hora de saída!');
+        return;
+    }
+    
     try {
-        // 1. Criar registro de ajuste
         const ajusteId = db.collection('ajustes_horas').doc().id;
+        const userName = document.getElementById('userName').textContent;
+        const user = auth.currentUser;
         
+        // 1. Criar registro de ajuste
         await db.collection('ajustes_horas').doc(ajusteId).set({
             id: ajusteId,
             funcionarioId: funcionarioId,
@@ -370,13 +472,16 @@ async function salvarAjusteHoras() {
             totalHoras: totalHoras,
             justificativa: justificativa,
             status: 'aprovado',
-            aprovadoPor: auth.currentUser.uid,
-            aprovadoPorNome: document.getElementById('userName').textContent,
+            aprovadoPor: user ? user.uid : null,
+            aprovadoPorNome: userName,
             dataAprovacao: new Date().toISOString(),
             dataCriacao: new Date().toISOString()
         });
         
-        // 2. Criar pontos de entrada e saída no sistema
+        // 2. Criar pontos de entrada e saída
+        const entradaTimestamp = new Date(`${data}T${horaEntrada}:00`).getTime();
+        const saidaTimestamp = new Date(`${data}T${horaSaida}:00`).getTime();
+        
         // Ponto de entrada
         await db.collection('pontos').add({
             funcionarioId: funcionarioId,
@@ -384,7 +489,7 @@ async function salvarAjusteHoras() {
             tipo: 'entrada',
             horario: horaEntrada,
             data: data,
-            timestamp: new Date(`${data}T${horaEntrada}:00`).getTime(),
+            timestamp: entradaTimestamp,
             localizacao: { latitude: null, longitude: null },
             metodo: 'ajuste_gestor',
             ajusteId: ajusteId,
@@ -399,7 +504,7 @@ async function salvarAjusteHoras() {
             tipo: 'saida',
             horario: horaSaida,
             data: data,
-            timestamp: new Date(`${data}T${horaSaida}:00`).getTime(),
+            timestamp: saidaTimestamp,
             localizacao: { latitude: null, longitude: null },
             metodo: 'ajuste_gestor',
             ajusteId: ajusteId,
@@ -407,7 +512,7 @@ async function salvarAjusteHoras() {
             dataRegistro: new Date().toISOString()
         });
         
-        alert('✅ Horas ajustadas com sucesso! Foram criados registros de entrada e saída.');
+        alert('✅ Horas ajustadas com sucesso!\nForam criados registros de entrada e saída.');
         
         // Limpar formulário
         document.getElementById('formAjusteHoras').reset();
@@ -420,19 +525,23 @@ async function salvarAjusteHoras() {
         carregarEstatisticas();
         
     } catch (error) {
-        console.error('Erro salvar ajuste:', error);
+        console.error('Erro ao salvar ajuste:', error);
         alert('Erro ao salvar ajuste de horas: ' + error.message);
     }
 }
 
 async function carregarAjustesRecentes() {
     try {
+        if (!db) return;
+        
         const snapshot = await db.collection('ajustes_horas')
             .orderBy('dataCriacao', 'desc')
             .limit(5)
             .get();
         
         const tbody = document.querySelector('#tabelaAjustes tbody');
+        if (!tbody) return;
+        
         let html = '';
         
         if (snapshot.empty) {
@@ -463,13 +572,15 @@ async function carregarAjustesRecentes() {
         tbody.innerHTML = html;
         
     } catch (error) {
-        console.error('Erro carregar ajustes:', error);
+        console.error('Erro ao carregar ajustes:', error);
     }
 }
 
 // ============ FUNÇÕES DE REGISTROS E ESTATÍSTICAS ============
 async function carregarRegistrosHoje() {
     try {
+        if (!db) return;
+        
         const hoje = new Date().toISOString().split('T')[0];
         const snapshot = await db.collection('pontos')
             .where('data', '==', hoje)
@@ -478,6 +589,8 @@ async function carregarRegistrosHoje() {
             .get();
         
         const tbody = document.querySelector('#tabelaRegistros tbody');
+        if (!tbody) return;
+        
         let html = '';
         
         if (snapshot.empty) {
@@ -489,7 +602,7 @@ async function carregarRegistrosHoje() {
                     <tr>
                         <td>${reg.funcionarioNome}</td>
                         <td>${reg.horario}</td>
-                        <td>${reg.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
+                        <td>${reg.tipo === 'entrada' ? 'Entrada' : 'Saída'}</td>
                         <td>${reg.localizacao?.latitude ? '📍' : '--'}</td>
                     </tr>
                 `;
@@ -499,12 +612,14 @@ async function carregarRegistrosHoje() {
         tbody.innerHTML = html;
         
     } catch (error) {
-        console.error('Erro carregar registros:', error);
+        console.error('Erro ao carregar registros:', error);
     }
 }
 
 async function carregarEstatisticas() {
     try {
+        if (!db) return;
+        
         // Total de funcionários ativos
         const funcionariosSnapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
@@ -557,12 +672,14 @@ async function carregarEstatisticas() {
         }
         
     } catch (error) {
-        console.error('Erro estatísticas:', error);
+        console.error('Erro ao carregar estatísticas:', error);
     }
 }
 
 async function carregarSelectFuncionarios() {
     try {
+        if (!db) return;
+        
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
             .where('status', '==', 'ativo')
@@ -582,14 +699,14 @@ async function carregarSelectFuncionarios() {
         }
         
     } catch (error) {
-        console.error('Erro carregar select:', error);
+        console.error('Erro ao carregar select:', error);
     }
 }
 
 // ============ FUNÇÕES DE RELATÓRIOS ============
 async function gerarRelatorioMensal() {
     const mesAno = document.getElementById('mesRelatorio')?.value;
-    if (!mesAno) return;
+    if (!mesAno || !db) return;
     
     try {
         const [ano, mes] = mesAno.split('-');
@@ -624,7 +741,7 @@ async function gerarRelatorioMensal() {
         const contentDiv = document.getElementById('relatorioMensalContent');
         if (contentDiv) {
             contentDiv.innerHTML = `
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px;">
                     <h4>Relatório de ${mesNome}</h4>
                     <div class="stats-grid" style="margin-top: 15px;">
                         <div class="stat-card">
@@ -649,13 +766,13 @@ async function gerarRelatorioMensal() {
         }
         
     } catch (error) {
-        console.error('Erro relatório mensal:', error);
+        console.error('Erro ao gerar relatório mensal:', error);
     }
 }
 
 async function gerarRelatorioAjustes() {
     const mesAno = document.getElementById('periodoAjustes')?.value;
-    if (!mesAno) return;
+    if (!mesAno || !db) return;
     
     try {
         const [ano, mes] = mesAno.split('-');
@@ -698,25 +815,11 @@ async function gerarRelatorioAjustes() {
         }
         
     } catch (error) {
-        console.error('Erro relatório ajustes:', error);
+        console.error('Erro ao gerar relatório de ajustes:', error);
     }
 }
 
-// ============ FUNÇÕES UTILITÁRIAS ============
-function logout() {
-    if (confirm('Deseja realmente sair?')) {
-        localStorage.removeItem('usuario_logado');
-        localStorage.removeItem('funcionario_logado');
-        
-        if (auth) {
-            auth.signOut();
-        }
-        
-        window.location.href = 'index.html';
-    }
-}
-
-// Exportar funções para uso global
+// ============ EXPORTAR FUNÇÕES PARA USO GLOBAL ============
 window.cadastrarFuncionario = cadastrarFuncionario;
 window.abrirEditarFuncionario = abrirEditarFuncionario;
 window.atualizarFuncionario = atualizarFuncionario;
@@ -727,3 +830,8 @@ window.calcularHoras = calcularHoras;
 window.gerarRelatorioMensal = gerarRelatorioMensal;
 window.gerarRelatorioAjustes = gerarRelatorioAjustes;
 window.logout = logout;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.openTab = openTab;
+window.filtrarFuncionarios = filtrarFuncionarios;
+window.carregarFuncionarios = carregarFuncionarios;
