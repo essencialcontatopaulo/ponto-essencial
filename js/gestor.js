@@ -1,106 +1,80 @@
-// js/gestor.js - VERSÃO CORRIGIDA
-// Script principal do painel do gestor
+// js/gestor.js
+// Script do Painel do Gestor - Essencial Print
 
-// Variáveis globais
 let db = null;
 let auth = null;
-let funcionarioEditandoId = null;
+let usuarioAtual = null;
 
-// Inicialização quando o DOM carrega
+// Inicialização
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('DOM carregado, verificando Firebase...');
+    console.log('🔧 Iniciando Painel do Gestor...');
     
-    // Verificar se Firebase está disponível
-    if (typeof firebase === 'undefined') {
-        console.error('Firebase não carregado!');
-        alert('Erro: Firebase não foi carregado. Verifique sua conexão.');
+    // Verificar se está logado como gestor
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
+    
+    if (!usuarioLogado || usuarioLogado.tipo !== 'gestor') {
+        alert('❌ Acesso restrito a gestores!');
+        window.location.href = 'index.html';
         return;
     }
     
+    usuarioAtual = usuarioLogado;
+    
+    // Configurar interface
+    document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
+    document.getElementById('userCargo').textContent = 
+        `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
+    
+    // Inicializar Firebase
     try {
-        // Inicializar Firebase se ainda não estiver
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK não carregado');
+        }
+        
         if (!firebase.apps.length) {
-            console.log('Inicializando Firebase...');
             firebase.initializeApp(firebaseConfig);
         }
         
-        // Obter instâncias
-        db = firebase.firestore();
         auth = firebase.auth();
+        db = firebase.firestore();
         
-        console.log('Firebase inicializado com sucesso');
+        console.log('✅ Firebase inicializado para gestor');
         
         // Verificar autenticação
-        verificarPermissaoGestor();
-        
-    } catch (error) {
-        console.error('Erro ao inicializar Firebase:', error);
-        alert('Erro ao conectar com o servidor: ' + error.message);
-    }
-});
-
-// ============ VERIFICAÇÃO DE PERMISSÃO ============
-async function verificarPermissaoGestor() {
-    try {
-        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
-        
-        if (!usuarioLogado || usuarioLogado.tipo !== 'gestor') {
-            alert('Acesso restrito a gestores!');
-            window.location.href = 'index.html';
-            return;
-        }
-        
-        // Configurar dados do gestor
-        document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
-        document.getElementById('userCargo').textContent = `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
-        
-        // Aguardar Firebase estar pronto
-        if (!db || !auth) {
-            setTimeout(verificarPermissaoGestor, 500);
-            return;
-        }
-        
-        // Verificar autenticação atual
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
-                // Se não estiver autenticado, redirecionar para login
                 alert('Sessão expirada! Faça login novamente.');
                 window.location.href = 'index.html';
                 return;
             }
             
             // Carregar dados do sistema
-            carregarFuncionarios();
-            carregarRegistrosHoje();
-            carregarAjustesRecentes();
-            carregarEstatisticas();
-            carregarSelectFuncionarios();
+            await carregarFuncionarios();
+            await carregarRegistrosHoje();
+            await carregarAjustesRecentes();
+            await carregarEstatisticas();
+            await carregarSelectFuncionarios();
             
-            // Configurar data atual
-            const hoje = new Date().toISOString().split('T')[0];
+            // Configurar data atual nos relatórios
             const mesAtual = new Date().toISOString().slice(0, 7);
+            document.getElementById('mesRelatorio').value = mesAtual;
+            document.getElementById('periodoRelatorio').value = mesAtual;
+            document.getElementById('periodoAjustes').value = mesAtual;
             
-            if (document.getElementById('mesRelatorio')) {
-                document.getElementById('mesRelatorio').value = mesAtual;
-                document.getElementById('periodoRelatorio').value = mesAtual;
-                document.getElementById('periodoAjustes').value = mesAtual;
-                gerarRelatorioMensal();
-            }
+            // Gerar relatório inicial
+            gerarRelatorioMensal();
         });
         
     } catch (error) {
-        console.error('Erro na verificação de permissão:', error);
-        alert('Erro ao verificar permissões: ' + error.message);
+        console.error('❌ Erro ao inicializar Firebase:', error);
+        alert('Erro de conexão com o servidor: ' + error.message);
     }
-}
+});
 
 // ============ FUNÇÕES DE FUNCIONÁRIOS ============
 async function carregarFuncionarios() {
     try {
-        if (!db) {
-            console.error('Firestore não inicializado');
-            return;
-        }
+        if (!db) throw new Error('Firestore não disponível');
         
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
@@ -108,8 +82,6 @@ async function carregarFuncionarios() {
             .get();
         
         const tbody = document.querySelector('#tabelaFuncionarios tbody');
-        if (!tbody) return;
-        
         let html = '';
         
         if (snapshot.empty) {
@@ -127,8 +99,10 @@ async function carregarFuncionarios() {
                         <td>${func.cargo || 'Não informado'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="abrirEditarFuncionario('${doc.id}')">Editar</button>
-                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="excluirFuncionario('${doc.id}')">${func.status === 'inativo' ? 'Excluir' : 'Inativar'}</button>
+                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" 
+                                    onclick="abrirEditarFuncionario('${doc.id}')">Editar</button>
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" 
+                                    onclick="excluirFuncionario('${doc.id}')">${func.status === 'inativo' ? 'Excluir' : 'Inativar'}</button>
                         </td>
                     </tr>
                 `;
@@ -169,13 +143,12 @@ async function cadastrarFuncionario() {
         return;
     }
     
-    if (!auth) {
-        alert('Erro: Sistema de autenticação não disponível');
-        return;
-    }
-    
     try {
-        console.log('Iniciando cadastro de funcionário...');
+        if (!auth || !db) {
+            throw new Error('Sistema de autenticação não disponível');
+        }
+        
+        console.log('Criando funcionário:', email);
         
         // 1. Criar usuário no Authentication
         const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
@@ -200,15 +173,13 @@ async function cadastrarFuncionario() {
             criadoPor: auth.currentUser ? auth.currentUser.uid : null
         });
         
-        console.log('Funcionário salvo no Firestore');
-        
         alert('✅ Funcionário cadastrado com sucesso!');
         closeModal('novoFuncionario');
         
         // Atualizar listas
-        carregarFuncionarios();
-        carregarSelectFuncionarios();
-        carregarEstatisticas();
+        await carregarFuncionarios();
+        await carregarSelectFuncionarios();
+        await carregarEstatisticas();
         
     } catch (error) {
         console.error('Erro ao cadastrar funcionário:', error);
@@ -219,8 +190,6 @@ async function cadastrarFuncionario() {
             alert('A senha deve ter pelo menos 6 caracteres!');
         } else if (error.code === 'auth/invalid-email') {
             alert('E-mail inválido!');
-        } else if (error.code === 'auth/network-request-failed') {
-            alert('Erro de conexão. Verifique sua internet!');
         } else {
             alert('Erro ao cadastrar funcionário: ' + error.message);
         }
@@ -242,7 +211,6 @@ async function abrirEditarFuncionario(funcionarioId) {
         }
         
         const func = doc.data();
-        funcionarioEditandoId = funcionarioId;
         
         // Preencher formulário
         document.getElementById('editarFuncionarioId').value = funcionarioId;
@@ -261,7 +229,7 @@ async function abrirEditarFuncionario(funcionarioId) {
         
     } catch (error) {
         console.error('Erro ao abrir edição:', error);
-        alert('Erro ao carregar dados do funcionário: ' + error.message);
+        alert('Erro ao carregar dados do funcionário');
     }
 }
 
@@ -297,9 +265,9 @@ async function atualizarFuncionario() {
         
         alert('✅ Funcionário atualizado com sucesso!');
         closeModal('editarFuncionario');
-        carregarFuncionarios();
-        carregarSelectFuncionarios();
-        carregarEstatisticas();
+        await carregarFuncionarios();
+        await carregarSelectFuncionarios();
+        await carregarEstatisticas();
         
     } catch (error) {
         console.error('Erro ao atualizar funcionário:', error);
@@ -308,11 +276,9 @@ async function atualizarFuncionario() {
 }
 
 async function excluirFuncionario(funcionarioId) {
-    const confirmMessage = funcionarioId === funcionarioEditandoId ? 
-        '⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR permanentemente este funcionário?\n\nEsta ação não pode ser desfeita!' :
-        '⚠️ Tem certeza que deseja INATIVAR este funcionário?\n\nEle não poderá mais acessar o sistema.';
+    const confirmMessage = confirm('⚠️ Tem certeza que deseja INATIVAR este funcionário?\n\nEle não poderá mais acessar o sistema.');
     
-    if (!confirm(confirmMessage)) {
+    if (!confirmMessage) {
         return;
     }
     
@@ -322,22 +288,16 @@ async function excluirFuncionario(funcionarioId) {
     }
     
     try {
-        if (funcionarioId === funcionarioEditandoId) {
-            // Exclusão permanente
-            await db.collection('usuarios').doc(funcionarioId).delete();
-            alert('✅ Funcionário excluído permanentemente!');
-        } else {
-            // Marcar como inativo
-            await db.collection('usuarios').doc(funcionarioId).update({
-                status: 'inativo',
-                dataDesativacao: new Date().toISOString()
-            });
-            alert('✅ Funcionário marcado como inativo!');
-        }
+        // Marcar como inativo
+        await db.collection('usuarios').doc(funcionarioId).update({
+            status: 'inativo',
+            dataDesativacao: new Date().toISOString()
+        });
         
-        carregarFuncionarios();
-        carregarEstatisticas();
-        carregarSelectFuncionarios();
+        alert('✅ Funcionário marcado como inativo!');
+        await carregarFuncionarios();
+        await carregarEstatisticas();
+        await carregarSelectFuncionarios();
         
     } catch (error) {
         console.error('Erro ao excluir funcionário:', error);
@@ -348,10 +308,7 @@ async function excluirFuncionario(funcionarioId) {
 // ============ FUNÇÕES DE AJUSTE DE HORAS ============
 async function carregarFuncionariosParaAjuste() {
     try {
-        if (!db) {
-            console.error('Firestore não inicializado');
-            return;
-        }
+        if (!db) return;
         
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
@@ -416,15 +373,11 @@ async function carregarHorarioAtual() {
         
     } catch (error) {
         console.error('Erro ao carregar horários:', error);
-        const element = document.getElementById('horariosExistentes');
-        if (element) {
-            element.innerHTML = '<p style="color: red;">Erro ao carregar horários</p>';
-        }
     }
 }
 
 async function salvarAjusteHoras() {
-    if (!db || !auth) {
+    if (!db || !auth || !auth.currentUser) {
         alert('Sistema não inicializado. Tente recarregar a página.');
         return;
     }
@@ -458,7 +411,6 @@ async function salvarAjusteHoras() {
     try {
         const ajusteId = db.collection('ajustes_horas').doc().id;
         const userName = document.getElementById('userName').textContent;
-        const user = auth.currentUser;
         
         // 1. Criar registro de ajuste
         await db.collection('ajustes_horas').doc(ajusteId).set({
@@ -472,7 +424,7 @@ async function salvarAjusteHoras() {
             totalHoras: totalHoras,
             justificativa: justificativa,
             status: 'aprovado',
-            aprovadoPor: user ? user.uid : null,
+            aprovadoPor: auth.currentUser.uid,
             aprovadoPorNome: userName,
             dataAprovacao: new Date().toISOString(),
             dataCriacao: new Date().toISOString()
@@ -520,9 +472,9 @@ async function salvarAjusteHoras() {
         closeModal('ajusteHoras');
         
         // Atualizar listas
-        carregarRegistrosHoje();
-        carregarAjustesRecentes();
-        carregarEstatisticas();
+        await carregarRegistrosHoje();
+        await carregarAjustesRecentes();
+        await carregarEstatisticas();
         
     } catch (error) {
         console.error('Erro ao salvar ajuste:', error);
@@ -819,7 +771,21 @@ async function gerarRelatorioAjustes() {
     }
 }
 
-// ============ EXPORTAR FUNÇÕES PARA USO GLOBAL ============
+// ============ FUNÇÕES AUXILIARES ============
+function logout() {
+    if (confirm('Deseja realmente sair?')) {
+        localStorage.removeItem('usuario_logado');
+        localStorage.removeItem('funcionario_logado');
+        
+        if (auth) {
+            auth.signOut();
+        }
+        
+        window.location.href = 'index.html';
+    }
+}
+
+// Exportar funções para uso global
 window.cadastrarFuncionario = cadastrarFuncionario;
 window.abrirEditarFuncionario = abrirEditarFuncionario;
 window.atualizarFuncionario = atualizarFuncionario;
@@ -830,8 +796,4 @@ window.calcularHoras = calcularHoras;
 window.gerarRelatorioMensal = gerarRelatorioMensal;
 window.gerarRelatorioAjustes = gerarRelatorioAjustes;
 window.logout = logout;
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.openTab = openTab;
-window.filtrarFuncionarios = filtrarFuncionarios;
 window.carregarFuncionarios = carregarFuncionarios;
