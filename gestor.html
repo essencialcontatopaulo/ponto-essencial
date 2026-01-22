@@ -11,16 +11,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Configuração Firebase -->
-    <script src="js/firebase-config.js" defer></script>
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <script src="js/firebase-config.js"></script>
     
     <!-- Script do Gestor -->
     <script src="js/gestor.js" defer></script>
     
     <style>
-        /* ESTILOS EM TONS DE VERDE - NOVO TEMA */
         * {
             margin: 0;
             padding: 0;
@@ -439,7 +435,7 @@
             <!-- Funcionários Ativos -->
             <div class="card">
                 <h2>Funcionários 
-                    <button class="btn btn-success" onclick="openModal('novoFuncionario')">+ Novo</button>
+                    <button class="btn btn-success" onclick="openModal('novoFuncionario')">Novo</button>
                     <button class="btn btn-primary" onclick="carregarFuncionarios()" title="Atualizar">Atualizar</button>
                 </h2>
                 <div class="search-box">
@@ -812,7 +808,6 @@
             if (modalElement) {
                 modalElement.style.display = 'none';
                 
-                // Limpar formulários
                 if (modalName === 'novoFuncionario') {
                     document.getElementById('formNovoFuncionario').reset();
                 }
@@ -826,7 +821,6 @@
         }
 
         function openTab(tabName) {
-            // Esconder todas as tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -834,7 +828,6 @@
                 btn.classList.remove('active');
             });
             
-            // Mostrar tab selecionada
             const tabElement = document.getElementById(tabName);
             if (tabElement) {
                 tabElement.classList.add('active');
@@ -889,6 +882,34 @@
                 window.location.href = 'index.html';
             }
         }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            if (document.getElementById('mesRelatorio')) {
+                document.getElementById('mesRelatorio').value = mesAtual;
+                document.getElementById('periodoRelatorio').value = mesAtual;
+                document.getElementById('periodoAjustes').value = mesAtual;
+            }
+            
+            if (document.getElementById('dataAdmissao')) {
+                document.getElementById('dataAdmissao').value = hoje;
+            }
+            
+            if (document.getElementById('dataAjuste')) {
+                document.getElementById('dataAjuste').value = hoje;
+            }
+            
+            const entradaInput = document.getElementById('horaEntradaAjuste');
+            const saidaInput = document.getElementById('horaSaidaAjuste');
+            
+            if (entradaInput && saidaInput) {
+                entradaInput.addEventListener('change', calcularHoras);
+                saidaInput.addEventListener('change', calcularHoras);
+            }
+        });
     </script>
 </body>
 </html>
