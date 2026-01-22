@@ -25,14 +25,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('userCargo').textContent = 
         `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
     
-    // Inicializar Firebase
+    // Inicializar Firebase - CÓDIGO CORRIGIDO
     try {
         if (typeof firebase === 'undefined') {
             throw new Error('Firebase SDK não carregado');
         }
         
+        // USAR CONFIGURAÇÃO DIRETA (mesma do index.html)
+        const config = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
+        
         if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+            firebase.initializeApp(config);
         }
         
         auth = firebase.auth();
