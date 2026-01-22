@@ -10,208 +10,40 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/gestor.js" defer></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            color: #333;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo h1 {
-            color: #1a237e;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .logo span {
-            color: #3949ab;
-            font-weight: 300;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .user-info h3 {
-            color: #1a237e;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .user-info p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            color: #1a237e;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e8eaf6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-logout {
-            background: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background-color: #e8eaf6;
-            color: #1a237e;
+        /* ESTILOS ESPECÍFICOS DO GESTOR (adicione ao seu style.css depois) */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 600;
         }
 
-        tbody tr:hover {
-            background-color: #f5f5f5;
+        .status-presente {
+            background: #d4edda;
+            color: #155724;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+        .status-atrasado {
+            background: #fff3cd;
+            color: #856404;
         }
 
-        .stat-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            border-left: 4px solid #1a237e;
+        .status-falta {
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a237e;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #1a237e;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #3949ab;
+        .status-inativo {
+            background: #e9ecef;
+            color: #495057;
         }
 
         .modal {
@@ -232,7 +64,7 @@
             border-radius: 15px;
             padding: 30px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -246,6 +78,7 @@
 
         .modal-header h3 {
             color: #1a237e;
+            margin: 0;
         }
 
         .close-modal {
@@ -254,6 +87,12 @@
             font-size: 24px;
             cursor: pointer;
             color: #666;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         .tab-navigation {
@@ -285,64 +124,6 @@
         .tab-content.active {
             display: block;
         }
-
-        .search-box {
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-presente {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-atrasado {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-falta {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        footer {
-            text-align: center;
-            color: white;
-            padding: 20px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .user-info {
-                text-align: center;
-            }
-        }
     </style>
 </head>
 <body>
@@ -363,14 +144,30 @@
             <div class="card">
                 <h2>📊 Estatísticas Gerais</h2>
                 <div class="stats-grid" id="statsGrid">
-                    <!-- Será preenchido por JavaScript -->
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Funcionários</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Registros Hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Pendentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Atrasos/Mês</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Funcionários Ativos -->
             <div class="card">
-                <h2>👥 Funcionários Ativos 
+                <h2>👥 Funcionários 
                     <button class="btn btn-success" onclick="openModal('novoFuncionario')">+ Novo</button>
+                    <button class="btn btn-primary" onclick="carregarFuncionarios()" title="Atualizar">↻</button>
                 </h2>
                 <div class="search-box">
                     <input type="text" id="searchFuncionarios" placeholder="Buscar funcionário..." onkeyup="filtrarFuncionarios()">
@@ -387,9 +184,38 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>
+                            <tr><td colspan="5" style="text-align: center;">Carregando funcionários...</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Ajuste de Horas -->
+            <div class="card">
+                <h2>⏰ Ajuste de Horas 
+                    <button class="btn btn-primary" onclick="openModal('ajusteHoras')">
+                        <span>+</span> Novo Ajuste
+                    </button>
+                </h2>
+                <p style="color: #666; margin-bottom: 15px;">Ajuste horas trabalhadas externamente</p>
+                
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #1a237e; margin-bottom: 10px;">📋 Últimos Ajustes</h4>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Funcionário</th>
+                                    <th>Data</th>
+                                    <th>Horas</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaAjustes">
+                                <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -407,27 +233,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Justificativas Pendentes -->
-            <div class="card">
-                <h2>⏳ Justificativas Pendentes</h2>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table id="tabelaJustificativas">
-                        <thead>
-                            <tr>
-                                <th>Funcionário</th>
-                                <th>Data</th>
-                                <th>Tipo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
+                            <tr><td colspan="4" style="text-align: center;">Carregando registros...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -440,7 +246,7 @@
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="openTab('relatorioMensal')">Mensal</button>
                 <button class="tab-btn" onclick="openTab('relatorioFuncionario')">Por Funcionário</button>
-                <button class="tab-btn" onclick="openTab('relatorioAtrasos')">Atrasos</button>
+                <button class="tab-btn" onclick="openTab('relatorioAjustes')">Ajustes</button>
             </div>
             
             <div id="relatorioMensal" class="tab-content active">
@@ -449,7 +255,7 @@
                     <input type="month" id="mesRelatorio" class="form-control" onchange="gerarRelatorioMensal()">
                 </div>
                 <div id="relatorioMensalContent">
-                    <!-- Conteúdo do relatório mensal -->
+                    <p style="color: #666;">Selecione um mês para gerar o relatório</p>
                 </div>
             </div>
             
@@ -465,17 +271,17 @@
                     <input type="month" id="periodoRelatorio" class="form-control" onchange="gerarRelatorioFuncionario()">
                 </div>
                 <div id="relatorioFuncionarioContent">
-                    <!-- Conteúdo do relatório por funcionário -->
+                    <p style="color: #666;">Selecione um funcionário e período</p>
                 </div>
             </div>
             
-            <div id="relatorioAtrasos" class="tab-content">
+            <div id="relatorioAjustes" class="tab-content">
                 <div class="form-group">
-                    <label for="periodoAtrasos">Período:</label>
-                    <input type="month" id="periodoAtrasos" class="form-control" onchange="gerarRelatorioAtrasos()">
+                    <label for="periodoAjustes">Período:</label>
+                    <input type="month" id="periodoAjustes" class="form-control" onchange="gerarRelatorioAjustes()">
                 </div>
-                <div id="relatorioAtrasosContent">
-                    <!-- Conteúdo do relatório de atrasos -->
+                <div id="relatorioAjustesContent">
+                    <p style="color: #666;">Selecione um período para ver os ajustes</p>
                 </div>
             </div>
         </div>
@@ -486,7 +292,7 @@
         </footer>
     </div>
 
-    <!-- Modal Novo Funcionário -->
+    <!-- MODAL NOVO FUNCIONÁRIO -->
     <div id="modalNovoFuncionario" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -494,522 +300,290 @@
                 <button class="close-modal" onclick="closeModal('novoFuncionario')">×</button>
             </div>
             <form id="formNovoFuncionario" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="nomeFuncionario">Nome Completo *</label>
-                    <input type="text" id="nomeFuncionario" class="form-control" required>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nomeFuncionario">Nome Completo *</label>
+                        <input type="text" id="nomeFuncionario" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailFuncionario">E-mail *</label>
+                        <input type="email" id="emailFuncionario" class="form-control" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="emailFuncionario">E-mail *</label>
-                    <input type="email" id="emailFuncionario" class="form-control" required>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="senhaFuncionario">Senha *</label>
+                        <input type="password" id="senhaFuncionario" class="form-control" required>
+                        <small style="color: #666; font-size: 12px;">Mínimo 6 caracteres</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="cpfFuncionario">CPF *</label>
+                        <input type="text" id="cpfFuncionario" class="form-control" placeholder="000.000.000-00" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="senhaFuncionario">Senha *</label>
-                    <input type="password" id="senhaFuncionario" class="form-control" required>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cargoFuncionario">Cargo *</label>
+                        <select id="cargoFuncionario" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            <option value="Operador">Operador</option>
+                            <option value="Designer">Designer</option>
+                            <option value="Atendente">Atendente</option>
+                            <option value="Auxiliar">Auxiliar</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="Gerente">Gerente</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="departamentoFuncionario">Departamento *</label>
+                        <select id="departamentoFuncionario" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            <option value="Produção">Produção</option>
+                            <option value="Atendimento">Atendimento</option>
+                            <option value="Design">Design</option>
+                            <option value="Administração">Administração</option>
+                            <option value="RH">RH</option>
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="Comercial">Comercial</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="cpfFuncionario">CPF</label>
-                    <input type="text" id="cpfFuncionario" class="form-control" placeholder="000.000.000-00">
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="salarioFuncionario">Salário (R$)</label>
+                        <input type="number" id="salarioFuncionario" class="form-control" step="0.01" placeholder="0,00">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataAdmissao">Data de Admissão *</label>
+                        <input type="date" id="dataAdmissao" class="form-control" required>
+                    </div>
                 </div>
+                
                 <div class="form-group">
-                    <label for="cargoFuncionario">Cargo *</label>
-                    <input type="text" id="cargoFuncionario" class="form-control" required>
+                    <label for="telefoneFuncionario">Telefone</label>
+                    <input type="text" id="telefoneFuncionario" class="form-control" placeholder="(11) 99999-9999">
                 </div>
+                
                 <div class="form-group">
-                    <label for="departamentoFuncionario">Departamento *</label>
-                    <input type="text" id="departamentoFuncionario" class="form-control" required>
+                    <label for="enderecoFuncionario">Endereço</label>
+                    <textarea id="enderecoFuncionario" class="form-control" rows="2" placeholder="Rua, Número, Bairro, Cidade"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="salarioFuncionario">Salário (R$)</label>
-                    <input type="number" id="salarioFuncionario" class="form-control" step="0.01" placeholder="0,00">
-                </div>
-                <div class="form-group">
-                    <label for="dataAdmissao">Data de Admissão</label>
-                    <input type="date" id="dataAdmissao" class="form-control">
-                </div>
+                
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-primary" onclick="cadastrarFuncionario()" style="flex: 1;">Cadastrar</button>
-                    <button type="button" class="btn btn-danger" onclick="closeModal('novoFuncionario')" style="flex: 1;">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="cadastrarFuncionario()" style="flex: 1;">
+                        ✓ Cadastrar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('novoFuncionario')" style="flex: 1;">
+                        × Cancelar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Ver Justificativa -->
-    <div id="modalVerJustificativa" class="modal">
+    <!-- MODAL AJUSTE DE HORAS -->
+    <div id="modalAjusteHoras" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📝 Justificativa</h3>
-                <button class="close-modal" onclick="closeModal('verJustificativa')">×</button>
+                <h3>⏰ Ajuste de Horas Trabalhadas</h3>
+                <button class="close-modal" onclick="closeModal('ajusteHoras')">×</button>
             </div>
-            <div id="justificativaContent">
-                <!-- Conteúdo da justificativa -->
+            <form id="formAjusteHoras" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="funcionarioAjuste">Funcionário *</label>
+                    <select id="funcionarioAjuste" class="form-control" required onchange="carregarHorarioAtual()">
+                        <option value="">Selecione um funcionário</option>
+                    </select>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dataAjuste">Data *</label>
+                        <input type="date" id="dataAjuste" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoAjuste">Tipo de Ajuste *</label>
+                        <select id="tipoAjuste" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            <option value="trabalho_externo">Trabalho Externo</option>
+                            <option value="hora_extra">Hora Extra</option>
+                            <option value="falta_justificada">Falta Justificada</option>
+                            <option value="atraso_justificado">Atraso Justificado</option>
+                            <option value="compensacao">Compensação de Horas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="horaEntradaAjuste">Hora de Entrada *</label>
+                        <input type="time" id="horaEntradaAjuste" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="horaSaidaAjuste">Hora de Saída *</label>
+                        <input type="time" id="horaSaidaAjuste" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="totalHorasAjuste">Total de Horas</label>
+                    <input type="text" id="totalHorasAjuste" class="form-control" readonly style="background: #f5f5f5;">
+                    <small style="color: #666; font-size: 12px;">Calculado automaticamente</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="justificativaAjuste">Justificativa *</label>
+                    <textarea id="justificativaAjuste" class="form-control" rows="3" 
+                              placeholder="Descreva o motivo do ajuste (ex: Trabalho externo sem acesso à internet)" required></textarea>
+                </div>
+                
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="color: #2e7d32; margin-bottom: 10px;">📋 Horários Registrados para esta data:</h4>
+                    <div id="horariosExistentes">
+                        <p style="color: #666;">Selecione um funcionário e data para ver os horários</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-success" onclick="salvarAjusteHoras()" style="flex: 1;">
+                        💾 Salvar Ajuste
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="calcularHoras()" style="flex: 1;">
+                        🧮 Calcular Horas
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('ajusteHoras')" style="flex: 1;">
+                        × Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR FUNCIONÁRIO -->
+    <div id="modalEditarFuncionario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Funcionário</h3>
+                <button class="close-modal" onclick="closeModal('editarFuncionario')">×</button>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;" id="justificativaActions">
-                <!-- Botões de aprovar/rejeitar -->
-            </div>
+            <form id="formEditarFuncionario" onsubmit="return false;">
+                <input type="hidden" id="editarFuncionarioId">
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editarNome">Nome Completo *</label>
+                        <input type="text" id="editarNome" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editarEmail">E-mail *</label>
+                        <input type="email" id="editarEmail" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editarCpf">CPF *</label>
+                        <input type="text" id="editarCpf" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editarCargo">Cargo *</label>
+                        <input type="text" id="editarCargo" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editarDepartamento">Departamento *</label>
+                        <input type="text" id="editarDepartamento" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div style="display: flex; gap: 15px; margin-top: 8px;">
+                            <label>
+                                <input type="radio" name="editarStatus" value="ativo" checked> Ativo
+                            </label>
+                            <label>
+                                <input type="radio" name="editarStatus" value="inativo"> Inativo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-success" onclick="atualizarFuncionario()" style="flex: 1;">
+                        💾 Salvar Alterações
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('editarFuncionario')" style="flex: 1;">
+                        × Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-            authDomain: "essencial-print-5a753.firebaseapp.com",
-            projectId: "essencial-print-5a753",
-            storageBucket: "essencial-print-5a753.firebasestorage.app",
-            messagingSenderId: "544082416072",
-            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
-        };
-        
-        // Inicializar Firebase
-        let db, auth;
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+        // Inicialização básica
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar data atual nos inputs
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            if (document.getElementById('mesRelatorio')) {
+                document.getElementById('mesRelatorio').value = mesAtual;
+                document.getElementById('periodoRelatorio').value = mesAtual;
+                document.getElementById('periodoAjustes').value = mesAtual;
             }
-            db = firebase.firestore();
-            auth = firebase.auth();
-        } catch (error) {
-            console.error('Erro Firebase:', error);
-        }
-
-        // Verificar se é gestor
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                verificarPermissaoGestor(user.uid);
-            } else {
-                window.location.href = 'index.html';
+            
+            if (document.getElementById('dataAdmissao')) {
+                document.getElementById('dataAdmissao').value = hoje;
+            }
+            
+            if (document.getElementById('dataAjuste')) {
+                document.getElementById('dataAjuste').value = hoje;
+            }
+            
+            // Configurar cálculo automático de horas
+            const entradaInput = document.getElementById('horaEntradaAjuste');
+            const saidaInput = document.getElementById('horaSaidaAjuste');
+            
+            if (entradaInput && saidaInput) {
+                entradaInput.addEventListener('change', calcularHoras);
+                saidaInput.addEventListener('change', calcularHoras);
             }
         });
 
-        async function verificarPermissaoGestor(userId) {
-            try {
-                const userDoc = await db.collection('usuarios').doc(userId).get();
-                
-                if (!userDoc.exists || userDoc.data().tipo !== 'gestor') {
-                    alert('Acesso restrito a gestores!');
-                    logout();
-                    return;
-                }
-                
-                // Configurar dados do gestor
-                const userData = userDoc.data();
-                document.getElementById('userName').textContent = userData.nome;
-                document.getElementById('userCargo').textContent = `${userData.cargo} - ${userData.departamento}`;
-                
-                // Carregar dados
-                carregarFuncionarios();
-                carregarRegistrosHoje();
-                carregarJustificativasPendentes();
-                carregarEstatisticas();
-                carregarSelectFuncionarios();
-                
-            } catch (error) {
-                console.error('Erro verificação:', error);
-                alert('Erro ao verificar permissões!');
-            }
-        }
-
-        // FUNÇÕES PRINCIPAIS
-        async function carregarFuncionarios() {
-            try {
-                const snapshot = await db.collection('usuarios')
-                    .where('tipo', '==', 'funcionario')
-                    .get();
-                
-                const tbody = document.querySelector('#tabelaFuncionarios tbody');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="5" style="text-align: center;">Nenhum funcionário cadastrado</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const func = doc.data();
-                        html += `
-                            <tr>
-                                <td>${func.nome}</td>
-                                <td>${func.email}</td>
-                                <td>${func.cargo || 'Não informado'}</td>
-                                <td><span class="status-badge status-presente">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="editarFuncionario('${doc.id}')">Editar</button>
-                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="excluirFuncionario('${doc.id}')">Excluir</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro carregar funcionários:', error);
-            }
-        }
-
-        async function carregarRegistrosHoje() {
-            try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const snapshot = await db.collection('pontos')
-                    .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
-                    .limit(50)
-                    .get();
-                
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="4" style="text-align: center;">Nenhum registro hoje</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const reg = doc.data();
-                        html += `
-                            <tr>
-                                <td>${reg.funcionarioNome}</td>
-                                <td>${reg.horario}</td>
-                                <td>${reg.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
-                                <td>${reg.localizacao.latitude ? '📍' : '--'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro carregar registros:', error);
-            }
-        }
-
-        async function carregarJustificativasPendentes() {
-            try {
-                const snapshot = await db.collection('justificativas')
-                    .where('status', '==', 'pendente')
-                    .orderBy('dataEnvio', 'desc')
-                    .get();
-                
-                const tbody = document.querySelector('#tabelaJustificativas tbody');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="4" style="text-align: center;">Nenhuma justificativa pendente</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const just = doc.data();
-                        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
-                        const tipoTexto = {
-                            'atraso': 'Atraso',
-                            'falta': 'Falta',
-                            'saida_antecipada': 'Saída Antecipada',
-                            'outro': 'Outro'
-                        }[just.tipo] || just.tipo;
-                        
-                        html += `
-                            <tr>
-                                <td>${just.funcionarioNome}</td>
-                                <td>${dataBR}</td>
-                                <td>${tipoTexto}</td>
-                                <td>
-                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="verJustificativa('${doc.id}')">Ver</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro carregar justificativas:', error);
-            }
-        }
-
-        async function carregarEstatisticas() {
-            try {
-                // Total de funcionários
-                const funcionariosSnapshot = await db.collection('usuarios')
-                    .where('tipo', '==', 'funcionario')
-                    .get();
-                
-                const totalFuncionarios = funcionariosSnapshot.size;
-                
-                // Registros de hoje
-                const hoje = new Date().toISOString().split('T')[0];
-                const registrosSnapshot = await db.collection('pontos')
-                    .where('data', '==', hoje)
-                    .get();
-                
-                const totalRegistrosHoje = registrosSnapshot.size;
-                
-                // Justificativas pendentes
-                const justificativasSnapshot = await db.collection('justificativas')
-                    .where('status', '==', 'pendente')
-                    .get();
-                
-                const totalJustificativasPendentes = justificativasSnapshot.size;
-                
-                // Atrasos do mês (simulação)
-                const hojeObj = new Date();
-                const primeiroDiaMes = new Date(hojeObj.getFullYear(), hojeObj.getMonth(), 1).toISOString().split('T')[0];
-                const ultimoDiaMes = new Date(hojeObj.getFullYear(), hojeObj.getMonth() + 1, 0).toISOString().split('T')[0];
-                
-                const atrasosSnapshot = await db.collection('justificativas')
-                    .where('tipo', '==', 'atraso')
-                    .where('data', '>=', primeiroDiaMes)
-                    .where('data', '<=', ultimoDiaMes)
-                    .get();
-                
-                const totalAtrasosMes = atrasosSnapshot.size;
-                
-                // Atualizar interface
-                const statsGrid = document.getElementById('statsGrid');
-                statsGrid.innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-number">${totalFuncionarios}</div>
-                        <div class="stat-label">Funcionários</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${totalRegistrosHoje}</div>
-                        <div class="stat-label">Registros Hoje</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${totalJustificativasPendentes}</div>
-                        <div class="stat-label">Pendentes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${totalAtrasosMes}</div>
-                        <div class="stat-label">Atrasos/Mês</div>
-                    </div>
-                `;
-                
-            } catch (error) {
-                console.error('Erro estatísticas:', error);
-            }
-        }
-
-        async function carregarSelectFuncionarios() {
-            try {
-                const snapshot = await db.collection('usuarios')
-                    .where('tipo', '==', 'funcionario')
-                    .get();
-                
-                const select = document.getElementById('funcionarioRelatorio');
-                let html = '<option value="">Selecione um funcionário</option>';
-                
-                snapshot.forEach(doc => {
-                    const func = doc.data();
-                    html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
-                });
-                
-                select.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro carregar select:', error);
-            }
-        }
-
-        // FUNÇÕES DE CADASTRO
-        async function cadastrarFuncionario() {
-            const nome = document.getElementById('nomeFuncionario').value.trim();
-            const email = document.getElementById('emailFuncionario').value.trim();
-            const senha = document.getElementById('senhaFuncionario').value;
-            const cpf = document.getElementById('cpfFuncionario').value.trim();
-            const cargo = document.getElementById('cargoFuncionario').value.trim();
-            const departamento = document.getElementById('departamentoFuncionario').value.trim();
-            const salario = document.getElementById('salarioFuncionario').value;
-            const dataAdmissao = document.getElementById('dataAdmissao').value;
-            
-            if (!nome || !email || !senha || !cargo || !departamento) {
-                alert('Preencha todos os campos obrigatórios (*)');
-                return;
-            }
-            
-            try {
-                // 1. Criar usuário no Authentication
-                const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
-                const userId = userCredential.user.uid;
-                
-                // 2. Criar no Firestore
-                await db.collection('usuarios').doc(userId).set({
-                    nome: nome,
-                    email: email,
-                    cpf: cpf,
-                    cargo: cargo,
-                    departamento: departamento,
-                    salario: salario ? parseFloat(salario) : null,
-                    dataAdmissao: dataAdmissao || null,
-                    tipo: 'funcionario',
-                    dataCriacao: new Date().toISOString(),
-                    status: 'ativo'
-                });
-                
-                alert('✅ Funcionário cadastrado com sucesso!');
-                closeModal('novoFuncionario');
-                document.getElementById('formNovoFuncionario').reset();
-                carregarFuncionarios();
-                carregarSelectFuncionarios();
-                carregarEstatisticas();
-                
-            } catch (error) {
-                console.error('Erro cadastrar:', error);
-                
-                if (error.code === 'auth/email-already-in-use') {
-                    alert('Este e-mail já está cadastrado!');
-                } else if (error.code === 'auth/weak-password') {
-                    alert('A senha deve ter pelo menos 6 caracteres!');
-                } else {
-                    alert('Erro ao cadastrar funcionário: ' + error.message);
-                }
-            }
-        }
-
-        // FUNÇÕES DE JUSTIFICATIVAS
-        async function verJustificativa(justificativaId) {
-            try {
-                const doc = await db.collection('justificativas').doc(justificativaId).get();
-                
-                if (!doc.exists) {
-                    alert('Justificativa não encontrada!');
-                    return;
-                }
-                
-                const justificativa = doc.data();
-                const dataBR = new Date(justificativa.data).toLocaleDateString('pt-BR');
-                const tipoTexto = {
-                    'atraso': 'Atraso',
-                    'falta': 'Falta',
-                    'saida_antecipada': 'Saída Antecipada',
-                    'outro': 'Outro'
-                }[justificativa.tipo] || justificativa.tipo;
-                
-                document.getElementById('justificativaContent').innerHTML = `
-                    <p><strong>Funcionário:</strong> ${justificativa.funcionarioNome}</p>
-                    <p><strong>Data:</strong> ${dataBR}</p>
-                    <p><strong>Tipo:</strong> ${tipoTexto}</p>
-                    <p><strong>Descrição:</strong></p>
-                    <p style="background: #f5f5f5; padding: 15px; border-radius: 8px;">${justificativa.descricao}</p>
-                    <p><strong>Enviada em:</strong> ${new Date(justificativa.dataEnvio).toLocaleString('pt-BR')}</p>
-                `;
-                
-                document.getElementById('justificativaActions').innerHTML = `
-                    <button class="btn btn-success" style="flex: 1;" onclick="aprovarJustificativa('${justificativaId}')">✅ Aprovar</button>
-                    <button class="btn btn-danger" style="flex: 1;" onclick="rejeitarJustificativa('${justificativaId}')">❌ Rejeitar</button>
-                `;
-                
-                openModal('verJustificativa');
-                
-            } catch (error) {
-                console.error('Erro ver justificativa:', error);
-            }
-        }
-
-        async function aprovarJustificativa(justificativaId) {
-            if (!confirm('Tem certeza que deseja aprovar esta justificativa?')) return;
-            
-            try {
-                await db.collection('justificativas').doc(justificativaId).update({
-                    status: 'aprovado',
-                    dataAnalise: new Date().toISOString(),
-                    analisadoPor: auth.currentUser.uid
-                });
-                
-                alert('✅ Justificativa aprovada!');
-                closeModal('verJustificativa');
-                carregarJustificativasPendentes();
-                carregarEstatisticas();
-                
-            } catch (error) {
-                console.error('Erro aprovar:', error);
-                alert('Erro ao aprovar justificativa!');
-            }
-        }
-
-        async function rejeitarJustificativa(justificativaId) {
-            if (!confirm('Tem certeza que deseja rejeitar esta justificativa?')) return;
-            
-            try {
-                await db.collection('justificativas').doc(justificativaId).update({
-                    status: 'rejeitado',
-                    dataAnalise: new Date().toISOString(),
-                    analisadoPor: auth.currentUser.uid
-                });
-                
-                alert('❌ Justificativa rejeitada!');
-                closeModal('verJustificativa');
-                carregarJustificativasPendentes();
-                carregarEstatisticas();
-                
-            } catch (error) {
-                console.error('Erro rejeitar:', error);
-                alert('Erro ao rejeitar justificativa!');
-            }
-        }
-
-        // FUNÇÕES DE RELATÓRIOS
-        async function gerarRelatorioMensal() {
-            const mesAno = document.getElementById('mesRelatorio').value;
-            if (!mesAno) return;
-            
-            try {
-                const [ano, mes] = mesAno.split('-');
-                const primeiroDia = `${ano}-${mes}-01`;
-                const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
-                
-                // Buscar registros do mês
-                const snapshot = await db.collection('pontos')
-                    .where('data', '>=', primeiroDia)
-                    .where('data', '<=', ultimoDia)
-                    .get();
-                
-                let totalRegistros = snapshot.size;
-                let entradas = 0;
-                let saidas = 0;
-                
-                snapshot.forEach(doc => {
-                    const reg = doc.data();
-                    if (reg.tipo === 'entrada') entradas++;
-                    if (reg.tipo === 'saida') saidas++;
-                });
-                
-                const mesNome = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-                
-                document.getElementById('relatorioMensalContent').innerHTML = `
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                        <h4>Relatório de ${mesNome}</h4>
-                        <div class="stats-grid" style="margin-top: 15px;">
-                            <div class="stat-card">
-                                <div class="stat-number">${totalRegistros}</div>
-                                <div class="stat-label">Total Registros</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">${entradas}</div>
-                                <div class="stat-label">Entradas</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">${saidas}</div>
-                                <div class="stat-label">Saídas</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">${Math.round((entradas + saidas) / 2)}</div>
-                                <div class="stat-label">Dias Úteis</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-            } catch (error) {
-                console.error('Erro relatório:', error);
-            }
-        }
-
-        // FUNÇÕES AUXILIARES
+        // Funções auxiliares de interface
         function openModal(modalName) {
-            document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`).style.display = 'flex';
+            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
+            if (modalElement) {
+                modalElement.style.display = 'flex';
+                
+                // Carregar dados se for modal de ajuste
+                if (modalName === 'ajusteHoras') {
+                    carregarFuncionariosParaAjuste();
+                }
+            }
         }
 
         function closeModal(modalName) {
-            document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`).style.display = 'none';
+            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
+            if (modalElement) {
+                modalElement.style.display = 'none';
+                
+                // Limpar formulários
+                if (modalName === 'novoFuncionario') {
+                    document.getElementById('formNovoFuncionario').reset();
+                }
+                if (modalName === 'ajusteHoras') {
+                    document.getElementById('formAjusteHoras').reset();
+                    document.getElementById('horariosExistentes').innerHTML = 
+                        '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
+                }
+            }
         }
 
         function openTab(tabName) {
@@ -1022,12 +596,47 @@
             });
             
             // Mostrar tab selecionada
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        function calcularHoras() {
+            const entrada = document.getElementById('horaEntradaAjuste')?.value;
+            const saida = document.getElementById('horaSaidaAjuste')?.value;
+            
+            if (!entrada || !saida) {
+                if (document.getElementById('totalHorasAjuste')) {
+                    document.getElementById('totalHorasAjuste').value = '';
+                }
+                return;
+            }
+            
+            // Converter para objetos Date
+            const [h1, m1] = entrada.split(':').map(Number);
+            const [h2, m2] = saida.split(':').map(Number);
+            
+            const entradaDate = new Date(0, 0, 0, h1, m1);
+            const saidaDate = new Date(0, 0, 0, h2, m2);
+            
+            // Calcular diferença
+            const diffMs = saidaDate - entradaDate;
+            const diffMinutes = Math.floor(diffMs / 60000);
+            
+            const horas = Math.floor(diffMinutes / 60);
+            const minutos = diffMinutes % 60;
+            
+            if (document.getElementById('totalHorasAjuste')) {
+                document.getElementById('totalHorasAjuste').value = `${horas}:${minutos.toString().padStart(2, '0')}`;
+            }
         }
 
         function filtrarFuncionarios() {
-            const input = document.getElementById('searchFuncionarios').value.toLowerCase();
+            const input = document.getElementById('searchFuncionarios')?.value.toLowerCase() || '';
             const rows = document.querySelectorAll('#tabelaFuncionarios tbody tr');
             
             rows.forEach(row => {
@@ -1038,28 +647,10 @@
 
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                auth.signOut().then(() => {
-                    localStorage.removeItem('usuario_logado');
-                    localStorage.removeItem('funcionario_logado');
-                    window.location.href = 'index.html';
-                });
+                // A função logout() será implementada no gestor.js
+                window.location.href = 'index.html';
             }
         }
-
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar data atual nos inputs
-            const hoje = new Date().toISOString().split('T')[0];
-            const mesAtual = new Date().toISOString().slice(0, 7);
-            
-            document.getElementById('mesRelatorio').value = mesAtual;
-            document.getElementById('periodoRelatorio').value = mesAtual;
-            document.getElementById('periodoAtrasos').value = mesAtual;
-            document.getElementById('dataAdmissao').value = hoje;
-            
-            // Gerar relatório inicial
-            gerarRelatorioMensal();
-        });
     </script>
 </body>
 </html>
