@@ -10,19 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase INCLUÍDA DIRETAMENTE -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-            authDomain: "essencial-print-5a753.firebaseapp.com",
-            projectId: "essencial-print-5a753",
-            storageBucket: "essencial-print-5a753.firebasestorage.app",
-            messagingSenderId: "544082416072",
-            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
-        };
-    </script>
-    
-    <!-- Configuração externa (opcional) -->
+    <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
     <script src="js/firebase-config.js"></script>
     
     <style>
@@ -522,6 +510,8 @@
                 } else if (error.code === 'auth/api-key-not-valid' || error.code === 'auth/invalid-api-key') {
                     errorMessage = 'API Key do Firebase inválida. Contate o administrador.';
                     showWarning(true);
+                } else if (error.code === 'firestore/permission-denied') {
+                    errorMessage = 'Permissão negada no banco de dados. Configure as regras do Firestore.';
                 } else {
                     errorMessage = 'Erro ao fazer login: ' + error.message;
                 }
