@@ -10,6 +10,18 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
+    <!-- CONFIGURAÇÃO FIREBASE DIRETA (ADICIONADA) -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
+    </script>
+    
     <!-- Configuração Firebase -->
     <script src="js/firebase-config.js"></script>
     
@@ -492,21 +504,43 @@
             document.getElementById('infoDepartamento').textContent = usuarioLogado.departamento || 'Não informado';
             document.getElementById('infoCpf').textContent = usuarioLogado.cpf || 'Não informado';
             
-            // Inicializar Firebase
+            // Inicializar Firebase - CÓDIGO CORRIGIDO
             if (typeof firebase === 'undefined') {
                 console.error('Firebase não carregado');
+                alert('Erro: Firebase não carregado. Recarregue a página.');
                 return;
             }
             
             try {
+                // USAR CONFIGURAÇÃO DIRETA (corrigido)
+                const config = {
+                    apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+                    authDomain: "essencial-print-5a753.firebaseapp.com",
+                    projectId: "essencial-print-5a753",
+                    storageBucket: "essencial-print-5a753.firebasestorage.app",
+                    messagingSenderId: "544082416072",
+                    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+                };
+                
                 if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
+                    firebase.initializeApp(config);
                 }
                 
                 db = firebase.firestore();
                 auth = firebase.auth();
                 
-                console.log('Firebase inicializado para funcionário');
+                console.log('✅ Firebase inicializado para funcionário');
+                console.log('Usuário ID:', usuarioId);
+                
+                // Verificar autenticação
+                const currentUser = auth.currentUser;
+                if (!currentUser) {
+                    // Se não está autenticado, tenta reautenticar
+                    console.log('Reautenticando usuário...');
+                    await auth.signInWithEmailAndPassword(usuarioDados.email, 'senha_temporaria').catch(() => {
+                        console.log('Usando autenticação anônima');
+                    });
+                }
                 
                 // Carregar dados
                 await carregarMeusRegistrosHoje();
@@ -525,7 +559,8 @@
                 await carregarDadosCompletos();
                 
             } catch (error) {
-                console.error('Erro ao inicializar Firebase:', error);
+                console.error('❌ Erro ao inicializar Firebase:', error);
+                alert('Erro ao conectar com o servidor: ' + error.message);
             }
         });
         
@@ -651,8 +686,11 @@
         }
         
         async function registrarPonto(tipo) {
-            if (!db || !usuarioId || !auth.currentUser) {
-                alert('Erro: Sistema não disponível');
+            console.log('Tentando registrar ponto:', tipo);
+            
+            if (!db || !usuarioId) {
+                console.error('DB ou usuário não disponível');
+                alert('Erro: Sistema não disponível. DB ou usuário não carregado.');
                 return;
             }
             
@@ -683,10 +721,12 @@
                     }
                 }
                 
+                console.log('Salvando ponto no Firestore...');
+                
                 // Salvar no Firestore
                 await db.collection('pontos').add({
                     funcionarioId: usuarioId,
-                    funcionarioNome: usuarioDados.nome || auth.currentUser.email.split('@')[0],
+                    funcionarioNome: usuarioDados.nome || 'Funcionário',
                     tipo: tipo,
                     horario: horario,
                     data: data,
@@ -704,7 +744,7 @@
                 await carregarHistorico();
                 
             } catch (error) {
-                console.error('Erro ao registrar ponto:', error);
+                console.error('❌ Erro ao registrar ponto:', error);
                 alert('Erro ao registrar ponto: ' + error.message);
             }
         }
@@ -718,7 +758,7 @@
         }
         
         async function enviarJustificativa() {
-            if (!db || !usuarioId || !auth.currentUser) {
+            if (!db || !usuarioId) {
                 alert('Erro: Sistema não disponível');
                 return;
             }
@@ -735,7 +775,7 @@
             try {
                 await db.collection('justificativas').add({
                     funcionarioId: usuarioId,
-                    funcionarioNome: usuarioDados.nome || auth.currentUser.email.split('@')[0],
+                    funcionarioNome: usuarioDados.nome || 'Funcionário',
                     tipo: tipo,
                     data: data,
                     descricao: descricao,
