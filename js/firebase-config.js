@@ -1,14 +1,13 @@
 // js/firebase-config.js
-// CONFIGURAÇÃO ATUALIZADA DO FIREBASE - GERE UMA NOVA NO CONSOLE
+// CONFIGURAÇÃO ATUALIZADA DO FIREBASE - COM API KEY CORRETA
 
-// ⚠️ SUBSTITUA ESTES VALORES COM OS DA NOVA CONFIGURAÇÃO ⚠️
 const firebaseConfig = {
-  apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-  authDomain: "essencial-print-5a753.firebaseapp.com",
-  projectId: "essencial-print-5a753",
-  storageBucket: "essencial-print-5a753.firebasestorage.app",
-  messagingSenderId: "544082416072",
-  appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+    apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+    authDomain: "essencial-print-5a753.firebaseapp.com",
+    projectId: "essencial-print-5a753",
+    storageBucket: "essencial-print-5a753.firebasestorage.app",
+    messagingSenderId: "544082416072",
+    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
 };
 
 // Função para inicializar Firebase com fallback
