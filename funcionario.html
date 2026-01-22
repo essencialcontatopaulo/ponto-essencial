@@ -601,10 +601,11 @@
                 const hoje = new Date().toISOString().split('T')[0];
                 console.log('Buscando registros para:', hoje, 'usuário:', usuarioId);
                 
+                // QUERY CORRIGIDA: usando dataRegistro em vez de timestamp
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
+                    .orderBy('dataRegistro', 'desc')  // CORREÇÃO AQUI
                     .get();
                 
                 console.log('Registros encontrados:', snapshot.size);
@@ -640,10 +641,11 @@
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
+                // QUERY CORRIGIDA: usando dataRegistro em vez de timestamp
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
+                    .orderBy('dataRegistro', 'desc')  // CORREÇÃO AQUI
                     .limit(1)
                     .get();
                 
@@ -725,14 +727,14 @@
                 
                 console.log('Salvando ponto no Firestore...');
                 
-                // Dados a serem salvos
+                // Dados a serem salvos - CORRIGIDO
                 const pontoData = {
                     funcionarioId: usuarioId,
                     funcionarioNome: usuarioDados.nome || 'Funcionário',
                     tipo: tipo,
                     horario: horario,
                     data: data,
-                    timestamp: agora.getTime(),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(), // CORREÇÃO AQUI
                     localizacao: localizacao,
                     metodo: 'web',
                     dataRegistro: agora.toISOString()
@@ -756,14 +758,16 @@
             } catch (error) {
                 console.error('❌ Erro ao registrar ponto:', error);
                 console.error('Código do erro:', error.code);
-                console.error('Mensagem completa:', error.message);
+                console.error('Mensagem completo:', error.message);
                 
                 let errorMessage = 'Erro ao registrar ponto: ' + error.message;
                 
                 if (error.code === 'permission-denied') {
                     errorMessage = 'Permissão negada. Configure as regras do Firestore para permitir escrita.';
                 } else if (error.code === 'failed-precondition') {
-                    errorMessage = 'Firestore não está configurado corretamente.';
+                    errorMessage = 'Índice necessário. Aguarde a criação do índice ou verifique o Firestore.';
+                } else if (error.message.includes('index')) {
+                    errorMessage = 'Aguarde a criação do índice no Firestore (leva alguns minutos).';
                 }
                 
                 alert(errorMessage);
@@ -822,10 +826,11 @@
                 seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
                 const dataInicio = seteDiasAtras.toISOString().split('T')[0];
                 
+                // QUERY CORRIGIDA: sem orderBy('timestamp') desnecessário
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '>=', dataInicio)
-                    .orderBy('data', 'desc')
+                    .orderBy('data', 'desc')  // Já está correto
                     .get();
                 
                 // Agrupar por data
