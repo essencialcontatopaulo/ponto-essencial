@@ -637,48 +637,67 @@
         }
         
         async function verificarStatusPonto() {
-            if (!db || !usuarioId) return;
+            if (!db || !usuarioId) {
+                console.log('DB ou usuário não disponível');
+                return;
+            }
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
-                // QUERY CORRIGIDA: usando dataRegistro em vez de timestamp
+                console.log('Verificando status para:', hoje, 'usuário:', usuarioId);
+                
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '==', hoje)
-                    .orderBy('dataRegistro', 'desc')  // CORREÇÃO AQUI
+                    .orderBy('dataRegistro', 'desc')
                     .limit(1)
                     .get();
+                
+                console.log('Resultado da consulta:', snapshot.size, 'documentos');
                 
                 const btnEntrada = document.getElementById('btnRegistrarEntrada');
                 const btnSaida = document.getElementById('btnRegistrarSaida');
                 const statusPonto = document.getElementById('statusPonto');
                 
                 if (snapshot.empty) {
-                    // Não registrou entrada hoje
+                    console.log('Nenhum registro hoje - permitir ENTRADA');
                     btnEntrada.disabled = false;
                     btnSaida.disabled = true;
                     statusPonto.textContent = 'Aguardando entrada';
                     statusPonto.style.color = '#666';
                 } else {
                     const ultimoRegistro = snapshot.docs[0].data();
+                    console.log('Último registro:', ultimoRegistro);
                     
                     if (ultimoRegistro.tipo === 'entrada') {
-                        // Registrou entrada, pode registrar saída
+                        console.log('Último foi ENTRADA - permitir SAÍDA');
                         btnEntrada.disabled = true;
                         btnSaida.disabled = false;
                         statusPonto.textContent = `Entrada registrada às ${ultimoRegistro.horario}`;
                         statusPonto.style.color = '#4caf50';
-                    } else {
-                        // Já registrou saída hoje
+                    } else if (ultimoRegistro.tipo === 'saida') {
+                        console.log('Último foi SAÍDA - bloquear tudo');
                         btnEntrada.disabled = true;
                         btnSaida.disabled = true;
                         statusPonto.textContent = `Saída registrada às ${ultimoRegistro.horario}`;
                         statusPonto.style.color = '#2e7d32';
+                    } else {
+                        console.log('Tipo desconhecido:', ultimoRegistro.tipo);
+                        btnEntrada.disabled = false;
+                        btnSaida.disabled = true;
+                        statusPonto.textContent = 'Status desconhecido';
+                        statusPonto.style.color = '#ff9800';
                     }
                 }
                 
             } catch (error) {
-                console.error('Erro ao verificar status:', error);
+                console.error('❌ Erro ao verificar status:', error);
+                console.error('Código do erro:', error.code);
+                console.error('Mensagem:', error.message);
+                
+                // Em caso de erro, mostrar botões
+                document.getElementById('btnRegistrarEntrada').disabled = false;
+                document.getElementById('btnRegistrarSaida').disabled = true;
             }
         }
         
@@ -748,17 +767,19 @@
                 
                 alert(`✅ ${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`);
                 
-                // Atualizar interface
-                await carregarMeusRegistrosHoje();
-                await verificarStatusPonto();
-                await carregarHistorico();
+                // Atualizar interface - AGORA COM TEMPO DE ESPERA
+                setTimeout(async () => {
+                    await carregarMeusRegistrosHoje();
+                    await verificarStatusPonto();
+                    await carregarHistorico();
+                }, 1000); // Aguarda 1 segundo para o Firestore processar
                 
                 console.log('=== REGISTRO CONCLUÍDO ===');
                 
             } catch (error) {
                 console.error('❌ Erro ao registrar ponto:', error);
                 console.error('Código do erro:', error.code);
-                console.error('Mensagem completo:', error.message);
+                console.error('Mensagem completa:', error.message);
                 
                 let errorMessage = 'Erro ao registrar ponto: ' + error.message;
                 
@@ -771,6 +792,60 @@
                 }
                 
                 alert(errorMessage);
+            }
+        }
+        
+        // Função para verificar dados no Firestore (debug)
+        async function verificarDadosFirestore() {
+            console.log('=== VERIFICAÇÃO FIRESTORE ===');
+            
+            try {
+                const hoje = new Date().toISOString().split('T')[0];
+                console.log('Data de hoje:', hoje);
+                console.log('Usuário ID:', usuarioId);
+                
+                // Verificar TODOS os registros de hoje
+                const snapshot = await db.collection('pontos')
+                    .where('funcionarioId', '==', usuarioId)
+                    .where('data', '==', hoje)
+                    .orderBy('dataRegistro', 'desc')
+                    .get();
+                
+                console.log('Total de registros hoje:', snapshot.size);
+                
+                if (snapshot.empty) {
+                    console.log('Nenhum registro encontrado para hoje');
+                } else {
+                    snapshot.forEach((doc, index) => {
+                        const data = doc.data();
+                        console.log(`Registro ${index + 1}:`, {
+                            id: doc.id,
+                            tipo: data.tipo,
+                            horario: data.horario,
+                            data: data.data,
+                            timestamp: data.timestamp,
+                            dataRegistro: data.dataRegistro,
+                            campos: Object.keys(data)
+                        });
+                    });
+                }
+                
+                // Verificar também sem filtro de data
+                console.log('=== TODOS OS REGISTROS DO USUÁRIO ===');
+                const todosSnapshot = await db.collection('pontos')
+                    .where('funcionarioId', '==', usuarioId)
+                    .orderBy('dataRegistro', 'desc')
+                    .limit(5)
+                    .get();
+                
+                console.log('Últimos 5 registros:', todosSnapshot.size);
+                todosSnapshot.forEach((doc, index) => {
+                    const data = doc.data();
+                    console.log(`Registro ${index + 1}: ${data.data} - ${data.tipo} às ${data.horario}`);
+                });
+                
+            } catch (error) {
+                console.error('Erro na verificação:', error);
             }
         }
         
@@ -929,8 +1004,9 @@
                 // Teste: Criar documento de teste
                 const testData = {
                     teste: 'funcionando',
-                    timestamp: new Date().toISOString(),
-                    usuario: usuarioId
+                    dataRegistro: new Date().toISOString(),
+                    usuario: usuarioId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
                 const docRef = await db.collection('testes').add(testData);
@@ -951,14 +1027,21 @@
             }
         }
         
-        // Adicionar botão de teste temporário (remova depois)
+        // Adicionar botão de teste temporário
         setTimeout(() => {
             const testBtn = document.createElement('button');
             testBtn.textContent = '🔧 TESTAR FIRESTORE';
             testBtn.style.cssText = 'position: fixed; bottom: 10px; right: 10px; background: orange; color: white; padding: 10px; border-radius: 5px; z-index: 9999;';
             testBtn.onclick = testarFirestore;
             document.body.appendChild(testBtn);
-        }, 2000);
+            
+            // Adicionar botão de debug temporário
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = '🐛 DEBUG DADOS';
+            debugBtn.style.cssText = 'position: fixed; bottom: 60px; right: 10px; background: purple; color: white; padding: 10px; border-radius: 5px; z-index: 9999;';
+            debugBtn.onclick = verificarDadosFirestore;
+            document.body.appendChild(debugBtn);
+        }, 3000);
         
         // Exportar funções para uso global
         window.registrarPonto = registrarPonto;
@@ -966,6 +1049,7 @@
         window.closeModal = closeModal;
         window.enviarJustificativa = enviarJustificativa;
         window.logout = logout;
+        window.verificarDadosFirestore = verificarDadosFirestore;
     </script>
 </body>
 </html>
