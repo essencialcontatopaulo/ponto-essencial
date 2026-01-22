@@ -10,9 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
-    <script src="js/firebase-config.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -492,16 +489,15 @@
             document.getElementById('infoDepartamento').textContent = usuarioLogado.departamento || 'Não informado';
             document.getElementById('infoCpf').textContent = usuarioLogado.cpf || 'Não informado';
             
-            // Inicializar Firebase - CÓDIGO CORRIGIDO
+            // Inicializar Firebase
             if (typeof firebase === 'undefined') {
-                console.error('Firebase não carregado');
                 alert('Erro: Firebase não carregado. Recarregue a página.');
                 return;
             }
             
             try {
-                // USAR CONFIGURAÇÃO DO ARQUIVO EXTERNO
-                const config = window.firebaseConfig || {
+                // Configuração do Firebase
+                const config = {
                     apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
                     authDomain: "essencial-print-5a753.firebaseapp.com",
                     projectId: "essencial-print-5a753",
@@ -517,17 +513,7 @@
                 db = firebase.firestore();
                 auth = firebase.auth();
                 
-                console.log('✅ Firebase inicializado para funcionário');
-                console.log('Usuário ID:', usuarioId);
-                console.log('Firestore disponível:', !!db);
-                
-                // Verificar autenticação
-                const currentUser = auth.currentUser;
-                if (!currentUser) {
-                    console.log('Usuário não autenticado, usando autenticação anônima');
-                } else {
-                    console.log('Usuário autenticado:', currentUser.email);
-                }
+                console.log('✅ Firebase inicializado');
                 
                 // Carregar dados
                 await carregarMeusRegistrosHoje();
@@ -542,12 +528,9 @@
                 const hoje = new Date().toISOString().split('T')[0];
                 document.getElementById('dataJustificativa').value = hoje;
                 
-                // Carregar dados completos do Firestore
-                await carregarDadosCompletos();
-                
             } catch (error) {
-                console.error('❌ Erro ao inicializar Firebase:', error);
-                alert('Erro ao conectar com o servidor: ' + error.message);
+                console.error('Erro ao inicializar Firebase:', error);
+                alert('Erro ao conectar com o servidor. Recarregue a página.');
             }
         });
         
@@ -567,48 +550,17 @@
             document.getElementById('horaAtual').textContent = horaFormatada;
         }
         
-        async function carregarDadosCompletos() {
+        async function carregarMeusRegistrosHoje() {
             if (!db || !usuarioId) return;
             
             try {
-                const userDoc = await db.collection('usuarios').doc(usuarioId).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    
-                    // Atualizar informações pessoais
-                    if (userData.dataAdmissao) {
-                        const dataAdmissao = new Date(userData.dataAdmissao).toLocaleDateString('pt-BR');
-                        document.getElementById('infoAdmissao').textContent = dataAdmissao;
-                    }
-                    
-                    if (userData.salario) {
-                        const infoDiv = document.getElementById('infoPessoal');
-                        infoDiv.innerHTML += `<p><strong>Salário:</strong> R$ ${userData.salario.toFixed(2)}</p>`;
-                    }
-                }
-            } catch (error) {
-                console.error('Erro ao carregar dados completos:', error);
-            }
-        }
-        
-        async function carregarMeusRegistrosHoje() {
-            if (!db || !usuarioId) {
-                console.log('Firestore ou usuário não disponível');
-                return;
-            }
-            
-            try {
                 const hoje = new Date().toISOString().split('T')[0];
-                console.log('Buscando registros para:', hoje, 'usuário:', usuarioId);
                 
-                // QUERY CORRIGIDA: usando dataRegistro em vez de timestamp
+                // Buscar registros SEM orderBy (funciona sem índice)
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '==', hoje)
-                    .orderBy('dataRegistro', 'desc')  // CORREÇÃO AQUI
                     .get();
-                
-                console.log('Registros encontrados:', snapshot.size);
                 
                 const tbody = document.querySelector('#tabelaMeusRegistros tbody');
                 let html = '';
@@ -616,9 +568,18 @@
                 if (snapshot.empty) {
                     html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
                 } else {
+                    // Converter para array e ordenar manualmente
+                    const registros = [];
                     snapshot.forEach(doc => {
-                        const reg = doc.data();
-                        console.log('Registro encontrado:', reg);
+                        registros.push(doc.data());
+                    });
+                    
+                    // Ordenar por dataRegistro (mais recente primeiro)
+                    registros.sort((a, b) => {
+                        return new Date(b.dataRegistro) - new Date(a.dataRegistro);
+                    });
+                    
+                    registros.forEach(reg => {
                         html += `
                             <tr>
                                 <td>${reg.horario}</td>
@@ -633,82 +594,67 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar registros:', error);
+                const tbody = document.querySelector('#tabelaMeusRegistros tbody');
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar</td></tr>';
             }
         }
         
         async function verificarStatusPonto() {
-            if (!db || !usuarioId) {
-                console.log('DB ou usuário não disponível');
-                return;
-            }
+            if (!db || !usuarioId) return;
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
-                console.log('Verificando status para:', hoje, 'usuário:', usuarioId);
                 
+                // Buscar registros SEM orderBy
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
                     .where('data', '==', hoje)
-                    .orderBy('dataRegistro', 'desc')
-                    .limit(1)
                     .get();
-                
-                console.log('Resultado da consulta:', snapshot.size, 'documentos');
                 
                 const btnEntrada = document.getElementById('btnRegistrarEntrada');
                 const btnSaida = document.getElementById('btnRegistrarSaida');
                 const statusPonto = document.getElementById('statusPonto');
                 
                 if (snapshot.empty) {
-                    console.log('Nenhum registro hoje - permitir ENTRADA');
                     btnEntrada.disabled = false;
                     btnSaida.disabled = true;
                     statusPonto.textContent = 'Aguardando entrada';
                     statusPonto.style.color = '#666';
                 } else {
-                    const ultimoRegistro = snapshot.docs[0].data();
-                    console.log('Último registro:', ultimoRegistro);
+                    // Encontrar o último registro manualmente
+                    let ultimoRegistro = null;
+                    let ultimaData = null;
+                    
+                    snapshot.forEach(doc => {
+                        const reg = doc.data();
+                        const dataReg = new Date(reg.dataRegistro || 0);
+                        
+                        if (!ultimoRegistro || dataReg > ultimaData) {
+                            ultimoRegistro = reg;
+                            ultimaData = dataReg;
+                        }
+                    });
                     
                     if (ultimoRegistro.tipo === 'entrada') {
-                        console.log('Último foi ENTRADA - permitir SAÍDA');
                         btnEntrada.disabled = true;
                         btnSaida.disabled = false;
                         statusPonto.textContent = `Entrada registrada às ${ultimoRegistro.horario}`;
                         statusPonto.style.color = '#4caf50';
-                    } else if (ultimoRegistro.tipo === 'saida') {
-                        console.log('Último foi SAÍDA - bloquear tudo');
+                    } else {
                         btnEntrada.disabled = true;
                         btnSaida.disabled = true;
                         statusPonto.textContent = `Saída registrada às ${ultimoRegistro.horario}`;
                         statusPonto.style.color = '#2e7d32';
-                    } else {
-                        console.log('Tipo desconhecido:', ultimoRegistro.tipo);
-                        btnEntrada.disabled = false;
-                        btnSaida.disabled = true;
-                        statusPonto.textContent = 'Status desconhecido';
-                        statusPonto.style.color = '#ff9800';
                     }
                 }
                 
             } catch (error) {
-                console.error('❌ Erro ao verificar status:', error);
-                console.error('Código do erro:', error.code);
-                console.error('Mensagem:', error.message);
-                
-                // Em caso de erro, mostrar botões
-                document.getElementById('btnRegistrarEntrada').disabled = false;
-                document.getElementById('btnRegistrarSaida').disabled = true;
+                console.error('Erro ao verificar status:', error);
             }
         }
         
         async function registrarPonto(tipo) {
-            console.log('=== INICIANDO REGISTRO DE PONTO ===');
-            console.log('Tipo:', tipo);
-            console.log('DB disponível?', !!db);
-            console.log('Usuário ID:', usuarioId);
-            
             if (!db || !usuarioId) {
-                console.error('DB ou usuário não disponível');
                 alert('Erro: Sistema não disponível. DB ou usuário não carregado.');
                 return;
             }
@@ -717,9 +663,6 @@
                 const agora = new Date();
                 const data = agora.toISOString().split('T')[0];
                 const horario = agora.toLocaleTimeString('pt-BR', { hour12: false });
-                
-                console.log('Data:', data);
-                console.log('Horário:', horario);
                 
                 // Obter localização (se permitido)
                 let localizacao = { latitude: null, longitude: null };
@@ -738,28 +681,23 @@
                             longitude: position.coords.longitude,
                             precisao: position.coords.accuracy
                         };
-                        console.log('Localização obtida:', localizacao);
                     } catch (geoError) {
                         console.warn('Não foi possível obter localização:', geoError.message);
                     }
                 }
                 
-                console.log('Salvando ponto no Firestore...');
-                
-                // Dados a serem salvos - CORRIGIDO
+                // Dados a serem salvos
                 const pontoData = {
                     funcionarioId: usuarioId,
                     funcionarioNome: usuarioDados.nome || 'Funcionário',
                     tipo: tipo,
                     horario: horario,
                     data: data,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(), // CORREÇÃO AQUI
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     localizacao: localizacao,
                     metodo: 'web',
                     dataRegistro: agora.toISOString()
                 };
-                
-                console.log('Dados do ponto:', pontoData);
                 
                 // Salvar no Firestore
                 const docRef = await db.collection('pontos').add(pontoData);
@@ -767,85 +705,14 @@
                 
                 alert(`✅ ${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`);
                 
-                // Atualizar interface - AGORA COM TEMPO DE ESPERA
-                setTimeout(async () => {
-                    await carregarMeusRegistrosHoje();
-                    await verificarStatusPonto();
-                    await carregarHistorico();
-                }, 1000); // Aguarda 1 segundo para o Firestore processar
-                
-                console.log('=== REGISTRO CONCLUÍDO ===');
+                // Atualizar interface
+                await carregarMeusRegistrosHoje();
+                await verificarStatusPonto();
+                await carregarHistorico();
                 
             } catch (error) {
-                console.error('❌ Erro ao registrar ponto:', error);
-                console.error('Código do erro:', error.code);
-                console.error('Mensagem completa:', error.message);
-                
-                let errorMessage = 'Erro ao registrar ponto: ' + error.message;
-                
-                if (error.code === 'permission-denied') {
-                    errorMessage = 'Permissão negada. Configure as regras do Firestore para permitir escrita.';
-                } else if (error.code === 'failed-precondition') {
-                    errorMessage = 'Índice necessário. Aguarde a criação do índice ou verifique o Firestore.';
-                } else if (error.message.includes('index')) {
-                    errorMessage = 'Aguarde a criação do índice no Firestore (leva alguns minutos).';
-                }
-                
-                alert(errorMessage);
-            }
-        }
-        
-        // Função para verificar dados no Firestore (debug)
-        async function verificarDadosFirestore() {
-            console.log('=== VERIFICAÇÃO FIRESTORE ===');
-            
-            try {
-                const hoje = new Date().toISOString().split('T')[0];
-                console.log('Data de hoje:', hoje);
-                console.log('Usuário ID:', usuarioId);
-                
-                // Verificar TODOS os registros de hoje
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', usuarioId)
-                    .where('data', '==', hoje)
-                    .orderBy('dataRegistro', 'desc')
-                    .get();
-                
-                console.log('Total de registros hoje:', snapshot.size);
-                
-                if (snapshot.empty) {
-                    console.log('Nenhum registro encontrado para hoje');
-                } else {
-                    snapshot.forEach((doc, index) => {
-                        const data = doc.data();
-                        console.log(`Registro ${index + 1}:`, {
-                            id: doc.id,
-                            tipo: data.tipo,
-                            horario: data.horario,
-                            data: data.data,
-                            timestamp: data.timestamp,
-                            dataRegistro: data.dataRegistro,
-                            campos: Object.keys(data)
-                        });
-                    });
-                }
-                
-                // Verificar também sem filtro de data
-                console.log('=== TODOS OS REGISTROS DO USUÁRIO ===');
-                const todosSnapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', usuarioId)
-                    .orderBy('dataRegistro', 'desc')
-                    .limit(5)
-                    .get();
-                
-                console.log('Últimos 5 registros:', todosSnapshot.size);
-                todosSnapshot.forEach((doc, index) => {
-                    const data = doc.data();
-                    console.log(`Registro ${index + 1}: ${data.data} - ${data.tipo} às ${data.horario}`);
-                });
-                
-            } catch (error) {
-                console.error('Erro na verificação:', error);
+                console.error('Erro ao registrar ponto:', error);
+                alert('Erro ao registrar ponto: ' + error.message);
             }
         }
         
@@ -899,27 +766,29 @@
             try {
                 const seteDiasAtras = new Date();
                 seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
-                const dataInicio = seteDiasAtras.toISOString().split('T')[0];
                 
-                // QUERY CORRIGIDA: sem orderBy('timestamp') desnecessário
+                // Busca todos os registros do usuário
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', usuarioId)
-                    .where('data', '>=', dataInicio)
-                    .orderBy('data', 'desc')  // Já está correto
                     .get();
                 
                 // Agrupar por data
                 const registrosPorData = {};
                 snapshot.forEach(doc => {
                     const reg = doc.data();
-                    if (!registrosPorData[reg.data]) {
-                        registrosPorData[reg.data] = { entrada: null, saida: null };
-                    }
+                    const dataReg = new Date(reg.data);
                     
-                    if (reg.tipo === 'entrada') {
-                        registrosPorData[reg.data].entrada = reg.horario;
-                    } else if (reg.tipo === 'saida') {
-                        registrosPorData[reg.data].saida = reg.horario;
+                    // Filtrar últimos 7 dias
+                    if (dataReg >= seteDiasAtras) {
+                        if (!registrosPorData[reg.data]) {
+                            registrosPorData[reg.data] = { entrada: null, saida: null };
+                        }
+                        
+                        if (reg.tipo === 'entrada') {
+                            registrosPorData[reg.data].entrada = reg.horario;
+                        } else if (reg.tipo === 'saida') {
+                            registrosPorData[reg.data].saida = reg.horario;
+                        }
                     }
                 });
                 
@@ -990,66 +859,12 @@
             }
         }
         
-        // TESTE DE FUNCIONAMENTO (temporário)
-        async function testarFirestore() {
-            try {
-                console.log('=== TESTE FIRESTORE ===');
-                
-                if (!db) {
-                    console.error('Firestore não inicializado');
-                    alert('Firestore não inicializado');
-                    return;
-                }
-                
-                // Teste: Criar documento de teste
-                const testData = {
-                    teste: 'funcionando',
-                    dataRegistro: new Date().toISOString(),
-                    usuario: usuarioId,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                const docRef = await db.collection('testes').add(testData);
-                console.log('✅ Documento criado com ID:', docRef.id);
-                alert('✅ Firestore funcionando! ID: ' + docRef.id);
-                
-                // Teste: Verificar coleção pontos
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', usuarioId)
-                    .limit(1)
-                    .get();
-                
-                console.log('Registros na coleção "pontos":', snapshot.size);
-                
-            } catch (error) {
-                console.error('❌ Erro no teste:', error);
-                alert('❌ Erro: ' + error.message);
-            }
-        }
-        
-        // Adicionar botão de teste temporário
-        setTimeout(() => {
-            const testBtn = document.createElement('button');
-            testBtn.textContent = '🔧 TESTAR FIRESTORE';
-            testBtn.style.cssText = 'position: fixed; bottom: 10px; right: 10px; background: orange; color: white; padding: 10px; border-radius: 5px; z-index: 9999;';
-            testBtn.onclick = testarFirestore;
-            document.body.appendChild(testBtn);
-            
-            // Adicionar botão de debug temporário
-            const debugBtn = document.createElement('button');
-            debugBtn.textContent = '🐛 DEBUG DADOS';
-            debugBtn.style.cssText = 'position: fixed; bottom: 60px; right: 10px; background: purple; color: white; padding: 10px; border-radius: 5px; z-index: 9999;';
-            debugBtn.onclick = verificarDadosFirestore;
-            document.body.appendChild(debugBtn);
-        }, 3000);
-        
         // Exportar funções para uso global
         window.registrarPonto = registrarPonto;
         window.abrirJustificativa = abrirJustificativa;
         window.closeModal = closeModal;
         window.enviarJustificativa = enviarJustificativa;
         window.logout = logout;
-        window.verificarDadosFirestore = verificarDadosFirestore;
     </script>
 </body>
 </html>
