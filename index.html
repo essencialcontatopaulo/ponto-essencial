@@ -200,6 +200,21 @@
             background: #388e3c;
         }
 
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .warning-box h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+
         @media (max-width: 480px) {
             .login-body {
                 padding: 30px 20px;
@@ -225,6 +240,13 @@
             
             <div class="error-message" id="errorMessage"></div>
             
+            <!-- Aviso sobre configuração do Firebase -->
+            <div class="warning-box" id="firebaseWarning" style="display: none;">
+                <h4>⚠️ Configuração do Firebase Necessária</h4>
+                <p>O sistema precisa ser configurado para funcionar.</p>
+                <p>Por favor, configure o arquivo <strong>js/firebase-config.js</strong> com sua API Key do Firebase.</p>
+            </div>
+            
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">E-mail</label>
@@ -249,19 +271,19 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-login">
+                <button type="submit" class="btn-login" id="btnLogin">
                     Entrar no Sistema
                 </button>
             </form>
 
             <div class="test-credentials">
-                <h4>Credenciais de Teste (Clique para preencher)</h4>
+                <h4>Credenciais de Teste</h4>
                 <button onclick="preencherCredenciais('gestor')">Acesso Gestor</button>
                 <button onclick="preencherCredenciais('funcionario')">Acesso Funcionário</button>
             </div>
             
             <div class="login-footer">
-                <p>Em caso de problemas, entre em contato com o RH</p>
+                <p>Em caso de problemas, entre em contato com o suporte técnico</p>
                 <p style="font-size: 12px; margin-top: 10px; color: #999;">
                     Versão 1.0 | © 2024 Essencial Print
                 </p>
@@ -270,6 +292,16 @@
     </div>
 
     <script>
+        // Configuração alternativa de fallback (APENAS PARA TESTES)
+        const firebaseConfigFallback = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
+
         // Funções de interface
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -294,6 +326,10 @@
             }, 5000);
         }
 
+        function showWarning(show) {
+            document.getElementById('firebaseWarning').style.display = show ? 'block' : 'none';
+        }
+
         function preencherCredenciais(tipo) {
             if (tipo === 'gestor') {
                 document.getElementById('email').value = 'gestor@essencialprint.com';
@@ -303,6 +339,60 @@
                 document.getElementById('email').value = 'funcionario@essencialprint.com';
                 document.getElementById('password').value = 'Funcionario123@';
                 showError('Credenciais de funcionário preenchidas. Clique em "Entrar no Sistema".');
+            }
+        }
+
+        // Função para testar conexão com Firebase
+        async function testarConexaoFirebase() {
+            try {
+                console.log('🔍 Testando conexão com Firebase...');
+                
+                if (typeof firebase === 'undefined') {
+                    showWarning(true);
+                    showError('Firebase SDK não carregado. Recarregue a página.');
+                    return false;
+                }
+                
+                // Tentar usar a configuração principal
+                let configUsada = window.firebaseConfig || firebaseConfigFallback;
+                
+                // Verificar se a API Key está configurada
+                if (!configUsada.apiKey || configUsada.apiKey.includes('SUA_NOVA_API_KEY_AQUI')) {
+                    console.warn('API Key não configurada, usando fallback');
+                    configUsada = firebaseConfigFallback;
+                }
+                
+                // Inicializar Firebase
+                let app;
+                if (!firebase.apps.length) {
+                    app = firebase.initializeApp(configUsada);
+                    console.log('✅ Firebase inicializado com configuração:', configUsada.projectId);
+                } else {
+                    app = firebase.apps[0];
+                    console.log('✅ Firebase já estava inicializado');
+                }
+                
+                // Testar conexão simples
+                const auth = firebase.auth();
+                await auth.signInAnonymously().catch(() => {});
+                await auth.signOut();
+                
+                console.log('✅ Conexão com Firebase OK');
+                showWarning(false);
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro na conexão Firebase:', error);
+                
+                // Se a API Key estiver inválida, mostrar aviso
+                if (error.code === 'auth/invalid-api-key' || error.code === 'auth/api-key-not-valid') {
+                    showWarning(true);
+                    showError('API Key do Firebase inválida. Configure uma nova no Firebase Console.');
+                } else {
+                    showError('Erro de conexão: ' + error.message);
+                }
+                
+                return false;
             }
         }
 
@@ -318,22 +408,25 @@
                 return;
             }
             
-            const loginBtn = document.querySelector('.btn-login');
+            const loginBtn = document.getElementById('btnLogin');
             const originalText = loginBtn.innerHTML;
             loginBtn.innerHTML = 'Entrando...';
             loginBtn.disabled = true;
             
             try {
-                console.log(`Tentando login com: ${email}`);
+                console.log(`🔐 Tentando login com: ${email}`);
                 
                 // Verificar Firebase
                 if (typeof firebase === 'undefined') {
-                    throw new Error('Firebase não carregado');
+                    throw new Error('Firebase não carregado. Recarregue a página.');
                 }
+                
+                // Usar configuração disponível
+                let configUsada = window.firebaseConfig || firebaseConfigFallback;
                 
                 // Inicializar se necessário
                 if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
+                    firebase.initializeApp(configUsada);
                 }
                 
                 const auth = firebase.auth();
@@ -343,39 +436,18 @@
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
-                console.log("Usuário autenticado:", user.email);
+                console.log('✅ Usuário autenticado:', user.email);
                 
                 // Buscar dados no Firestore
                 const userDoc = await db.collection('usuarios').doc(user.uid).get();
                 
+                let userData;
                 if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    
-                    // Salvar dados
-                    const userInfo = {
-                        id: user.uid,
-                        email: user.email,
-                        nome: userData.nome,
-                        cargo: userData.cargo || 'Funcionário',
-                        departamento: userData.departamento || 'Não informado',
-                        tipo: userData.tipo || 'funcionario',
-                        cpf: userData.cpf || ''
-                    };
-                    
-                    localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
-                    
-                    // Redirecionar
-                    if (userData.tipo === 'gestor') {
-                        window.location.href = 'gestor.html';
-                    } else {
-                        window.location.href = 'funcionario.html';
-                    }
-                    
+                    userData = userDoc.data();
                 } else {
-                    // Se não existe no Firestore
+                    // Se não existe no Firestore, criar automaticamente
                     if (email === 'gestor@essencialprint.com') {
-                        // Criar gestor
-                        await db.collection('usuarios').doc(user.uid).set({
+                        userData = {
                             nome: 'Administrador Gestor',
                             email: email,
                             tipo: 'gestor',
@@ -383,78 +455,76 @@
                             departamento: 'Administração',
                             dataCriacao: new Date().toISOString(),
                             status: 'ativo'
-                        });
-                        
-                        const userInfo = {
-                            id: user.uid,
-                            email: user.email,
-                            nome: 'Administrador Gestor',
-                            cargo: 'Gestor',
-                            departamento: 'Administração',
-                            tipo: 'gestor'
                         };
-                        
-                        localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
-                        window.location.href = 'gestor.html';
-                        
+                        await db.collection('usuarios').doc(user.uid).set(userData);
                     } else {
-                        // Criar funcionário
-                        const userInfo = {
-                            id: user.uid,
-                            email: user.email,
-                            nome: user.email.split('@')[0],
+                        userData = {
+                            nome: email.split('@')[0],
+                            email: email,
+                            tipo: 'funcionario',
                             cargo: 'Funcionário',
                             departamento: 'Não informado',
-                            tipo: 'funcionario'
+                            dataCriacao: new Date().toISOString(),
+                            status: 'ativo'
                         };
-                        
-                        localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
-                        
-                        await db.collection('usuarios').doc(user.uid).set({
-                            nome: userInfo.nome,
-                            email: user.email,
-                            tipo: 'funcionario',
-                            cargo: userInfo.cargo,
-                            departamento: userInfo.departamento,
-                            dataCriacao: new Date().toISOString()
-                        });
-                        
-                        window.location.href = 'funcionario.html';
+                        await db.collection('usuarios').doc(user.uid).set(userData);
                     }
                 }
                 
-            } catch (error) {
-                console.error('Erro no login:', error);
+                // Salvar dados no localStorage
+                const userInfo = {
+                    id: user.uid,
+                    email: user.email,
+                    nome: userData.nome,
+                    cargo: userData.cargo,
+                    departamento: userData.departamento,
+                    tipo: userData.tipo,
+                    cpf: userData.cpf || ''
+                };
                 
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        showError('Usuário não encontrado.');
-                        break;
-                    case 'auth/wrong-password':
-                        showError('Senha incorreta.');
-                        break;
-                    case 'auth/invalid-email':
-                        showError('E-mail inválido.');
-                        break;
-                    case 'auth/invalid-login-credentials':
-                        showError('Credenciais inválidas.');
-                        break;
-                    case 'auth/network-request-failed':
-                        showError('Erro de conexão. Verifique sua internet.');
-                        break;
-                    default:
-                        showError('Erro ao fazer login: ' + error.message);
+                localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                
+                // Redirecionar
+                if (userData.tipo === 'gestor') {
+                    window.location.href = 'gestor.html';
+                } else {
+                    window.location.href = 'funcionario.html';
                 }
                 
+            } catch (error) {
+                console.error('❌ Erro no login:', error);
+                
+                // Tratamento de erros específicos
+                let errorMessage = 'Erro ao fazer login';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Usuário não encontrado.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Senha incorreta.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'E-mail inválido.';
+                } else if (error.code === 'auth/invalid-login-credentials') {
+                    errorMessage = 'Credenciais inválidas.';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Erro de conexão. Verifique sua internet.';
+                } else if (error.code === 'auth/api-key-not-valid' || error.code === 'auth/invalid-api-key') {
+                    errorMessage = 'API Key do Firebase inválida. Contate o administrador.';
+                    showWarning(true);
+                } else {
+                    errorMessage = 'Erro ao fazer login: ' + error.message;
+                }
+                
+                showError(errorMessage);
                 loginBtn.innerHTML = originalText;
                 loginBtn.disabled = false;
             }
         }
 
         // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("Página de login carregada");
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📱 Página de login carregada');
             
+            // Configurar evento do formulário
             document.getElementById('loginForm').addEventListener('submit', login);
             
             // Verificar se já está logado
@@ -466,6 +536,15 @@
                     window.location.href = 'funcionario.html';
                 }
             }
+            
+            // Testar conexão com Firebase
+            await testarConexaoFirebase();
+            
+            // Preencher automaticamente para testes
+            setTimeout(() => {
+                console.log('🔍 Testando credenciais automaticamente...');
+                preencherCredenciais('gestor');
+            }, 1000);
         });
     </script>
 </body>
