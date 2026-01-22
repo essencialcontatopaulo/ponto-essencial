@@ -13,7 +13,7 @@
     <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
     <script src="js/firebase-config.js"></script>
     
-    <!-- Script do Gestor -->
+    <!-- Script do Gestor (AGORA COM DEFER) -->
     <script src="js/gestor.js" defer></script>
     
     <style>
@@ -794,132 +794,30 @@
         </div>
     </div>
 
+    <!-- INICIALIZAÇÃO DO SISTEMA - SCRIPT EMBUTIDO -->
     <script>
-        // INICIALIZAÇÃO DO FIREBASE - ADICIONAR ISSO AQUI
-        document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se o Firebase já está inicializado
-            if (typeof firebase !== 'undefined' && firebaseConfig) {
-                try {
-                    // Inicializar Firebase (modo compatibilidade v9)
-                    firebase.initializeApp(firebaseConfig);
-                    console.log('Firebase inicializado com sucesso!');
-                    
-                    // Configurar serviços
-                    const auth = firebase.auth();
-                    const db = firebase.firestore();
-                    
-                    // Verificar se usuário está logado como gestor
-                    verificarAutenticacao();
-                    
-                    // Carregar dados iniciais
-                    carregarDadosIniciais();
-                    
-                } catch (error) {
-                    console.error('Erro ao inicializar Firebase:', error);
-                    alert('Erro na configuração do sistema. Verifique o console para mais detalhes.');
-                }
-            } else {
-                console.error('Firebase ou configuração não encontrados.');
-                alert('Erro: Configuração do Firebase não encontrada!');
-            }
-            
-            // Restante da inicialização da UI
-            const hoje = new Date().toISOString().split('T')[0];
-            const mesAtual = new Date().toISOString().slice(0, 7);
-            
-            if (document.getElementById('mesRelatorio')) {
-                document.getElementById('mesRelatorio').value = mesAtual;
-                document.getElementById('periodoRelatorio').value = mesAtual;
-                document.getElementById('periodoAjustes').value = mesAtual;
-            }
-            
-            if (document.getElementById('dataAdmissao')) {
-                document.getElementById('dataAdmissao').value = hoje;
-            }
-            
-            if (document.getElementById('dataAjuste')) {
-                document.getElementById('dataAjuste').value = hoje;
-            }
-            
-            const entradaInput = document.getElementById('horaEntradaAjuste');
-            const saidaInput = document.getElementById('horaSaidaAjuste');
-            
-            if (entradaInput && saidaInput) {
-                entradaInput.addEventListener('change', calcularHoras);
-                saidaInput.addEventListener('change', calcularHoras);
-            }
-        });
-        
-        // Função para verificar autenticação
-        function verificarAutenticacao() {
-            const auth = firebase.auth();
-            
-            auth.onAuthStateChanged((user) => {
-                if (!user) {
-                    // Se não houver usuário logado, redirecionar para login
-                    alert('Acesso não autorizado! Faça login como gestor.');
-                    window.location.href = 'index.html';
-                } else {
-                    // Verificar se usuário é gestor (você precisa implementar esta verificação)
-                    // Por enquanto, apenas exibe o nome do usuário
-                    document.getElementById('userName').textContent = user.displayName || user.email || 'Gestor';
-                }
-            });
-        }
-        
-        // Função para carregar dados iniciais
-        function carregarDadosIniciais() {
-            carregarFuncionarios();
-            carregarRegistrosHoje();
-            carregarAjustes();
-            carregarEstatisticas();
-            carregarFuncionariosSelect();
-        }
-        
-        // Placeholder para funções que devem estar no gestor.js
-        function carregarFuncionarios() {
-            console.log('Carregando funcionários...');
-            // Esta função deve ser implementada no arquivo gestor.js
-        }
-        
-        function carregarRegistrosHoje() {
-            console.log('Carregando registros de hoje...');
-            // Esta função deve ser implementada no arquivo gestor.js
-        }
-        
-        function carregarAjustes() {
-            console.log('Carregando ajustes...');
-            // Esta função deve ser implementada no arquivo gestor.js
-        }
-        
-        function carregarEstatisticas() {
-            console.log('Carregando estatísticas...');
-            // Esta função deve ser implementada no arquivo gestor.js
-        }
-        
-        function carregarFuncionariosSelect() {
-            console.log('Carregando funcionários para select...');
-            // Esta função deve ser implementada no arquivo gestor.js
-        }
-
-        // Funções básicas de interface
+        // ============ FUNÇÕES BÁSICAS DA INTERFACE ============
         function openModal(modalName) {
-            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
+            const modalId = `modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`;
+            const modalElement = document.getElementById(modalId);
             if (modalElement) {
                 modalElement.style.display = 'flex';
             }
         }
 
         function closeModal(modalName) {
-            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
+            const modalId = `modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`;
+            const modalElement = document.getElementById(modalId);
             if (modalElement) {
                 modalElement.style.display = 'none';
                 
                 if (modalName === 'novoFuncionario') {
                     document.getElementById('formNovoFuncionario').reset();
+                    document.getElementById('dataAdmissao').value = new Date().toISOString().split('T')[0];
                 }
                 if (modalName === 'ajusteHoras') {
                     document.getElementById('formAjusteHoras').reset();
+                    document.getElementById('dataAjuste').value = new Date().toISOString().split('T')[0];
                     document.getElementById('totalHorasAjuste').value = '';
                     document.getElementById('horariosExistentes').innerHTML = 
                         '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
@@ -928,6 +826,7 @@
         }
 
         function openTab(tabName) {
+            // Remove active de todas as tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -935,12 +834,15 @@
                 btn.classList.remove('active');
             });
             
+            // Ativa a tab clicada
             const tabElement = document.getElementById(tabName);
+            const clickedBtn = event.target;
+            
             if (tabElement) {
                 tabElement.classList.add('active');
             }
-            if (event && event.target) {
-                event.target.classList.add('active');
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
             }
         }
 
@@ -958,12 +860,15 @@
             const [h1, m1] = entrada.split(':').map(Number);
             const [h2, m2] = saida.split(':').map(Number);
             
+            // Criar objetos Date para o mesmo dia
             const entradaDate = new Date(0, 0, 0, h1, m1);
             const saidaDate = new Date(0, 0, 0, h2, m2);
             
+            // Calcular diferença em milissegundos
             const diffMs = saidaDate - entradaDate;
-            const diffMinutes = Math.floor(diffMs / 60000);
             
+            // Converter para horas e minutos
+            const diffMinutes = Math.floor(diffMs / 60000);
             const horas = Math.floor(diffMinutes / 60);
             const minutos = diffMinutes % 60;
             
@@ -984,23 +889,46 @@
 
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                if (firebase.auth) {
-                    firebase.auth().signOut()
-                        .then(() => {
-                            localStorage.removeItem('usuario_logado');
-                            localStorage.removeItem('funcionario_logado');
-                            window.location.href = 'index.html';
-                        })
-                        .catch((error) => {
-                            console.error('Erro ao fazer logout:', error);
-                        });
-                } else {
-                    localStorage.removeItem('usuario_logado');
-                    localStorage.removeItem('funcionario_logado');
-                    window.location.href = 'index.html';
-                }
+                localStorage.removeItem('usuario_logado');
+                localStorage.removeItem('funcionario_logado');
+                window.location.href = 'index.html';
             }
         }
+        
+        // ============ INICIALIZAÇÃO DA PÁGINA ============
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar datas padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            // Data de admissão padrão: hoje
+            if (document.getElementById('dataAdmissao')) {
+                document.getElementById('dataAdmissao').value = hoje;
+            }
+            
+            // Data de ajuste padrão: hoje
+            if (document.getElementById('dataAjuste')) {
+                document.getElementById('dataAjuste').value = hoje;
+            }
+            
+            // Configurar relatórios para o mês atual
+            if (document.getElementById('mesRelatorio')) {
+                document.getElementById('mesRelatorio').value = mesAtual;
+                document.getElementById('periodoRelatorio').value = mesAtual;
+                document.getElementById('periodoAjustes').value = mesAtual;
+            }
+            
+            // Adicionar listeners para cálculo automático de horas
+            const entradaInput = document.getElementById('horaEntradaAjuste');
+            const saidaInput = document.getElementById('horaSaidaAjuste');
+            
+            if (entradaInput && saidaInput) {
+                entradaInput.addEventListener('change', calcularHoras);
+                saidaInput.addEventListener('change', calcularHoras);
+            }
+            
+            console.log('✅ Interface do gestor inicializada');
+        });
     </script>
 </body>
 </html>
