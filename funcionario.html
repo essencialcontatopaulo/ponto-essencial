@@ -139,6 +139,16 @@
             transform: translateY(-2px);
         }
         
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+        
         .registro-info {
             background: #e8f5e8;
             border-radius: 10px;
@@ -183,6 +193,79 @@
             color: #721c24;
         }
         
+        /* Modal para justificativa */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border-top: 5px solid #4caf50;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            color: #1b5e20;
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #1b5e20;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -211,6 +294,24 @@
             padding: 20px;
             font-size: 14px;
             opacity: 0.9;
+        }
+        
+        .justificativa-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .justificativa-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .justificativa-aprovada {
+            background: #d4edda;
+            color: #155724;
         }
     </style>
 </head>
@@ -245,6 +346,10 @@
                     📤 Registrar Saída
                 </button>
                 
+                <button class="btn btn-info" onclick="abrirModalJustificativa()" id="btnJustificativa">
+                    📝 Justificar Falta/Atraso
+                </button>
+                
                 <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                     <h4 style="color: #1b5e20; margin-bottom: 10px;">Último Registro</h4>
                     <div id="ultimoRegistro">
@@ -262,13 +367,21 @@
                             <tr>
                                 <th>Horário</th>
                                 <th>Tipo</th>
+                                <th>Justificativa</th>
                                 <th>Localização</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="3" style="text-align: center;">Carregando registros...</td></tr>
+                            <tr><td colspan="4" style="text-align: center;">Carregando registros...</td></tr>
                         </tbody>
                     </table>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                    <h4 style="color: #856404; margin-bottom: 10px;">⚠️ Suas Justificativas</h4>
+                    <div id="justificativasLista">
+                        <p style="color: #666;">Nenhuma justificativa pendente</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -279,8 +392,64 @@
         </footer>
     </div>
 
+    <!-- Modal para Justificativa -->
+    <div id="modalJustificativa" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Justificar Falta ou Atraso</h3>
+                <button class="close-modal" onclick="fecharModalJustificativa()">×</button>
+            </div>
+            <form id="formJustificativa" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="tipoJustificativa">Tipo *</label>
+                    <select id="tipoJustificativa" class="form-control" required>
+                        <option value="">Selecione...</option>
+                        <option value="falta_justificada">Falta Justificada</option>
+                        <option value="atraso_justificado">Atraso Justificado</option>
+                        <option value="saida_antecipada">Saída Antecipada</option>
+                        <option value="ausencia_justificada">Ausência Justificada</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dataJustificativa">Data *</label>
+                    <input type="date" id="dataJustificativa" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="horaJustificativa">Hora (para atrasos)</label>
+                    <input type="time" id="horaJustificativa" class="form-control">
+                    <small style="color: #666;">Preencha apenas para atrasos</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivoJustificativa">Motivo/Justificativa *</label>
+                    <textarea id="motivoJustificativa" class="form-control" 
+                              placeholder="Descreva detalhadamente o motivo da falta/atraso..." 
+                              required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="anexoJustificativa">Anexar Comprovante (opcional)</label>
+                    <input type="file" id="anexoJustificativa" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                    <small style="color: #666;">Aceito: PDF, JPG, PNG (max 5MB)</small>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-primary" onclick="enviarJustificativa()" style="flex: 1;">
+                        Enviar Justificativa
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalJustificativa()" style="flex: 1;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // js/funcionario.js - Versão completa
+        // js/funcionario.js - Versão completa com justificativa
         console.log('=== FUNCIONARIO.JS CARREGADO ===');
         
         let db = null;
@@ -334,28 +503,41 @@
                 const user = auth.currentUser;
                 if (!user) {
                     console.log('⚠️ Nenhum usuário autenticado no Firebase');
-                    console.log('💡 Tentando recuperar sessão...');
                     
-                    const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
-                    if (savedUser && savedUser.uid === usuarioAtual.id) {
-                        console.log('🔄 Usando sessão salva');
-                    } else {
-                        alert('⚠️ Sessão expirada. Faça login novamente.');
-                        window.location.href = 'index.html';
-                        return;
+                    // Tentar fazer login com email/senha do localStorage
+                    try {
+                        const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
+                        if (savedUser && savedUser.email) {
+                            console.log('🔄 Tentando login automático...');
+                            // Nota: Não podemos fazer login sem senha aqui
+                            // O usuário precisa fazer login manualmente
+                        }
+                    } catch (e) {
+                        console.error('Erro ao recuperar sessão:', e);
                     }
+                    
+                    alert('⚠️ Sessão expirada. Faça login novamente.');
+                    window.location.href = 'index.html';
+                    return;
                 } else {
                     console.log('✅ Usuário autenticado no Firebase:', user.email);
                 }
                 
-                // 5. Iniciar relógio
+                // 5. Configurar data no modal de justificativa
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('dataJustificativa').value = hoje;
+                
+                // 6. Iniciar relógio
                 iniciarRelogio();
                 
-                // 6. Verificar registros do dia
+                // 7. Verificar registros do dia
                 await verificarRegistrosHoje();
                 
-                // 7. Carregar histórico
+                // 8. Carregar histórico
                 await carregarRegistrosHoje();
+                
+                // 9. Carregar justificativas
+                await carregarJustificativas();
                 
                 console.log('✅ Sistema do funcionário inicializado');
                 
@@ -531,6 +713,130 @@
             }
         }
         
+        // Função para abrir modal de justificativa
+        function abrirModalJustificativa() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataJustificativa').value = hoje;
+            document.getElementById('modalJustificativa').style.display = 'flex';
+        }
+        
+        // Função para fechar modal
+        function fecharModalJustificativa() {
+            document.getElementById('modalJustificativa').style.display = 'none';
+            document.getElementById('formJustificativa').reset();
+            document.getElementById('dataJustificativa').value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Função para enviar justificativa
+        async function enviarJustificativa() {
+            const tipo = document.getElementById('tipoJustificativa').value;
+            const data = document.getElementById('dataJustificativa').value;
+            const hora = document.getElementById('horaJustificativa').value;
+            const motivo = document.getElementById('motivoJustificativa').value.trim();
+            
+            if (!tipo || !data || !motivo) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            if (motivo.length < 10) {
+                alert('A justificativa deve ter pelo menos 10 caracteres');
+                return;
+            }
+            
+            try {
+                const justificativaId = 'just-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                
+                // Dados da justificativa
+                const justificativaData = {
+                    id: justificativaId,
+                    funcionarioId: usuarioAtual.id,
+                    funcionarioNome: usuarioAtual.nome,
+                    tipo: tipo,
+                    data: data,
+                    hora: hora || null,
+                    motivo: motivo,
+                    status: 'pendente',
+                    dataEnvio: new Date().toISOString()
+                };
+                
+                // Salvar no Firestore
+                await db.collection('justificativas').doc(justificativaId).set(justificativaData);
+                
+                console.log('✅ Justificativa enviada:', justificativaId);
+                
+                alert('✅ Justificativa enviada com sucesso!\n\nAguardando aprovação do gestor.');
+                
+                // Fechar modal e limpar formulário
+                fecharModalJustificativa();
+                
+                // Atualizar lista de justificativas
+                await carregarJustificativas();
+                
+            } catch (error) {
+                console.error('❌ Erro ao enviar justificativa:', error);
+                alert('Erro ao enviar justificativa: ' + error.message);
+            }
+        }
+        
+        // Função para carregar justificativas
+        async function carregarJustificativas() {
+            try {
+                const userId = usuarioAtual.id;
+                const hoje = new Date().toISOString().split('T')[0];
+                
+                // Buscar justificativas do usuário (últimos 30 dias)
+                const trintaDiasAtras = new Date();
+                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+                const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+                
+                const snapshot = await db.collection('justificativas')
+                    .where('funcionarioId', '==', userId)
+                    .where('data', '>=', dataInicio)
+                    .orderBy('data', 'desc')
+                    .limit(10)
+                    .get();
+                
+                const listaDiv = document.getElementById('justificativasLista');
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<p style="color: #666;">Nenhuma justificativa nos últimos 30 dias</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const just = doc.data();
+                        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
+                        const statusClass = just.status === 'aprovada' ? 'justificativa-aprovada' : 'justificativa-pendente';
+                        const statusText = just.status === 'aprovada' ? 'Aprovada' : 'Pendente';
+                        
+                        let tipoTexto = '';
+                        switch(just.tipo) {
+                            case 'falta_justificada': tipoTexto = 'Falta'; break;
+                            case 'atraso_justificado': tipoTexto = 'Atraso'; break;
+                            case 'saida_antecipada': tipoTexto = 'Saída Antecipada'; break;
+                            case 'ausencia_justificada': tipoTexto = 'Ausência'; break;
+                            default: tipoTexto = just.tipo;
+                        }
+                        
+                        html += `
+                            <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                <p style="margin: 0; font-weight: 600;">${dataBR} - ${tipoTexto}</p>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">${just.motivo.substring(0, 50)}${just.motivo.length > 50 ? '...' : ''}</p>
+                                <span class="justificativa-badge ${statusClass}">${statusText}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                listaDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro ao carregar justificativas:', error);
+                document.getElementById('justificativasLista').innerHTML = 
+                    '<p style="color: red;">Erro ao carregar justificativas</p>';
+            }
+        }
+        
         // Função para carregar registros do dia
         async function carregarRegistrosHoje() {
             try {
@@ -547,17 +853,26 @@
                 let html = '';
                 
                 if (snapshot.empty) {
-                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
+                    html = '<tr><td colspan="4" style="text-align: center;">Nenhum registro hoje</td></tr>';
                 } else {
                     snapshot.forEach(doc => {
                         const reg = doc.data();
                         const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
                         const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
                         
+                        // Verificar se tem justificativa associada
+                        let justificativa = '--';
+                        if (reg.justificativaId) {
+                            justificativa = '<span class="justificativa-badge justificativa-aprovada">Justificado</span>';
+                        } else if (reg.observacao && reg.observacao.includes('Ajuste')) {
+                            justificativa = '<span class="justificativa-badge justificativa-aprovada">Ajustado</span>';
+                        }
+                        
                         html += `
                             <tr>
                                 <td>${reg.horario}</td>
                                 <td>${tipoIcone} ${tipoTexto}</td>
+                                <td>${justificativa}</td>
                                 <td>${reg.localizacao?.latitude ? '📍' : '--'}</td>
                             </tr>
                         `;
@@ -570,7 +885,7 @@
                 console.error('Erro ao carregar registros:', error);
                 const tbody = document.querySelector('#tabelaRegistros tbody');
                 if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
                 }
             }
         }
@@ -596,6 +911,9 @@
         // Exportar funções
         window.registrarEntrada = registrarEntrada;
         window.registrarSaida = registrarSaida;
+        window.abrirModalJustificativa = abrirModalJustificativa;
+        window.fecharModalJustificativa = fecharModalJustificativa;
+        window.enviarJustificativa = enviarJustificativa;
         window.logout = logout;
         
     </script>
