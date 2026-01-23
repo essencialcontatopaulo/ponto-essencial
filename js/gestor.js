@@ -1,4 +1,4 @@
-// js/gestor.js - VERSÃO COMPLETA E FUNCIONAL
+// js/gestor.js - VERSÃO SIMPLIFICADA E FUNCIONAL
 console.log('=== GESTOR.JS CARREGADO ===');
 
 let db = null;
@@ -14,24 +14,56 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     if (!usuarioLogado || usuarioLogado.tipo !== 'gestor') {
         alert('❌ Acesso restrito a gestores!');
-        window.location.href = 'index.html';
+        window.location.href = 'index (5).html';
         return;
     }
     
     usuarioAtual = usuarioLogado;
-    console.log('👤 Usuário logado:', usuarioAtual.nome);
+    console.log('👤 Gestor logado:', usuarioAtual.nome);
     
     // 2. Configurar interface
     document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
     document.getElementById('userCargo').textContent = 
         `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
     
-    // 3. Inicializar Firebase
+    // 3. Configurar datas
+    const hoje = new Date().toISOString().split('T')[0];
+    const mesAtual = new Date().toISOString().slice(0, 7);
+    
+    if (document.getElementById('dataAdmissao')) {
+        document.getElementById('dataAdmissao').value = hoje;
+    }
+    if (document.getElementById('dataAjuste')) {
+        document.getElementById('dataAjuste').value = hoje;
+    }
+    if (document.getElementById('mesRelatorio')) {
+        document.getElementById('mesRelatorio').value = mesAtual;
+        document.getElementById('periodoRelatorio').value = mesAtual;
+        document.getElementById('periodoAjustes').value = mesAtual;
+    }
+    
+    // 4. Inicializar Firebase
+    await inicializarFirebase();
+    
+    // 5. Carregar dados
+    if (db) {
+        await carregarDadosIniciais();
+    } else {
+        alert('⚠️ Não foi possível conectar ao banco de dados. Alguns recursos podem estar limitados.');
+    }
+});
+
+// Função para inicializar Firebase
+async function inicializarFirebase() {
     try {
         console.log('⚙️ Inicializando Firebase...');
         
         if (typeof firebase === 'undefined') {
             throw new Error('Firebase SDK não carregado');
+        }
+        
+        if (!firebaseConfig) {
+            throw new Error('Configuração do Firebase não encontrada');
         }
         
         // Verificar se já foi inicializado
@@ -46,66 +78,49 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         console.log('✅ Serviços Firebase obtidos');
         
-        // 4. Verificar autenticação no Firebase
+        // Verificar autenticação
         const user = auth.currentUser;
         if (!user) {
             console.log('⚠️ Nenhum usuário autenticado no Firebase');
             
-            // Tentar fazer login com as credenciais salvas
-            try {
-                const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
-                if (savedUser && savedUser.email) {
-                    console.log('🔄 Tentando login automático...');
-                    
-                    // O login automático não é possível sem senha
-                    // O usuário precisa fazer login manualmente
-                    console.log('💡 Usuário precisa fazer login manualmente');
-                }
-            } catch (e) {
-                console.error('Erro ao recuperar sessão:', e);
+            // Tentar login com as credenciais salvas
+            const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
+            if (savedUser) {
+                console.log('🔄 Usando sessão salva');
             }
-            
-            // Solicitar login
-            alert('⚠️ Sessão expirada. Faça login novamente.');
-            window.location.href = 'index.html';
-            return;
         } else {
             console.log('✅ Usuário autenticado no Firebase:', user.email);
         }
         
-        // 5. Carregar dados iniciais
-        await carregarDadosIniciais();
-        
-        // 6. Configurar datas
-        configurarDatas();
-        
-        // 7. Gerar relatório inicial
-        gerarRelatorioMensal();
+        return true;
         
     } catch (error) {
-        console.error('❌ Erro na inicialização:', error);
-        alert('Erro ao conectar com o servidor: ' + error.message);
+        console.error('❌ Erro ao conectar ao Firebase:', error);
+        db = null;
+        return false;
     }
-});
+}
 
-// ============ FUNÇÃO DE CADASTRO DE FUNCIONÁRIO ============
+// Função para cadastrar funcionário (SIMPLIFICADA)
 async function cadastrarFuncionario() {
-    console.log('📝 Iniciando cadastro de funcionário...');
+    if (!db) {
+        alert('❌ Sistema não conectado ao banco de dados.');
+        return;
+    }
     
-    // 1. Coletar dados
     const dados = {
         nome: document.getElementById('nomeFuncionario').value.trim(),
         email: document.getElementById('emailFuncionario').value.trim().toLowerCase(),
         senha: document.getElementById('senhaFuncionario').value,
-        cpf: document.getElementById('cpfFuncionario').value.trim().replace(/\D/g, ''),
+        cpf: document.getElementById('cpfFuncionario').value.trim(),
         cargo: document.getElementById('cargoFuncionario').value,
         departamento: document.getElementById('departamentoFuncionario').value,
         dataAdmissao: document.getElementById('dataAdmissao').value
     };
     
-    // 2. Validações
-    if (!dados.nome || !dados.email || !dados.senha || !dados.cargo || !dados.departamento || !dados.dataAdmissao) {
-        alert('Preencha todos os campos obrigatórios (*)');
+    // Validações
+    if (!dados.nome || !dados.email || !dados.senha || !dados.cargo || !dados.departamento) {
+        alert('Preencha todos os campos obrigatórios!');
         return;
     }
     
@@ -114,39 +129,17 @@ async function cadastrarFuncionario() {
         return;
     }
     
-    if (dados.cpf && dados.cpf.length !== 11) {
-        alert('CPF deve ter 11 dígitos');
-        return;
-    }
-    
-    // 3. Loading
-    const btn = document.querySelector('#formNovoFuncionario .btn-success');
-    const textoOriginal = btn.textContent;
-    btn.textContent = 'Cadastrando...';
-    btn.disabled = true;
-    
     try {
-        // 4. Verificar se Firebase está disponível
-        if (!auth || !db) {
-            throw new Error('Sistema não inicializado');
-        }
-        
-        console.log('🔐 Etapa 1: Criando no Firebase Auth...');
-        
-        // 5. Criar usuário no Firebase Authentication
+        // 1. Criar usuário no Firebase Auth
         const userCredential = await auth.createUserWithEmailAndPassword(dados.email, dados.senha);
         const userId = userCredential.user.uid;
         
-        console.log('✅ Usuário criado no Auth. ID:', userId);
-        
-        // 6. Atualizar perfil do usuário
+        // 2. Atualizar perfil
         await userCredential.user.updateProfile({
             displayName: dados.nome
         });
         
-        console.log('✅ Perfil atualizado');
-        
-        // 7. Preparar dados para Firestore
+        // 3. Preparar dados para Firestore
         const funcionarioData = {
             id: userId,
             nome: dados.nome,
@@ -154,7 +147,7 @@ async function cadastrarFuncionario() {
             cpf: dados.cpf || '',
             cargo: dados.cargo,
             departamento: dados.departamento,
-            dataAdmissao: dados.dataAdmissao,
+            dataAdmissao: dados.dataAdmissao || new Date().toISOString().split('T')[0],
             tipo: 'funcionario',
             status: 'ativo',
             dataCriacao: new Date().toISOString(),
@@ -162,115 +155,50 @@ async function cadastrarFuncionario() {
             criadoPorNome: usuarioAtual?.nome || 'Gestor'
         };
         
-        // Campos opcionais
-        const salario = document.getElementById('salarioFuncionario').value;
-        const telefone = document.getElementById('telefoneFuncionario').value.trim();
-        const endereco = document.getElementById('enderecoFuncionario').value.trim();
-        
-        if (salario && !isNaN(parseFloat(salario))) {
-            funcionarioData.salario = parseFloat(salario);
-        }
-        
-        if (telefone) {
-            funcionarioData.telefone = telefone.replace(/\D/g, '');
-        }
-        
-        if (endereco) {
-            funcionarioData.endereco = endereco;
-        }
-        
-        console.log('📝 Etapa 2: Salvando no Firestore...', funcionarioData);
-        
-        // 8. Salvar no Firestore
+        // 4. Salvar no Firestore
         await db.collection('usuarios').doc(userId).set(funcionarioData);
         
-        console.log('✅ Funcionário salvo no Firestore!');
+        alert(`✅ FUNCIONÁRIO CADASTRADO COM SUCESSO!\n\n📋 Dados:\n• Nome: ${dados.nome}\n• Email: ${dados.email}\n• Cargo: ${dados.cargo}\n• Senha: ${dados.senha}`);
         
-        // 9. SUCESSO
-        alert(`✅ FUNCIONÁRIO CADASTRADO COM SUCESSO!\n\n📋 Dados:\n• Nome: ${dados.nome}\n• Email: ${dados.email}\n• Cargo: ${dados.cargo}\n• Senha: ${dados.senha}\n\n⚠️ Anote a senha para entregar ao funcionário!`);
-        
-        // 10. Limpar formulário
+        // 5. Limpar e fechar
         document.getElementById('formNovoFuncionario').reset();
-        configurarDatas();
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataAdmissao').value = hoje;
+        closeModal('novoFuncionario');
         
-        // 11. Fechar modal e atualizar
-        setTimeout(() => {
-            closeModal('novoFuncionario');
-            
-            // Atualizar listas
-            carregarFuncionarios();
-            carregarSelectFuncionarios();
-            carregarFuncionariosParaAjuste();
-            carregarEstatisticas();
-            
-            console.log('🔄 Interface atualizada');
-        }, 1000);
+        // 6. Atualizar dados
+        await carregarFuncionarios();
+        await carregarSelectFuncionarios();
+        await carregarFuncionariosParaAjuste();
+        await carregarEstatisticas();
         
     } catch (error) {
-        console.error('❌ ERRO NO CADASTRO:', error);
-        
-        // Tratamento de erros
-        let mensagem = '';
+        console.error('❌ Erro ao cadastrar funcionário:', error);
         
         if (error.code === 'auth/email-already-in-use') {
-            mensagem = '❌ Este email já está cadastrado!';
+            alert('❌ Este email já está cadastrado!');
         } else if (error.code === 'auth/invalid-email') {
-            mensagem = '❌ Email inválido!';
-        } else if (error.code === 'auth/operation-not-allowed') {
-            mensagem = '❌ Cadastro por email não está habilitado. Habilite no Firebase Console.';
+            alert('❌ Email inválido!');
         } else if (error.code === 'auth/weak-password') {
-            mensagem = '❌ Senha muito fraca. Use pelo menos 6 caracteres.';
-        } else if (error.code === 'permission-denied') {
-            mensagem = '❌ Permissão negada. Verifique as regras do Firestore.';
-        } else if (error.code === 'auth/network-request-failed') {
-            mensagem = '❌ Erro de conexão. Verifique sua internet.';
+            alert('❌ Senha muito fraca. Use pelo menos 6 caracteres.');
         } else {
-            mensagem = 'Erro: ' + (error.message || 'Desconhecido');
-        }
-        
-        alert(mensagem);
-        
-    } finally {
-        // Restaurar botão
-        if (btn) {
-            btn.textContent = textoOriginal;
-            btn.disabled = false;
+            alert('Erro: ' + error.message);
         }
     }
 }
 
-// ============ FUNÇÕES DE CARREGAMENTO ============
-async function carregarDadosIniciais() {
-    try {
-        await Promise.all([
-            carregarFuncionarios(),
-            carregarRegistrosHoje(),
-            carregarAjustesRecentes(),
-            carregarEstatisticas(),
-            carregarSelectFuncionarios(),
-            carregarFuncionariosParaAjuste(),
-            carregarJustificativasPendentes()
-        ]);
-        console.log('✅ Dados iniciais carregados');
-    } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-    }
-}
-
+// Carregar funcionários
 async function carregarFuncionarios() {
+    if (!db) return;
+    
     try {
-        console.log('📋 Carregando funcionários...');
-        
         const snapshot = await db.collection('usuarios')
             .where('tipo', '==', 'funcionario')
             .orderBy('nome')
             .get();
         
         const tbody = document.querySelector('#tabelaFuncionarios tbody');
-        if (!tbody) {
-            console.error('Tabela de funcionários não encontrada');
-            return;
-        }
+        if (!tbody) return;
         
         let html = '';
         
@@ -300,18 +228,16 @@ async function carregarFuncionarios() {
         }
         
         tbody.innerHTML = html;
-        console.log(`✅ ${snapshot.size} funcionários carregados`);
         
     } catch (error) {
         console.error('❌ Erro ao carregar funcionários:', error);
-        const tbody = document.querySelector('#tabelaFuncionarios tbody');
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro ao carregar funcionários</td></tr>';
-        }
     }
 }
 
+// Carregar registros de hoje
 async function carregarRegistrosHoje() {
+    if (!db) return;
+    
     try {
         const hoje = new Date().toISOString().split('T')[0];
         const snapshot = await db.collection('pontos')
@@ -348,43 +274,10 @@ async function carregarRegistrosHoje() {
     }
 }
 
-async function carregarAjustesRecentes() {
-    try {
-        const snapshot = await db.collection('ajustes_horas')
-            .orderBy('dataCriacao', 'desc')
-            .limit(5)
-            .get();
-        
-        const tbody = document.querySelector('#tabelaAjustes tbody');
-        if (!tbody) return;
-        
-        let html = '';
-        
-        if (snapshot.empty) {
-            html = '<tr><td colspan="4" style="text-align: center;">Nenhum ajuste recente</td></tr>';
-        } else {
-            snapshot.forEach(doc => {
-                const ajuste = doc.data();
-                const dataBR = new Date(ajuste.data).toLocaleDateString('pt-BR');
-                html += `
-                    <tr>
-                        <td>${ajuste.funcionarioNome || 'Desconhecido'}</td>
-                        <td>${dataBR}</td>
-                        <td>${ajuste.totalHoras || '0:00'}h</td>
-                        <td><span class="status-badge status-presente">Aprovado</span></td>
-                    </tr>
-                `;
-            });
-        }
-        
-        tbody.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Erro ao carregar ajustes:', error);
-    }
-}
-
+// Carregar estatísticas
 async function carregarEstatisticas() {
+    if (!db) return;
+    
     try {
         // Total de funcionários ativos
         const funcionariosSnapshot = await db.collection('usuarios')
@@ -453,58 +346,10 @@ async function carregarEstatisticas() {
     }
 }
 
-async function carregarSelectFuncionarios() {
-    try {
-        const snapshot = await db.collection('usuarios')
-            .where('tipo', '==', 'funcionario')
-            .where('status', '==', 'ativo')
-            .orderBy('nome')
-            .get();
-        
-        const select = document.getElementById('funcionarioRelatorio');
-        if (select) {
-            let html = '<option value="">Selecione um funcionário</option>';
-            
-            snapshot.forEach(doc => {
-                const func = doc.data();
-                html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
-            });
-            
-            select.innerHTML = html;
-        }
-        
-    } catch (error) {
-        console.error('Erro ao carregar select:', error);
-    }
-}
-
-async function carregarFuncionariosParaAjuste() {
-    try {
-        const snapshot = await db.collection('usuarios')
-            .where('tipo', '==', 'funcionario')
-            .where('status', '==', 'ativo')
-            .orderBy('nome')
-            .get();
-        
-        const select = document.getElementById('funcionarioAjuste');
-        if (select) {
-            let html = '<option value="">Selecione um funcionário</option>';
-            
-            snapshot.forEach(doc => {
-                const func = doc.data();
-                html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
-            });
-            
-            select.innerHTML = html;
-        }
-        
-    } catch (error) {
-        console.error('Erro ao carregar funcionários para ajuste:', error);
-    }
-}
-
-// ============ FUNÇÕES DE JUSTIFICATIVAS ============
+// Carregar justificativas pendentes
 async function carregarJustificativasPendentes() {
+    if (!db) return;
+    
     try {
         const snapshot = await db.collection('justificativas')
             .where('status', '==', 'pendente')
@@ -523,7 +368,6 @@ async function carregarJustificativasPendentes() {
                 const just = doc.data();
                 const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
                 
-                // Traduzir tipo
                 let tipoTexto = '';
                 switch(just.tipo) {
                     case 'falta_justificada': tipoTexto = 'Falta Justificada'; break;
@@ -567,25 +411,16 @@ async function carregarJustificativasPendentes() {
         
     } catch (error) {
         console.error('Erro ao carregar justificativas:', error);
-        document.getElementById('justificativasContainer').innerHTML = 
-            '<p style="color: red;">Erro ao carregar justificativas</p>';
     }
 }
 
+// Aprovar justificativa
 async function aprovarJustificativa(justificativaId) {
+    if (!db) return;
+    
     if (!confirm('Aprovar esta justificativa?')) return;
     
     try {
-        const justDoc = await db.collection('justificativas').doc(justificativaId).get();
-        
-        if (!justDoc.exists) {
-            alert('Justificativa não encontrada');
-            return;
-        }
-        
-        const just = justDoc.data();
-        
-        // Atualizar status da justificativa
         await db.collection('justificativas').doc(justificativaId).update({
             status: 'aprovada',
             dataAprovacao: new Date().toISOString(),
@@ -593,32 +428,9 @@ async function aprovarJustificativa(justificativaId) {
             aprovadoPorNome: usuarioAtual.nome
         });
         
-        // Se for falta ou atraso, criar ajuste de horas automaticamente
-        if (just.tipo === 'falta_justificada' || just.tipo === 'atraso_justificado') {
-            const ajusteId = 'ajuste-' + Date.now();
-            
-            await db.collection('ajustes_horas').doc(ajusteId).set({
-                id: ajusteId,
-                funcionarioId: just.funcionarioId,
-                funcionarioNome: just.funcionarioNome,
-                data: just.data,
-                tipo: just.tipo,
-                justificativa: just.motivo,
-                status: 'aprovado',
-                aprovadoPor: usuarioAtual.id,
-                aprovadoPorNome: usuarioAtual.nome,
-                dataCriacao: new Date().toISOString()
-            });
-            
-            console.log('✅ Ajuste criado automaticamente para justificativa');
-        }
-        
         alert('✅ Justificativa aprovada com sucesso!');
-        
-        // Atualizar listas
         await carregarJustificativasPendentes();
         await carregarEstatisticas();
-        await carregarAjustesRecentes();
         
     } catch (error) {
         console.error('Erro ao aprovar justificativa:', error);
@@ -626,7 +438,10 @@ async function aprovarJustificativa(justificativaId) {
     }
 }
 
+// Rejeitar justificativa
 async function rejeitarJustificativa(justificativaId) {
+    if (!db) return;
+    
     const motivoRejeicao = prompt('Informe o motivo da rejeição:');
     
     if (!motivoRejeicao || motivoRejeicao.trim() === '') {
@@ -644,8 +459,6 @@ async function rejeitarJustificativa(justificativaId) {
         });
         
         alert('✅ Justificativa rejeitada!');
-        
-        // Atualizar listas
         await carregarJustificativasPendentes();
         await carregarEstatisticas();
         
@@ -655,478 +468,94 @@ async function rejeitarJustificativa(justificativaId) {
     }
 }
 
-async function verDetalhesJustificativa(justificativaId) {
+// Carregar dados iniciais
+async function carregarDadosIniciais() {
     try {
-        const justDoc = await db.collection('justificativas').doc(justificativaId).get();
-        
-        if (!justDoc.exists) {
-            alert('Justificativa não encontrada');
-            return;
-        }
-        
-        const just = justDoc.data();
-        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
-        
-        let tipoTexto = '';
-        switch(just.tipo) {
-            case 'falta_justificada': tipoTexto = 'Falta Justificada'; break;
-            case 'atraso_justificado': tipoTexto = 'Atraso Justificado'; break;
-            case 'saida_antecipada': tipoTexto = 'Saída Antecipada'; break;
-            case 'ausencia_justificada': tipoTexto = 'Ausência Justificada'; break;
-            default: tipoTexto = just.tipo;
-        }
-        
-        const detalhes = `
-📋 DETALHES DA JUSTIFICATIVA
-
-👤 Funcionário: ${just.funcionarioNome}
-📅 Data: ${dataBR}
-📝 Tipo: ${tipoTexto}
-${just.hora ? `🕒 Hora: ${just.hora}\n` : ''}
-📄 Motivo/Justificativa:
-${just.motivo}
-
-📤 Data de Envio: ${new Date(just.dataEnvio).toLocaleString('pt-BR')}
-`;
-
-        alert(detalhes);
-        
+        await Promise.all([
+            carregarFuncionarios(),
+            carregarRegistrosHoje(),
+            carregarEstatisticas(),
+            carregarJustificativasPendentes(),
+            carregarFuncionariosParaAjuste(),
+            carregarSelectFuncionarios()
+        ]);
+        console.log('✅ Dados iniciais carregados');
     } catch (error) {
-        console.error('Erro ao ver detalhes:', error);
-        alert('Erro ao carregar detalhes: ' + error.message);
+        console.error('Erro ao carregar dados:', error);
     }
 }
 
-// ============ FUNÇÕES DE EDIÇÃO ============
-async function abrirEditarFuncionario(funcionarioId) {
-    try {
-        const doc = await db.collection('usuarios').doc(funcionarioId).get();
-        
-        if (!doc.exists) {
-            alert('Funcionário não encontrado!');
-            return;
-        }
-        
-        const func = doc.data();
-        
-        // Preencher formulário
-        document.getElementById('editarFuncionarioId').value = funcionarioId;
-        document.getElementById('editarNome').value = func.nome || '';
-        document.getElementById('editarEmail').value = func.email || '';
-        document.getElementById('editarCpf').value = func.cpf || '';
-        document.getElementById('editarCargo').value = func.cargo || '';
-        document.getElementById('editarDepartamento').value = func.departamento || '';
-        
-        // Configurar status
-        document.querySelectorAll('input[name="editarStatus"]').forEach(radio => {
-            radio.checked = (radio.value === (func.status || 'ativo'));
-        });
-        
-        openModal('editarFuncionario');
-        
-    } catch (error) {
-        console.error('Erro ao abrir edição:', error);
-        alert('Erro ao carregar dados do funcionário');
-    }
-}
-
-async function atualizarFuncionario() {
-    const funcionarioId = document.getElementById('editarFuncionarioId').value;
-    const nome = document.getElementById('editarNome').value.trim();
-    const email = document.getElementById('editarEmail').value.trim();
-    const cpf = document.getElementById('editarCpf').value.trim();
-    const cargo = document.getElementById('editarCargo').value.trim();
-    const departamento = document.getElementById('editarDepartamento').value.trim();
-    const status = document.querySelector('input[name="editarStatus"]:checked').value;
-    
-    if (!nome || !email || !cpf || !cargo || !departamento) {
-        alert('Preencha todos os campos obrigatórios!');
-        return;
-    }
+// Funções auxiliares
+async function carregarFuncionariosParaAjuste() {
+    if (!db) return;
     
     try {
-        await db.collection('usuarios').doc(funcionarioId).update({
-            nome: nome,
-            email: email,
-            cpf: cpf,
-            cargo: cargo,
-            departamento: departamento,
-            status: status,
-            dataAtualizacao: new Date().toISOString()
-        });
-        
-        alert('✅ Funcionário atualizado com sucesso!');
-        closeModal('editarFuncionario');
-        
-        // Atualizar listas
-        await carregarFuncionarios();
-        await carregarSelectFuncionarios();
-        await carregarFuncionariosParaAjuste();
-        await carregarEstatisticas();
-        
-    } catch (error) {
-        console.error('Erro ao atualizar funcionário:', error);
-        alert('Erro ao atualizar funcionário: ' + error.message);
-    }
-}
-
-async function excluirFuncionario(funcionarioId, nomeFuncionario) {
-    const confirmMessage = confirm(
-        `⚠️ Tem certeza que deseja INATIVAR este funcionário?\n\nNome: ${nomeFuncionario || 'Funcionário'}\n\nEle não poderá mais acessar o sistema.`
-    );
-    
-    if (!confirmMessage) {
-        return;
-    }
-    
-    try {
-        // Marcar como inativo
-        await db.collection('usuarios').doc(funcionarioId).update({
-            status: 'inativo',
-            dataDesativacao: new Date().toISOString()
-        });
-        
-        alert('✅ Funcionário marcado como inativo!');
-        
-        // Atualizar interface
-        await carregarFuncionarios();
-        await carregarEstatisticas();
-        await carregarSelectFuncionarios();
-        await carregarFuncionariosParaAjuste();
-        
-    } catch (error) {
-        console.error('Erro ao excluir funcionário:', error);
-        alert('Erro ao processar funcionário: ' + error.message);
-    }
-}
-
-// ============ FUNÇÕES DE AJUSTE DE HORAS ============
-async function carregarHorarioAtual() {
-    const funcionarioId = document.getElementById('funcionarioAjuste').value;
-    const data = document.getElementById('dataAjuste').value;
-    
-    if (!funcionarioId || !data) {
-        const element = document.getElementById('horariosExistentes');
-        if (element) {
-            element.innerHTML = '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
-        }
-        return;
-    }
-    
-    try {
-        const snapshot = await db.collection('pontos')
-            .where('funcionarioId', '==', funcionarioId)
-            .where('data', '==', data)
-            .orderBy('timestamp')
+        const snapshot = await db.collection('usuarios')
+            .where('tipo', '==', 'funcionario')
+            .where('status', '==', 'ativo')
+            .orderBy('nome')
             .get();
         
-        let html = '';
-        
-        if (snapshot.empty) {
-            html = '<p style="color: #666;">Nenhum registro encontrado para esta data</p>';
-        } else {
-            html = '<ul style="margin: 0; padding-left: 20px;">';
-            snapshot.forEach(doc => {
-                const ponto = doc.data();
-                const tipoEmoji = ponto.tipo === 'entrada' ? '📥' : '📤';
-                html += `<li>${tipoEmoji} ${ponto.horario} - ${ponto.tipo === 'entrada' ? 'Entrada' : 'Saída'}</li>`;
-            });
-            html += '</ul>';
-        }
-        
-        const element = document.getElementById('horariosExistentes');
-        if (element) {
-            element.innerHTML = html;
-        }
-        
-    } catch (error) {
-        console.error('Erro ao carregar horários:', error);
-    }
-}
-
-async function salvarAjusteHoras() {
-    if (!db) {
-        alert('Sistema não inicializado. Tente recarregar a página.');
-        return;
-    }
-    
-    const funcionarioId = document.getElementById('funcionarioAjuste').value;
-    const funcionarioSelect = document.getElementById('funcionarioAjuste').selectedOptions[0];
-    const funcionarioNome = funcionarioSelect ? funcionarioSelect.text.split(' - ')[0] : 'Funcionário';
-    const data = document.getElementById('dataAjuste').value;
-    const tipoAjuste = document.getElementById('tipoAjuste').value;
-    const horaEntrada = document.getElementById('horaEntradaAjuste').value;
-    const horaSaida = document.getElementById('horaSaidaAjuste').value;
-    const totalHoras = document.getElementById('totalHorasAjuste').value;
-    const justificativa = document.getElementById('justificativaAjuste').value.trim();
-    
-    // Validações
-    if (!funcionarioId || !data || !tipoAjuste || !horaEntrada || !horaSaida || !justificativa) {
-        alert('Preencha todos os campos obrigatórios!');
-        return;
-    }
-    
-    if (!totalHoras) {
-        alert('Calcule as horas primeiro! Clique em "Calcular Horas"');
-        return;
-    }
-    
-    if (horaEntrada >= horaSaida) {
-        alert('A hora de entrada deve ser anterior à hora de saída!');
-        return;
-    }
-    
-    try {
-        const ajusteId = 'ajuste-' + Date.now();
-        
-        // 1. Criar registro de ajuste
-        await db.collection('ajustes_horas').doc(ajusteId).set({
-            id: ajusteId,
-            funcionarioId: funcionarioId,
-            funcionarioNome: funcionarioNome,
-            data: data,
-            tipo: tipoAjuste,
-            horaEntrada: horaEntrada,
-            horaSaida: horaSaida,
-            totalHoras: totalHoras,
-            justificativa: justificativa,
-            status: 'aprovado',
-            aprovadoPor: usuarioAtual?.id || 'gestor',
-            aprovadoPorNome: usuarioAtual?.nome || 'Gestor',
-            dataCriacao: new Date().toISOString()
-        });
-        
-        // 2. Criar pontos de entrada e saída
-        const entradaTimestamp = new Date(`${data}T${horaEntrada}:00`).getTime();
-        const saidaTimestamp = new Date(`${data}T${horaSaida}:00`).getTime();
-        
-        // Ponto de entrada
-        await db.collection('pontos').add({
-            funcionarioId: funcionarioId,
-            funcionarioNome: funcionarioNome,
-            tipo: 'entrada',
-            horario: horaEntrada,
-            data: data,
-            timestamp: entradaTimestamp,
-            localizacao: { latitude: null, longitude: null },
-            metodo: 'ajuste_gestor',
-            ajusteId: ajusteId,
-            observacao: `Ajuste gestor: ${justificativa}`,
-            dataRegistro: new Date().toISOString()
-        });
-        
-        // Ponto de saída
-        await db.collection('pontos').add({
-            funcionarioId: funcionarioId,
-            funcionarioNome: funcionarioNome,
-            tipo: 'saida',
-            horario: horaSaida,
-            data: data,
-            timestamp: saidaTimestamp,
-            localizacao: { latitude: null, longitude: null },
-            metodo: 'ajuste_gestor',
-            ajusteId: ajusteId,
-            observacao: `Ajuste gestor: ${justificativa}`,
-            dataRegistro: new Date().toISOString()
-        });
-        
-        alert('✅ Horas ajustadas com sucesso!\nForam criados registros de entrada e saída.');
-        
-        // Limpar formulário
-        document.getElementById('formAjusteHoras').reset();
-        document.getElementById('totalHorasAjuste').value = '';
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('dataAjuste').value = hoje;
-        
-        closeModal('ajusteHoras');
-        
-        // Atualizar listas
-        await carregarRegistrosHoje();
-        await carregarAjustesRecentes();
-        await carregarEstatisticas();
-        
-    } catch (error) {
-        console.error('Erro ao salvar ajuste:', error);
-        alert('Erro ao salvar ajuste de horas: ' + error.message);
-    }
-}
-
-// ============ FUNÇÕES DE RELATÓRIO ============
-async function gerarRelatorioMensal() {
-    const mesAno = document.getElementById('mesRelatorio')?.value;
-    if (!mesAno || !db) return;
-    
-    try {
-        const [ano, mes] = mesAno.split('-');
-        const primeiroDia = `${ano}-${mes}-01`;
-        const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
-        
-        // Buscar registros do mês
-        const pontosSnapshot = await db.collection('pontos')
-            .where('data', '>=', primeiroDia)
-            .where('data', '<=', ultimoDia)
-            .get();
-        
-        // Buscar ajustes do mês
-        const ajustesSnapshot = await db.collection('ajustes_horas')
-            .where('data', '>=', primeiroDia)
-            .where('data', '<=', ultimoDia)
-            .get();
-        
-        // Buscar justificativas do mês
-        const justificativasSnapshot = await db.collection('justificativas')
-            .where('data', '>=', primeiroDia)
-            .where('data', '<=', ultimoDia)
-            .get();
-        
-        let totalRegistros = pontosSnapshot.size;
-        let entradas = 0;
-        let saidas = 0;
-        let totalAjustes = ajustesSnapshot.size;
-        let justificativasAprovadas = 0;
-        let justificativasRejeitadas = 0;
-        let justificativasPendentes = 0;
-        
-        pontosSnapshot.forEach(doc => {
-            const reg = doc.data();
-            if (reg.tipo === 'entrada') entradas++;
-            if (reg.tipo === 'saida') saidas++;
-        });
-        
-        justificativasSnapshot.forEach(doc => {
-            const just = doc.data();
-            if (just.status === 'aprovada') justificativasAprovadas++;
-            else if (just.status === 'rejeitada') justificativasRejeitadas++;
-            else if (just.status === 'pendente') justificativasPendentes++;
-        });
-        
-        const mesNome = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        
-        const contentDiv = document.getElementById('relatorioMensalContent');
-        if (contentDiv) {
-            contentDiv.innerHTML = `
-                <div style="background: #e8f5e8; padding: 20px; border-radius: 10px;">
-                    <h4>Relatório de ${mesNome}</h4>
-                    <div class="stats-grid" style="margin-top: 15px;">
-                        <div class="stat-card">
-                            <div class="stat-number">${totalRegistros}</div>
-                            <div class="stat-label">Total Registros</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${entradas}</div>
-                            <div class="stat-label">Entradas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${saidas}</div>
-                            <div class="stat-label">Saídas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${totalAjustes}</div>
-                            <div class="stat-label">Ajustes</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${justificativasAprovadas}</div>
-                            <div class="stat-label">Justificativas Aprovadas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${justificativasRejeitadas}</div>
-                            <div class="stat-label">Justificativas Rejeitadas</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-    } catch (error) {
-        console.error('Erro ao gerar relatório mensal:', error);
-    }
-}
-
-async function gerarRelatorioAjustes() {
-    const mesAno = document.getElementById('periodoAjustes')?.value;
-    if (!mesAno || !db) return;
-    
-    try {
-        const [ano, mes] = mesAno.split('-');
-        const primeiroDia = `${ano}-${mes}-01`;
-        const ultimoDia = new Date(ano, mes, 0).toISOString().split('T')[0];
-        
-        const snapshot = await db.collection('ajustes_horas')
-            .where('data', '>=', primeiroDia)
-            .where('data', '<=', ultimoDia)
-            .orderBy('data')
-            .get();
-        
-        let html = '<h4>Ajustes do Período</h4>';
-        
-        if (snapshot.empty) {
-            html += '<p style="color: #666;">Nenhum ajuste encontrado</p>';
-        } else {
-            html += '<table style="width: 100%; margin-top: 15px;">';
-            html += '<thead><tr><th>Data</th><th>Funcionário</th><th>Horas</th><th>Tipo</th><th>Status</th></tr></thead><tbody>';
+        const select = document.getElementById('funcionarioAjuste');
+        if (select) {
+            let html = '<option value="">Selecione um funcionário</option>';
             
             snapshot.forEach(doc => {
-                const ajuste = doc.data();
-                const dataBR = new Date(ajuste.data).toLocaleDateString('pt-BR');
-                html += `
-                    <tr>
-                        <td>${dataBR}</td>
-                        <td>${ajuste.funcionarioNome}</td>
-                        <td>${ajuste.totalHoras}h</td>
-                        <td>${ajuste.tipo}</td>
-                        <td><span class="status-badge ${ajuste.status === 'aprovado' ? 'status-aprovado' : 'status-pendente'}">${ajuste.status === 'aprovado' ? 'Aprovado' : 'Pendente'}</span></td>
-                    </tr>
-                `;
+                const func = doc.data();
+                html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
             });
             
-            html += '</tbody></table>';
-        }
-        
-        const contentDiv = document.getElementById('relatorioAjustesContent');
-        if (contentDiv) {
-            contentDiv.innerHTML = html;
+            select.innerHTML = html;
         }
         
     } catch (error) {
-        console.error('Erro ao gerar relatório de ajustes:', error);
+        console.error('Erro ao carregar funcionários para ajuste:', error);
     }
 }
 
-// ============ FUNÇÕES AUXILIARES ============
-function configurarDatas() {
-    const hoje = new Date().toISOString().split('T')[0];
-    const mesAtual = new Date().toISOString().slice(0, 7);
+async function carregarSelectFuncionarios() {
+    if (!db) return;
     
-    // Configurar datas nos formulários
-    const elementosData = [
-        { id: 'dataAdmissao', valor: hoje },
-        { id: 'dataAjuste', valor: hoje },
-        { id: 'mesRelatorio', valor: mesAtual },
-        { id: 'periodoRelatorio', valor: mesAtual },
-        { id: 'periodoAjustes', valor: mesAtual }
-    ];
-    
-    elementosData.forEach(item => {
-        const elemento = document.getElementById(item.id);
-        if (elemento) {
-            elemento.value = item.valor;
+    try {
+        const snapshot = await db.collection('usuarios')
+            .where('tipo', '==', 'funcionario')
+            .where('status', '==', 'ativo')
+            .orderBy('nome')
+            .get();
+        
+        const select = document.getElementById('funcionarioRelatorio');
+        if (select) {
+            let html = '<option value="">Selecione um funcionário</option>';
+            
+            snapshot.forEach(doc => {
+                const func = doc.data();
+                html += `<option value="${doc.id}">${func.nome} - ${func.cargo}</option>`;
+            });
+            
+            select.innerHTML = html;
         }
-    });
+        
+    } catch (error) {
+        console.error('Erro ao carregar select:', error);
+    }
 }
 
-// ============ EXPORTAR FUNÇÕES ============
+// Exportar funções
 window.cadastrarFuncionario = cadastrarFuncionario;
-window.abrirEditarFuncionario = abrirEditarFuncionario;
-window.atualizarFuncionario = atualizarFuncionario;
-window.excluirFuncionario = excluirFuncionario;
-window.salvarAjusteHoras = salvarAjusteHoras;
-window.carregarHorarioAtual = carregarHorarioAtual;
-window.calcularHoras = calcularHoras;
-window.gerarRelatorioMensal = gerarRelatorioMensal;
-window.gerarRelatorioAjustes = gerarRelatorioAjustes;
+window.carregarFuncionarios = carregarFuncionarios;
 window.carregarJustificativasPendentes = carregarJustificativasPendentes;
 window.aprovarJustificativa = aprovarJustificativa;
 window.rejeitarJustificativa = rejeitarJustificativa;
-window.verDetalhesJustificativa = verDetalhesJustificativa;
-window.carregarFuncionarios = carregarFuncionarios;
-window.filtrarFuncionarios = filtrarFuncionarios;
+window.verDetalhesJustificativa = async function(id) {
+    if (!db) return;
+    
+    try {
+        const justDoc = await db.collection('justificativas').doc(id).get();
+        if (justDoc.exists) {
+            const just = justDoc.data();
+            alert(`Detalhes:\n\nFuncionário: ${just.funcionarioNome}\nData: ${just.data}\nTipo: ${just.tipo}\nMotivo: ${just.motivo}`);
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+};
