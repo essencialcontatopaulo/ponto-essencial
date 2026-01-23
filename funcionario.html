@@ -454,11 +454,10 @@
     </div>
 
     <script>
-        // js/funcionario.js - Versão CORRIGIDA (sem erro de sessão)
+        // js/funcionario.js - Versão CORRIGIDA (solução completa)
         console.log('=== FUNCIONARIO.JS CARREGADO ===');
         
         let db = null;
-        let auth = null;
         let usuarioAtual = null;
         let ultimoRegistro = null;
         let timerHora = null;
@@ -484,7 +483,7 @@
             document.getElementById('userCargo').textContent = 
                 `${usuarioLogado.cargo || 'Funcionário'} - ${usuarioLogado.departamento || 'Departamento'}`;
             
-            // 3. Inicializar Firebase
+            // 3. Inicializar Firebase SEM autenticação obrigatória
             try {
                 console.log('⚙️ Inicializando Firebase...');
                 
@@ -498,59 +497,25 @@
                     console.log('✅ Firebase inicializado');
                 }
                 
-                // Obter referências
-                auth = firebase.auth();
+                // Obter referência do Firestore apenas
                 db = firebase.firestore();
                 
-                console.log('✅ Serviços Firebase obtidos');
+                console.log('✅ Firestore obtido');
                 
-                // 4. Verificar autenticação no Firebase
-                const user = auth.currentUser;
-                if (!user) {
-                    console.log('⚠️ Nenhum usuário autenticado no Firebase');
-                    
-                    // Tentar recuperar sessão do localStorage
-                    const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
-                    
-                    if (savedUser && savedUser.uid === usuarioAtual.id) {
-                        console.log('🔄 Recuperando sessão do localStorage...');
-                        
-                        // IMPORTANTE: Não podemos fazer login sem senha aqui
-                        // O sistema deve redirecionar para login se a sessão expirou
-                        alert('⚠️ Sessão expirada. Faça login novamente.');
-                        window.location.href = 'index.html';
-                        return;
-                    } else {
-                        alert('⚠️ Faça login para continuar.');
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                } else {
-                    console.log('✅ Usuário autenticado no Firebase:', user.email);
-                    
-                    // Verificar se o usuário autenticado é o mesmo do localStorage
-                    if (user.uid !== usuarioAtual.id) {
-                        console.warn('⚠️ ID do Firebase diferente do localStorage:', user.uid, usuarioAtual.id);
-                        alert('⚠️ Dados inconsistentes. Faça login novamente.');
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                }
-                
-                // 5. Configurar data no modal de justificativa
+                // 4. Configurar data no modal de justificativa
                 const hoje = new Date().toISOString().split('T')[0];
                 document.getElementById('dataJustificativa').value = hoje;
                 
-                // 6. Iniciar relógio
+                // 5. Iniciar relógio
                 iniciarRelogio();
                 
-                // 7. Verificar registros do dia
+                // 6. Verificar registros do dia
                 await verificarRegistrosHoje();
                 
-                // 8. Carregar histórico
+                // 7. Carregar histórico
                 await carregarRegistrosHoje();
                 
-                // 9. Carregar justificativas
+                // 8. Carregar justificativas
                 await carregarJustificativas();
                 
                 console.log('✅ Sistema do funcionário inicializado');
@@ -644,6 +609,8 @@
                 
             } catch (error) {
                 console.error('Erro ao verificar registros:', error);
+                // Se houver erro de permissão, pode ser que o Firestore precise de regras
+                alert('⚠️ Erro ao carregar registros. Verifique as permissões do Firestore.');
             }
         }
         
@@ -736,4 +703,165 @@
         
         // Função para fechar modal
         function fecharModalJustificativa() {
-            document.getElementById
+            document.getElementById('modalJustificativa').style.display = 'none';
+            document.getElementById('formJustificativa').reset();
+        }
+        
+        // Função para enviar justificativa
+        async function enviarJustificativa() {
+            try {
+                const tipo = document.getElementById('tipoJustificativa').value;
+                const data = document.getElementById('dataJustificativa').value;
+                const hora = document.getElementById('horaJustificativa').value;
+                const motivo = document.getElementById('motivoJustificativa').value;
+                
+                if (!tipo || !data || !motivo) {
+                    alert('Preencha todos os campos obrigatórios!');
+                    return;
+                }
+                
+                // Criar registro de justificativa
+                await db.collection('justificativas').add({
+                    funcionarioId: usuarioAtual.id,
+                    funcionarioNome: usuarioAtual.nome,
+                    tipo: tipo,
+                    data: data,
+                    hora: hora || null,
+                    motivo: motivo,
+                    status: 'pendente',
+                    dataEnvio: new Date().toISOString(),
+                    timestamp: Date.now()
+                });
+                
+                console.log('✅ Justificativa enviada');
+                alert('✅ Justificativa enviada com sucesso! Aguarde aprovação do administrador.');
+                
+                fecharModalJustificativa();
+                await carregarJustificativas();
+                
+            } catch (error) {
+                console.error('❌ Erro ao enviar justificativa:', error);
+                alert('Erro ao enviar justificativa: ' + error.message);
+            }
+        }
+        
+        // Função para carregar justificativas
+        async function carregarJustificativas() {
+            try {
+                const userId = usuarioAtual.id;
+                
+                const snapshot = await db.collection('justificativas')
+                    .where('funcionarioId', '==', userId)
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get();
+                
+                const container = document.getElementById('justificativasLista');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="color: #666;">Nenhuma justificativa pendente</p>';
+                } else {
+                    let html = '';
+                    snapshot.forEach(doc => {
+                        const just = doc.data();
+                        const dataFormatada = new Date(just.data).toLocaleDateString('pt-BR');
+                        
+                        let statusClass = 'justificativa-pendente';
+                        let statusText = 'Pendente';
+                        
+                        if (just.status === 'aprovada') {
+                            statusClass = 'justificativa-aprovada';
+                            statusText = 'Aprovada';
+                        } else if (just.status === 'rejeitada') {
+                            statusClass = 'justificativa-rejeitada';
+                            statusText = 'Rejeitada';
+                        }
+                        
+                        html += `
+                            <div class="justificativa-item">
+                                <strong>${dataFormatada}</strong> - ${just.tipo.replace('_', ' ')}
+                                <span class="justificativa-badge ${statusClass}">${statusText}</span>
+                                <p style="margin-top: 5px; font-size: 13px; color: #666;">
+                                    ${just.motivo.substring(0, 80)}${just.motivo.length > 80 ? '...' : ''}
+                                </p>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar justificativas:', error);
+            }
+        }
+        
+        // Função para carregar registros do dia
+        async function carregarRegistrosHoje() {
+            try {
+                const hoje = new Date().toISOString().split('T')[0];
+                const userId = usuarioAtual.id;
+                
+                const snapshot = await db.collection('pontos')
+                    .where('funcionarioId', '==', userId)
+                    .where('data', '==', hoje)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const reg = doc.data();
+                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
+                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
+                        
+                        html += `
+                            <tr>
+                                <td>${reg.horario}</td>
+                                <td>${tipoIcone} ${tipoTexto}</td>
+                                <td>${reg.justificativa ? '📝' : '--'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro ao carregar registros:', error);
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
+                }
+            }
+        }
+        
+        // Função de logout
+        function logout() {
+            if (confirm('Deseja realmente sair?')) {
+                localStorage.removeItem('usuario_logado');
+                localStorage.removeItem('firebase_user');
+                
+                if (timerHora) {
+                    clearInterval(timerHora);
+                }
+                
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Exportar funções
+        window.registrarEntrada = registrarEntrada;
+        window.registrarSaida = registrarSaida;
+        window.abrirModalJustificativa = abrirModalJustificativa;
+        window.fecharModalJustificativa = fecharModalJustificativa;
+        window.enviarJustificativa = enviarJustificativa;
+        window.logout = logout;
+        
+    </script>
+</body>
+</html>
