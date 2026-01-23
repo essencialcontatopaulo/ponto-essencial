@@ -7,7 +7,6 @@
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Configuração Firebase -->
@@ -139,16 +138,6 @@
             transform: translateY(-2px);
         }
         
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-        
         .registro-info {
             background: #e8f5e8;
             border-radius: 10px;
@@ -193,77 +182,23 @@
             color: #721c24;
         }
         
-        /* Modal para justificativa */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            border-top: 5px solid #4caf50;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-header h3 {
-            color: #1b5e20;
-            margin: 0;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: #1b5e20;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #c8e6c9;
+        .alert {
+            padding: 15px;
             border-radius: 8px;
-            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
-        .form-control:focus {
-            outline: none;
-            border-color: #4caf50;
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffeaa7;
         }
         
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #c3e6cb;
         }
         
         table {
@@ -296,39 +231,18 @@
             opacity: 0.9;
         }
         
-        .justificativa-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-        
-        .justificativa-pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .justificativa-aprovada {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .justificativa-rejeitada {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .justificativa-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Alerta de status -->
+        <div id="alertStatus" class="alert" style="display: none;"></div>
+        
         <header>
             <div class="logo">
                 <h1>Essencial<span>Print</span> - Ponto Eletrônico</h1>
@@ -358,10 +272,6 @@
                     📤 Registrar Saída
                 </button>
                 
-                <button class="btn btn-info" onclick="abrirModalJustificativa()" id="btnJustificativa">
-                    📝 Justificar Falta/Atraso
-                </button>
-                
                 <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                     <h4 style="color: #1b5e20; margin-bottom: 10px;">Último Registro</h4>
                     <div id="ultimoRegistro">
@@ -373,26 +283,19 @@
             <!-- Card de Histórico -->
             <div class="card">
                 <h2>Seus Registros de Hoje</h2>
-                <div style="max-height: 300px; overflow-y: auto;">
+                <div style="max-height: 400px; overflow-y: auto;">
                     <table id="tabelaRegistros">
                         <thead>
                             <tr>
                                 <th>Horário</th>
                                 <th>Tipo</th>
-                                <th>Justificativa</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="3" style="text-align: center;">Carregando registros...</td></tr>
+                            <tr><td colspan="3" style="text-align: center;" id="loadingRegistros">Carregando registros...</td></tr>
                         </tbody>
                     </table>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
-                    <h4 style="color: #856404; margin-bottom: 10px;">⚠️ Suas Justificativas</h4>
-                    <div id="justificativasLista">
-                        <p style="color: #666;">Nenhuma justificativa pendente</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -403,64 +306,14 @@
         </footer>
     </div>
 
-    <!-- Modal para Justificativa -->
-    <div id="modalJustificativa" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Justificar Falta ou Atraso</h3>
-                <button class="close-modal" onclick="fecharModalJustificativa()">×</button>
-            </div>
-            <form id="formJustificativa" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="tipoJustificativa">Tipo *</label>
-                    <select id="tipoJustificativa" class="form-control" required>
-                        <option value="">Selecione...</option>
-                        <option value="falta_justificada">Falta Justificada</option>
-                        <option value="atraso_justificado">Atraso Justificado</option>
-                        <option value="saida_antecipada">Saída Antecipada</option>
-                        <option value="ausencia_justificada">Ausência Justificada</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dataJustificativa">Data *</label>
-                    <input type="date" id="dataJustificativa" class="form-control" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="horaJustificativa">Hora (para atrasos)</label>
-                    <input type="time" id="horaJustificativa" class="form-control">
-                    <small style="color: #666;">Preencha apenas para atrasos</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="motivoJustificativa">Motivo/Justificativa *</label>
-                    <textarea id="motivoJustificativa" class="form-control" 
-                              placeholder="Descreva detalhadamente o motivo da falta/atraso..." 
-                              required></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-primary" onclick="enviarJustificativa()" style="flex: 1;">
-                        Enviar Justificativa
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="fecharModalJustificativa()" style="flex: 1;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // js/funcionario.js - Versão CORRIGIDA (solução completa)
+        // js/funcionario.js - Versão Simplificada
         console.log('=== FUNCIONARIO.JS CARREGADO ===');
         
         let db = null;
         let usuarioAtual = null;
-        let ultimoRegistro = null;
         let timerHora = null;
+        let firebaseConectado = false;
         
         // Inicialização
         document.addEventListener('DOMContentLoaded', async function() {
@@ -476,19 +329,42 @@
             }
             
             usuarioAtual = usuarioLogado;
-            console.log('👤 Funcionário logado:', usuarioAtual.nome);
+            console.log('👤 Funcionário logado:', usuarioAtual);
             
             // 2. Configurar interface
             document.getElementById('userName').textContent = usuarioLogado.nome || 'Funcionário';
             document.getElementById('userCargo').textContent = 
                 `${usuarioLogado.cargo || 'Funcionário'} - ${usuarioLogado.departamento || 'Departamento'}`;
             
-            // 3. Inicializar Firebase SEM autenticação obrigatória
+            // 3. Iniciar relógio
+            iniciarRelogio();
+            
+            // 4. Tentar inicializar Firebase
+            await inicializarFirebase();
+            
+            // 5. Se Firebase conectou, carregar dados
+            if (firebaseConectado) {
+                await carregarRegistrosHoje();
+                verificarUltimoRegistro();
+            } else {
+                mostrarAlerta('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.', 'warning');
+                carregarRegistrosLocais();
+            }
+            
+            console.log('✅ Sistema do funcionário inicializado');
+        });
+        
+        // Função para inicializar Firebase
+        async function inicializarFirebase() {
             try {
                 console.log('⚙️ Inicializando Firebase...');
                 
                 if (typeof firebase === 'undefined') {
                     throw new Error('Firebase SDK não carregado');
+                }
+                
+                if (!firebaseConfig) {
+                    throw new Error('Configuração do Firebase não encontrada');
                 }
                 
                 // Verificar se já foi inicializado
@@ -497,34 +373,40 @@
                     console.log('✅ Firebase inicializado');
                 }
                 
-                // Obter referência do Firestore apenas
+                // Obter referência do Firestore
                 db = firebase.firestore();
                 
-                console.log('✅ Firestore obtido');
+                // Testar conexão
+                await db.collection('test').limit(1).get();
                 
-                // 4. Configurar data no modal de justificativa
-                const hoje = new Date().toISOString().split('T')[0];
-                document.getElementById('dataJustificativa').value = hoje;
+                firebaseConectado = true;
+                mostrarAlerta('✅ Conectado ao servidor!', 'success');
+                console.log('✅ Firebase conectado com sucesso');
                 
-                // 5. Iniciar relógio
-                iniciarRelogio();
-                
-                // 6. Verificar registros do dia
-                await verificarRegistrosHoje();
-                
-                // 7. Carregar histórico
-                await carregarRegistrosHoje();
-                
-                // 8. Carregar justificativas
-                await carregarJustificativas();
-                
-                console.log('✅ Sistema do funcionário inicializado');
+                return true;
                 
             } catch (error) {
-                console.error('❌ Erro na inicialização:', error);
-                alert('Erro ao conectar com o servidor: ' + error.message);
+                console.error('❌ Erro ao conectar ao Firebase:', error);
+                console.log('💡 Dica: Configure as regras do Firestore para permitir leitura/escrita');
+                firebaseConectado = false;
+                return false;
             }
-        });
+        }
+        
+        // Função para mostrar alerta
+        function mostrarAlerta(mensagem, tipo) {
+            const alertDiv = document.getElementById('alertStatus');
+            alertDiv.textContent = mensagem;
+            alertDiv.className = `alert alert-${tipo}`;
+            alertDiv.style.display = 'block';
+            
+            // Remover alerta após 5 segundos (exceto para warnings)
+            if (tipo !== 'warning') {
+                setTimeout(() => {
+                    alertDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
         
         // Função para iniciar relógio
         function iniciarRelogio() {
@@ -553,64 +435,41 @@
             timerHora = setInterval(atualizarHora, 1000);
         }
         
-        // Função para verificar registros do dia
-        async function verificarRegistrosHoje() {
-            try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const userId = usuarioAtual.id;
+        // Função para verificar último registro
+        function verificarUltimoRegistro() {
+            const registros = JSON.parse(localStorage.getItem(`registros_${usuarioAtual.id}`) || '[]');
+            const hoje = new Date().toISOString().split('T')[0];
+            const registrosHoje = registros.filter(r => r.data === hoje);
+            
+            if (registrosHoje.length > 0) {
+                const ultimo = registrosHoje[registrosHoje.length - 1];
                 
-                // Buscar registros do usuário hoje
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', userId)
-                    .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
-                    .limit(1)
-                    .get();
+                const statusDiv = document.getElementById('statusRegistro');
+                const btnEntrada = document.getElementById('btnEntrada');
+                const btnSaida = document.getElementById('btnSaida');
+                const ultimoDiv = document.getElementById('ultimoRegistro');
                 
-                if (!snapshot.empty) {
-                    ultimoRegistro = snapshot.docs[0].data();
+                if (ultimo.tipo === 'entrada') {
+                    statusDiv.textContent = 'Status: Em trabalho';
+                    statusDiv.className = 'status-badge status-presente';
+                    btnEntrada.disabled = true;
+                    btnSaida.disabled = false;
                     
-                    // Atualizar interface conforme último registro
-                    const statusDiv = document.getElementById('statusRegistro');
-                    const btnEntrada = document.getElementById('btnEntrada');
-                    const btnSaida = document.getElementById('btnSaida');
-                    const ultimoDiv = document.getElementById('ultimoRegistro');
-                    
-                    if (ultimoRegistro.tipo === 'entrada') {
-                        statusDiv.textContent = 'Status: Em trabalho';
-                        statusDiv.className = 'status-badge status-presente';
-                        btnEntrada.disabled = true;
-                        btnSaida.disabled = false;
-                        
-                        ultimoDiv.innerHTML = `
-                            <p><strong>Última entrada:</strong> ${ultimoRegistro.horario}</p>
-                            <p style="color: #666; font-size: 14px;">Aguardando registro de saída</p>
-                        `;
-                    } else {
-                        statusDiv.textContent = 'Status: Saída registrada';
-                        statusDiv.className = 'status-badge status-ausente';
-                        btnEntrada.disabled = false;
-                        btnSaida.disabled = true;
-                        
-                        ultimoDiv.innerHTML = `
-                            <p><strong>Última saída:</strong> ${ultimoRegistro.horario}</p>
-                            <p style="color: #666; font-size: 14px;">Aguardando nova entrada</p>
-                        `;
-                    }
+                    ultimoDiv.innerHTML = `
+                        <p><strong>Última entrada:</strong> ${ultimo.horario}</p>
+                        <p style="color: #666; font-size: 14px;">Aguardando registro de saída</p>
+                    `;
                 } else {
-                    // Nenhum registro hoje
-                    const statusDiv = document.getElementById('statusRegistro');
-                    statusDiv.textContent = 'Status: Aguardando primeira entrada';
+                    statusDiv.textContent = 'Status: Saída registrada';
                     statusDiv.className = 'status-badge status-ausente';
+                    btnEntrada.disabled = false;
+                    btnSaida.disabled = true;
                     
-                    document.getElementById('ultimoRegistro').innerHTML = 
-                        '<p style="color: #666;">Nenhum registro hoje</p>';
+                    ultimoDiv.innerHTML = `
+                        <p><strong>Última saída:</strong> ${ultimo.horario}</p>
+                        <p style="color: #666; font-size: 14px;">Aguardando nova entrada</p>
+                    `;
                 }
-                
-            } catch (error) {
-                console.error('Erro ao verificar registros:', error);
-                // Se houver erro de permissão, pode ser que o Firestore precise de regras
-                alert('⚠️ Erro ao carregar registros. Verifique as permissões do Firestore.');
             }
         }
         
@@ -620,37 +479,50 @@
                 return;
             }
             
+            const hoje = new Date().toISOString().split('T')[0];
+            const horaAtual = new Date().toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const timestamp = Date.now();
+            
+            const registro = {
+                funcionarioId: usuarioAtual.id,
+                funcionarioNome: usuarioAtual.nome,
+                tipo: 'entrada',
+                horario: horaAtual,
+                data: hoje,
+                timestamp: timestamp,
+                metodo: 'web',
+                dataRegistro: new Date().toISOString()
+            };
+            
             try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const horaAtual = new Date().toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                const timestamp = Date.now();
+                if (firebaseConectado && db) {
+                    // Salvar no Firestore
+                    await db.collection('pontos').add(registro);
+                    console.log('✅ Entrada registrada no Firestore');
+                    mostrarAlerta(`✅ Entrada registrada às ${horaAtual}`, 'success');
+                }
                 
-                // Criar registro de entrada
-                await db.collection('pontos').add({
-                    funcionarioId: usuarioAtual.id,
-                    funcionarioNome: usuarioAtual.nome,
-                    tipo: 'entrada',
-                    horario: horaAtual,
-                    data: hoje,
-                    timestamp: timestamp,
-                    localizacao: { latitude: null, longitude: null },
-                    metodo: 'web',
-                    dataRegistro: new Date().toISOString()
-                });
-                
-                console.log('✅ Entrada registrada:', horaAtual);
-                alert(`✅ Entrada registrada às ${horaAtual}`);
+                // Sempre salvar localmente também
+                salvarRegistroLocal(registro);
                 
                 // Atualizar interface
-                await verificarRegistrosHoje();
-                await carregarRegistrosHoje();
+                verificarUltimoRegistro();
+                
+                if (firebaseConectado) {
+                    await carregarRegistrosHoje();
+                } else {
+                    carregarRegistrosLocais();
+                }
                 
             } catch (error) {
                 console.error('❌ Erro ao registrar entrada:', error);
-                alert('Erro ao registrar entrada: ' + error.message);
+                // Se falhar no Firestore, salvar apenas localmente
+                salvarRegistroLocal(registro);
+                mostrarAlerta(`✅ Entrada registrada localmente às ${horaAtual}`, 'warning');
+                carregarRegistrosLocais();
             }
         }
         
@@ -660,144 +532,66 @@
                 return;
             }
             
+            const hoje = new Date().toISOString().split('T')[0];
+            const horaAtual = new Date().toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const timestamp = Date.now();
+            
+            const registro = {
+                funcionarioId: usuarioAtual.id,
+                funcionarioNome: usuarioAtual.nome,
+                tipo: 'saida',
+                horario: horaAtual,
+                data: hoje,
+                timestamp: timestamp,
+                metodo: 'web',
+                dataRegistro: new Date().toISOString()
+            };
+            
             try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const horaAtual = new Date().toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                const timestamp = Date.now();
+                if (firebaseConectado && db) {
+                    // Salvar no Firestore
+                    await db.collection('pontos').add(registro);
+                    console.log('✅ Saída registrada no Firestore');
+                    mostrarAlerta(`✅ Saída registrada às ${horaAtual}`, 'success');
+                }
                 
-                // Criar registro de saída
-                await db.collection('pontos').add({
-                    funcionarioId: usuarioAtual.id,
-                    funcionarioNome: usuarioAtual.nome,
-                    tipo: 'saida',
-                    horario: horaAtual,
-                    data: hoje,
-                    timestamp: timestamp,
-                    localizacao: { latitude: null, longitude: null },
-                    metodo: 'web',
-                    dataRegistro: new Date().toISOString()
-                });
-                
-                console.log('✅ Saída registrada:', horaAtual);
-                alert(`✅ Saída registrada às ${horaAtual}`);
+                // Sempre salvar localmente também
+                salvarRegistroLocal(registro);
                 
                 // Atualizar interface
-                await verificarRegistrosHoje();
-                await carregarRegistrosHoje();
+                verificarUltimoRegistro();
+                
+                if (firebaseConectado) {
+                    await carregarRegistrosHoje();
+                } else {
+                    carregarRegistrosLocais();
+                }
                 
             } catch (error) {
                 console.error('❌ Erro ao registrar saída:', error);
-                alert('Erro ao registrar saída: ' + error.message);
+                // Se falhar no Firestore, salvar apenas localmente
+                salvarRegistroLocal(registro);
+                mostrarAlerta(`✅ Saída registrada localmente às ${horaAtual}`, 'warning');
+                carregarRegistrosLocais();
             }
         }
         
-        // Função para abrir modal de justificativa
-        function abrirModalJustificativa() {
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataJustificativa').value = hoje;
-            document.getElementById('modalJustificativa').style.display = 'flex';
+        // Função para salvar registro localmente
+        function salvarRegistroLocal(registro) {
+            const chave = `registros_${usuarioAtual.id}`;
+            const registros = JSON.parse(localStorage.getItem(chave) || '[]');
+            registros.push(registro);
+            localStorage.setItem(chave, JSON.stringify(registros));
+            console.log('📝 Registro salvo localmente:', registro);
         }
         
-        // Função para fechar modal
-        function fecharModalJustificativa() {
-            document.getElementById('modalJustificativa').style.display = 'none';
-            document.getElementById('formJustificativa').reset();
-        }
-        
-        // Função para enviar justificativa
-        async function enviarJustificativa() {
-            try {
-                const tipo = document.getElementById('tipoJustificativa').value;
-                const data = document.getElementById('dataJustificativa').value;
-                const hora = document.getElementById('horaJustificativa').value;
-                const motivo = document.getElementById('motivoJustificativa').value;
-                
-                if (!tipo || !data || !motivo) {
-                    alert('Preencha todos os campos obrigatórios!');
-                    return;
-                }
-                
-                // Criar registro de justificativa
-                await db.collection('justificativas').add({
-                    funcionarioId: usuarioAtual.id,
-                    funcionarioNome: usuarioAtual.nome,
-                    tipo: tipo,
-                    data: data,
-                    hora: hora || null,
-                    motivo: motivo,
-                    status: 'pendente',
-                    dataEnvio: new Date().toISOString(),
-                    timestamp: Date.now()
-                });
-                
-                console.log('✅ Justificativa enviada');
-                alert('✅ Justificativa enviada com sucesso! Aguarde aprovação do administrador.');
-                
-                fecharModalJustificativa();
-                await carregarJustificativas();
-                
-            } catch (error) {
-                console.error('❌ Erro ao enviar justificativa:', error);
-                alert('Erro ao enviar justificativa: ' + error.message);
-            }
-        }
-        
-        // Função para carregar justificativas
-        async function carregarJustificativas() {
-            try {
-                const userId = usuarioAtual.id;
-                
-                const snapshot = await db.collection('justificativas')
-                    .where('funcionarioId', '==', userId)
-                    .orderBy('timestamp', 'desc')
-                    .limit(5)
-                    .get();
-                
-                const container = document.getElementById('justificativasLista');
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<p style="color: #666;">Nenhuma justificativa pendente</p>';
-                } else {
-                    let html = '';
-                    snapshot.forEach(doc => {
-                        const just = doc.data();
-                        const dataFormatada = new Date(just.data).toLocaleDateString('pt-BR');
-                        
-                        let statusClass = 'justificativa-pendente';
-                        let statusText = 'Pendente';
-                        
-                        if (just.status === 'aprovada') {
-                            statusClass = 'justificativa-aprovada';
-                            statusText = 'Aprovada';
-                        } else if (just.status === 'rejeitada') {
-                            statusClass = 'justificativa-rejeitada';
-                            statusText = 'Rejeitada';
-                        }
-                        
-                        html += `
-                            <div class="justificativa-item">
-                                <strong>${dataFormatada}</strong> - ${just.tipo.replace('_', ' ')}
-                                <span class="justificativa-badge ${statusClass}">${statusText}</span>
-                                <p style="margin-top: 5px; font-size: 13px; color: #666;">
-                                    ${just.motivo.substring(0, 80)}${just.motivo.length > 80 ? '...' : ''}
-                                </p>
-                            </div>
-                        `;
-                    });
-                    
-                    container.innerHTML = html;
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar justificativas:', error);
-            }
-        }
-        
-        // Função para carregar registros do dia
+        // Função para carregar registros do Firestore
         async function carregarRegistrosHoje() {
+            if (!firebaseConectado) return;
+            
             try {
                 const hoje = new Date().toISOString().split('T')[0];
                 const userId = usuarioAtual.id;
@@ -805,39 +599,66 @@
                 const snapshot = await db.collection('pontos')
                     .where('funcionarioId', '==', userId)
                     .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
+                    .orderBy('timestamp', 'asc')
                     .get();
                 
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const reg = doc.data();
-                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
-                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
-                        
-                        html += `
-                            <tr>
-                                <td>${reg.horario}</td>
-                                <td>${tipoIcone} ${tipoTexto}</td>
-                                <td>${reg.justificativa ? '📝' : '--'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
+                atualizarTabelaRegistros(snapshot, 'servidor');
                 
             } catch (error) {
-                console.error('Erro ao carregar registros:', error);
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
-                }
+                console.error('Erro ao carregar registros do Firestore:', error);
+                // Se falhar, carregar registros locais
+                carregarRegistrosLocais();
             }
+        }
+        
+        // Função para carregar registros locais
+        function carregarRegistrosLocais() {
+            const chave = `registros_${usuarioAtual.id}`;
+            const todosRegistros = JSON.parse(localStorage.getItem(chave) || '[]');
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            // Filtrar registros de hoje
+            const registrosHoje = todosRegistros.filter(r => r.data === hoje);
+            
+            // Ordenar por timestamp
+            registrosHoje.sort((a, b) => a.timestamp - b.timestamp);
+            
+            atualizarTabelaRegistros({ docs: registrosHoje.map(r => ({ data: () => r })) }, 'local');
+        }
+        
+        // Função para atualizar tabela de registros
+        function atualizarTabelaRegistros(snapshot, origem) {
+            const tbody = document.querySelector('#tabelaRegistros tbody');
+            
+            if (!snapshot || snapshot.docs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #666;">
+                            Nenhum registro hoje (${origem === 'local' ? 'modo local' : 'servidor'})
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            snapshot.docs.forEach(doc => {
+                const reg = typeof doc.data === 'function' ? doc.data() : doc;
+                const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
+                const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
+                const origemText = origem === 'local' ? 'Local' : 'Servidor';
+                
+                html += `
+                    <tr>
+                        <td>${reg.horario}</td>
+                        <td>${tipoIcone} ${tipoTexto}</td>
+                        <td>${origemText}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
         }
         
         // Função de logout
@@ -854,12 +675,9 @@
             }
         }
         
-        // Exportar funções
+        // Exportar funções para o escopo global
         window.registrarEntrada = registrarEntrada;
         window.registrarSaida = registrarSaida;
-        window.abrirModalJustificativa = abrirModalJustificativa;
-        window.fecharModalJustificativa = fecharModalJustificativa;
-        window.enviarJustificativa = enviarJustificativa;
         window.logout = logout;
         
     </script>
