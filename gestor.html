@@ -10,860 +10,465 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
+    <!-- Configuração Firebase -->
     <script src="js/firebase-config.js"></script>
     
-    <!-- Script do Gestor -->
-    <script src="js/gestor.js" defer></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-            color: #333;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid #2e7d32;
-        }
-
-        .logo h1 {
-            color: #1b5e20;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .logo span {
-            color: #388e3c;
-            font-weight: 300;
-        }
-
-        .user-info h3 {
-            color: #1b5e20;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .user-info p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .btn-logout {
-            background: #d32f2f;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            transition: background 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: #b71c1c;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #4caf50;
-        }
-
-        .card h2 {
-            color: #1b5e20;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #c8e6c9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: #2e7d32;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1b5e20;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-success {
-            background: #4caf50;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #388e3c;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #d32f2f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-warning {
-            background: #ff9800;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #f57c00;
-            transform: translateY(-2px);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #1b5e20;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #c8e6c9;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #4caf50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        /* Estatísticas */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-card {
-            background: #e8f5e8;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            border-left: 4px solid #2e7d32;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1b5e20;
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Tabelas */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        th {
-            background-color: #e8f5e8;
-            color: #1b5e20;
-            font-weight: 600;
-        }
-
-        tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        /* Badges de status */
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-presente {
-            background: #c8e6c9;
-            color: #1b5e20;
-        }
-
-        .status-atrasado {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-falta {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-inativo {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        .status-pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-aprovado {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejeitado {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-top: 5px solid #4caf50;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            color: #1b5e20;
-            margin: 0;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .close-modal:hover {
-            color: #f44336;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        /* Tabs */
-        .tab-navigation {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #c8e6c9;
-        }
-
-        .tab-btn {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab-btn.active {
-            color: #1b5e20;
-            border-bottom: 3px solid #1b5e20;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Search */
-        .search-box {
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #c8e6c9;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            color: white;
-            padding: 20px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        footer p:first-child {
-            font-weight: 600;
-        }
-
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            
-            .user-info {
-                text-align: center;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Justificativas */
-        .justificativa-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-left: 4px solid #ff9800;
-        }
-
-        .justificativa-aprovada {
-            border-left-color: #4caf50;
-        }
-
-        .justificativa-rejeitada {
-            border-left-color: #f44336;
-        }
-
-        .justificativa-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .justificativa-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
+        /* MANTER TODO O CSS QUE VOCÊ JÁ TEM */
+        /* Copie todo o CSS do seu arquivo gestor (3).html aqui */
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <h1>Essencial<span>Print</span></h1>
-            </div>
-            <div class="user-info">
-                <h3 id="userName">Gestor</h3>
-                <p id="userCargo">Painel Administrativo</p>
-                <button class="btn-logout" onclick="logout()">Sair</button>
-            </div>
-        </header>
-
-        <div class="dashboard">
-            <!-- Estatísticas -->
-            <div class="card">
-                <h2>Estatísticas Gerais</h2>
-                <div class="stats-grid" id="statsGrid">
-                    <div class="stat-card">
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Funcionários</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Registros Hoje</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Pendentes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Ajustes/Mês</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Funcionários Ativos -->
-            <div class="card">
-                <h2>Funcionários 
-                    <button class="btn btn-success" onclick="openModal('novoFuncionario')">Novo</button>
-                    <button class="btn btn-primary" onclick="carregarFuncionarios()" title="Atualizar">Atualizar</button>
-                </h2>
-                <div class="search-box">
-                    <input type="text" id="searchFuncionarios" placeholder="Buscar funcionário..." onkeyup="filtrarFuncionarios()">
-                </div>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table id="tabelaFuncionarios">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Cargo</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="5" style="text-align: center;">Carregando funcionários...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Ajuste de Horas -->
-            <div class="card">
-                <h2>Ajuste de Horas 
-                    <button class="btn btn-primary" onclick="openModal('ajusteHoras')">
-                        Novo Ajuste
-                    </button>
-                </h2>
-                <p style="color: #666; margin-bottom: 15px;">Ajuste horas trabalhadas externamente</p>
-                
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 10px;">
-                    <h4 style="color: #1b5e20; margin-bottom: 10px;">Últimos Ajustes</h4>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Funcionário</th>
-                                    <th>Data</th>
-                                    <th>Horas</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaAjustes">
-                                <tr><td colspan="4" style="text-align: center;">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Registros do Dia -->
-            <div class="card">
-                <h2>Registros de Hoje</h2>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <table id="tabelaRegistros">
-                        <thead>
-                            <tr>
-                                <th>Funcionário</th>
-                                <th>Horário</th>
-                                <th>Tipo</th>
-                                <th>Localização</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="4" style="text-align: center;">Carregando registros...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Relatórios -->
-        <div class="card" style="margin-bottom: 25px;">
-            <h2>Relatórios</h2>
-            <div class="tab-navigation">
-                <button class="tab-btn active" onclick="openTab('relatorioMensal')">Mensal</button>
-                <button class="tab-btn" onclick="openTab('relatorioFuncionario')">Por Funcionário</button>
-                <button class="tab-btn" onclick="openTab('relatorioAjustes')">Ajustes</button>
-            </div>
-            
-            <div id="relatorioMensal" class="tab-content active">
-                <div class="form-group">
-                    <label for="mesRelatorio">Mês:</label>
-                    <input type="month" id="mesRelatorio" class="form-control" onchange="gerarRelatorioMensal()">
-                </div>
-                <div id="relatorioMensalContent">
-                    <p style="color: #666;">Selecione um mês para gerar o relatório</p>
-                </div>
-            </div>
-            
-            <div id="relatorioFuncionario" class="tab-content">
-                <div class="form-group">
-                    <label for="funcionarioRelatorio">Funcionário:</label>
-                    <select id="funcionarioRelatorio" class="form-control" onchange="gerarRelatorioFuncionario()">
-                        <option value="">Selecione um funcionário</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="periodoRelatorio">Período:</label>
-                    <input type="month" id="periodoRelatorio" class="form-control" onchange="gerarRelatorioFuncionario()">
-                </div>
-                <div id="relatorioFuncionarioContent">
-                    <p style="color: #666;">Selecione um funcionário e período</p>
-                </div>
-            </div>
-            
-            <div id="relatorioAjustes" class="tab-content">
-                <div class="form-group">
-                    <label for="periodoAjustes">Período:</label>
-                    <input type="month" id="periodoAjustes" class="form-control" onchange="gerarRelatorioAjustes()">
-                </div>
-                <div id="relatorioAjustesContent">
-                    <p style="color: #666;">Selecione um período para ver os ajustes</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- JUSTIFICATIVAS PENDENTES -->
-        <div class="card" style="margin-bottom: 25px;">
-            <h2>Justificativas Pendentes 
-                <button class="btn btn-warning" onclick="carregarJustificativasPendentes()" title="Atualizar">
-                    Atualizar
-                </button>
-            </h2>
-            <div id="justificativasContainer">
-                <p style="color: #666;">Carregando justificativas pendentes...</p>
-            </div>
-        </div>
-
-        <footer>
-            <p>Essencial Print &copy; 2024 - Painel Administrativo</p>
-            <p>Acesso restrito a gestores autorizados</p>
-        </footer>
-    </div>
-
-    <!-- MODAL NOVO FUNCIONÁRIO -->
-    <div id="modalNovoFuncionario" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Cadastrar Novo Funcionário</h3>
-                <button class="close-modal" onclick="closeModal('novoFuncionario')">×</button>
-            </div>
-            <form id="formNovoFuncionario" onsubmit="return false;">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="nomeFuncionario">Nome Completo *</label>
-                        <input type="text" id="nomeFuncionario" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="emailFuncionario">E-mail *</label>
-                        <input type="email" id="emailFuncionario" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="senhaFuncionario">Senha *</label>
-                        <input type="password" id="senhaFuncionario" class="form-control" required>
-                        <small style="color: #666; font-size: 12px;">Mínimo 6 caracteres</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="cpfFuncionario">CPF *</label>
-                        <input type="text" id="cpfFuncionario" class="form-control" placeholder="000.000.000-00" required>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="cargoFuncionario">Cargo *</label>
-                        <select id="cargoFuncionario" class="form-control" required>
-                            <option value="">Selecione...</option>
-                            <option value="Operador">Operador</option>
-                            <option value="Designer">Designer</option>
-                            <option value="Atendente">Atendente</option>
-                            <option value="Auxiliar">Auxiliar</option>
-                            <option value="Supervisor">Supervisor</option>
-                            <option value="Gerente">Gerente</option>
-                            <option value="Outro">Outro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="departamentoFuncionario">Departamento *</label>
-                        <select id="departamentoFuncionario" class="form-control" required>
-                            <option value="">Selecione...</option>
-                            <option value="Produção">Produção</option>
-                            <option value="Atendimento">Atendimento</option>
-                            <option value="Design">Design</option>
-                            <option value="Administração">Administração</option>
-                            <option value="RH">RH</option>
-                            <option value="Financeiro">Financeiro</option>
-                            <option value="Comercial">Comercial</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="salarioFuncionario">Salário (R$)</label>
-                        <input type="number" id="salarioFuncionario" class="form-control" step="0.01" placeholder="0,00">
-                    </div>
-                    <div class="form-group">
-                        <label for="dataAdmissao">Data de Admissão *</label>
-                        <input type="date" id="dataAdmissao" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="telefoneFuncionario">Telefone</label>
-                    <input type="text" id="telefoneFuncionario" class="form-control" placeholder="(11) 99999-9999">
-                </div>
-                
-                <div class="form-group">
-                    <label for="enderecoFuncionario">Endereço</label>
-                    <textarea id="enderecoFuncionario" class="form-control" rows="2" placeholder="Rua, Número, Bairro, Cidade"></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-success" onclick="cadastrarFuncionario()" style="flex: 1;">
-                        Cadastrar
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="closeModal('novoFuncionario')" style="flex: 1;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL AJUSTE DE HORAS -->
-    <div id="modalAjusteHoras" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Ajuste de Horas Trabalhadas</h3>
-                <button class="close-modal" onclick="closeModal('ajusteHoras')">×</button>
-            </div>
-            <form id="formAjusteHoras" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="funcionarioAjuste">Funcionário *</label>
-                    <select id="funcionarioAjuste" class="form-control" required onchange="carregarHorarioAtual()">
-                        <option value="">Selecione um funcionário</option>
-                    </select>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="dataAjuste">Data *</label>
-                        <input type="date" id="dataAjuste" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="tipoAjuste">Tipo de Ajuste *</label>
-                        <select id="tipoAjuste" class="form-control" required>
-                            <option value="">Selecione...</option>
-                            <option value="trabalho_externo">Trabalho Externo</option>
-                            <option value="hora_extra">Hora Extra</option>
-                            <option value="falta_justificada">Falta Justificada</option>
-                            <option value="atraso_justificado">Atraso Justificado</option>
-                            <option value="compensacao">Compensação de Horas</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="horaEntradaAjuste">Hora de Entrada *</label>
-                        <input type="time" id="horaEntradaAjuste" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="horaSaidaAjuste">Hora de Saída *</label>
-                        <input type="time" id="horaSaidaAjuste" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="totalHorasAjuste">Total de Horas</label>
-                    <input type="text" id="totalHorasAjuste" class="form-control" readonly style="background: #f5f5f5;">
-                    <small style="color: #666; font-size: 12px;">Calculado automaticamente</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="justificativaAjuste">Justificativa *</label>
-                    <textarea id="justificativaAjuste" class="form-control" rows="3" 
-                              placeholder="Descreva o motivo do ajuste (ex: Trabalho externo sem acesso à internet)" required></textarea>
-                </div>
-                
-                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h4 style="color: #2e7d32; margin-bottom: 10px;">Horários Registrados para esta data:</h4>
-                    <div id="horariosExistentes">
-                        <p style="color: #666;">Selecione um funcionário e data para ver os horários</p>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-success" onclick="salvarAjusteHoras()" style="flex: 1;">
-                        Salvar Ajuste
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="calcularHoras()" style="flex: 1;">
-                        Calcular Horas
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="closeModal('ajusteHoras')" style="flex: 1;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR FUNCIONÁRIO -->
-    <div id="modalEditarFuncionario" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Funcionário</h3>
-                <button class="close-modal" onclick="closeModal('editarFuncionario')">×</button>
-            </div>
-            <form id="formEditarFuncionario" onsubmit="return false;">
-                <input type="hidden" id="editarFuncionarioId">
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="editarNome">Nome Completo *</label>
-                        <input type="text" id="editarNome" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editarEmail">E-mail *</label>
-                        <input type="email" id="editarEmail" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="editarCpf">CPF *</label>
-                        <input type="text" id="editarCpf" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editarCargo">Cargo *</label>
-                        <input type="text" id="editarCargo" class="form-control" required>
-                    </div>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="editarDepartamento">Departamento *</label>
-                        <input type="text" id="editarDepartamento" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <div style="display: flex; gap: 15px; margin-top: 8px;">
-                            <label>
-                                <input type="radio" name="editarStatus" value="ativo" checked> Ativo
-                            </label>
-                            <label>
-                                <input type="radio" name="editarStatus" value="inativo"> Inativo
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-success" onclick="atualizarFuncionario()" style="flex: 1;">
-                        Salvar Alterações
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="closeModal('editarFuncionario')" style="flex: 1;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SCRIPT DE INTERFACE -->
+    <!-- MANTER TODO O HTML QUE VOCÊ JÁ TEM -->
+    <!-- Copie todo o HTML do seu arquivo gestor (3).html aqui -->
+    
     <script>
-        // Funções básicas de interface
+        // js/gestor.js - VERSÃO SIMPLIFICADA
+        console.log('=== GESTOR.JS CARREGADO ===');
+        
+        let db = null;
+        let auth = null;
+        let usuarioAtual = null;
+        
+        // Inicialização SIMPLIFICADA
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔧 Iniciando Painel do Gestor...');
+            
+            // 1. Verificar login local
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
+            
+            if (!usuarioLogado || usuarioLogado.tipo !== 'gestor') {
+                alert('❌ Acesso restrito a gestores!');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            usuarioAtual = usuarioLogado;
+            console.log('👤 Gestor logado:', usuarioAtual.nome);
+            
+            // 2. Configurar interface
+            document.getElementById('userName').textContent = usuarioLogado.nome || 'Gestor';
+            document.getElementById('userCargo').textContent = 
+                `${usuarioLogado.cargo || 'Gestor'} - ${usuarioLogado.departamento || 'Administração'}`;
+            
+            // 3. Configurar datas
+            const hoje = new Date().toISOString().split('T')[0];
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            
+            if (document.getElementById('dataAdmissao')) {
+                document.getElementById('dataAdmissao').value = hoje;
+            }
+            if (document.getElementById('dataAjuste')) {
+                document.getElementById('dataAjuste').value = hoje;
+            }
+            if (document.getElementById('mesRelatorio')) {
+                document.getElementById('mesRelatorio').value = mesAtual;
+                document.getElementById('periodoAjustes').value = mesAtual;
+            }
+            
+            // 4. Inicializar Firebase de forma SIMPLES
+            await inicializarFirebase();
+            
+            // 5. Carregar dados se Firebase conectou
+            if (db) {
+                await carregarDadosIniciais();
+            } else {
+                alert('⚠️ Não foi possível conectar ao banco de dados. Recarregue a página.');
+            }
+        });
+        
+        // Função SIMPLIFICADA para inicializar Firebase
+        async function inicializarFirebase() {
+            try {
+                console.log('⚙️ Inicializando Firebase...');
+                
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK não carregado');
+                }
+                
+                // Verificar se já foi inicializado
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase inicializado');
+                }
+                
+                // Obter referências
+                auth = firebase.auth();
+                db = firebase.firestore();
+                
+                console.log('✅ Serviços Firebase obtidos');
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro ao conectar ao Firebase:', error);
+                db = null;
+                return false;
+            }
+        }
+        
+        // Função para cadastrar funcionário
+        async function cadastrarFuncionario() {
+            if (!db) {
+                alert('❌ Sistema não conectado ao banco de dados.');
+                return;
+            }
+            
+            const dados = {
+                nome: document.getElementById('nomeFuncionario').value.trim(),
+                email: document.getElementById('emailFuncionario').value.trim().toLowerCase(),
+                senha: document.getElementById('senhaFuncionario').value,
+                cpf: document.getElementById('cpfFuncionario').value.trim(),
+                cargo: document.getElementById('cargoFuncionario').value,
+                departamento: document.getElementById('departamentoFuncionario').value,
+                dataAdmissao: document.getElementById('dataAdmissao').value
+            };
+            
+            // Validações
+            if (!dados.nome || !dados.email || !dados.senha || !dados.cargo || !dados.departamento) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            if (dados.senha.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres');
+                return;
+            }
+            
+            try {
+                // 1. Criar usuário no Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(dados.email, dados.senha);
+                const userId = userCredential.user.uid;
+                
+                // 2. Atualizar perfil
+                await userCredential.user.updateProfile({
+                    displayName: dados.nome
+                });
+                
+                // 3. Preparar dados para Firestore
+                const funcionarioData = {
+                    id: userId,
+                    nome: dados.nome,
+                    email: dados.email,
+                    cpf: dados.cpf || '',
+                    cargo: dados.cargo,
+                    departamento: dados.departamento,
+                    dataAdmissao: dados.dataAdmissao || new Date().toISOString().split('T')[0],
+                    tipo: 'funcionario',
+                    status: 'ativo',
+                    dataCriacao: new Date().toISOString(),
+                    criadoPor: usuarioAtual?.id || 'gestor',
+                    criadoPorNome: usuarioAtual?.nome || 'Gestor'
+                };
+                
+                // 4. Salvar no Firestore
+                await db.collection('usuarios').doc(userId).set(funcionarioData);
+                
+                alert(`✅ FUNCIONÁRIO CADASTRADO COM SUCESSO!\n\n📋 Dados:\n• Nome: ${dados.nome}\n• Email: ${dados.email}\n• Cargo: ${dados.cargo}\n• Senha: ${dados.senha}`);
+                
+                // 5. Limpar e fechar
+                document.getElementById('formNovoFuncionario').reset();
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('dataAdmissao').value = hoje;
+                closeModal('novoFuncionario');
+                
+                // 6. Atualizar dados
+                await carregarFuncionarios();
+                await carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('❌ Erro ao cadastrar funcionário:', error);
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('❌ Este email já está cadastrado!');
+                } else if (error.code === 'auth/invalid-email') {
+                    alert('❌ Email inválido!');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('❌ Senha muito fraca. Use pelo menos 6 caracteres.');
+                } else {
+                    alert('Erro: ' + error.message);
+                }
+            }
+        }
+        
+        // Carregar funcionários
+        async function carregarFuncionarios() {
+            if (!db) return;
+            
+            try {
+                const snapshot = await db.collection('usuarios')
+                    .where('tipo', '==', 'funcionario')
+                    .orderBy('nome')
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaFuncionarios tbody');
+                if (!tbody) return;
+                
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="5" style="text-align: center;">Nenhum funcionário cadastrado</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const func = doc.data();
+                        const statusClass = func.status === 'ativo' ? 'status-presente' : 'status-inativo';
+                        const statusText = func.status === 'ativo' ? 'Ativo' : 'Inativo';
+                        
+                        html += `
+                            <tr>
+                                <td>${func.nome || 'Não informado'}</td>
+                                <td>${func.email || 'Não informado'}</td>
+                                <td>${func.cargo || 'Não informado'}</td>
+                                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" 
+                                            onclick="abrirEditarFuncionario('${doc.id}')">Editar</button>
+                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" 
+                                            onclick="excluirFuncionario('${doc.id}', '${func.nome || ''}')">${func.status === 'ativo' ? 'Inativar' : 'Excluir'}</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar funcionários:', error);
+            }
+        }
+        
+        // Carregar registros de hoje
+        async function carregarRegistrosHoje() {
+            if (!db) return;
+            
+            try {
+                const hoje = new Date().toISOString().split('T')[0];
+                const snapshot = await db.collection('pontos')
+                    .where('data', '==', hoje)
+                    .orderBy('timestamp', 'desc')
+                    .limit(20)
+                    .get();
+                
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                if (!tbody) return;
+                
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<tr><td colspan="4" style="text-align: center;">Nenhum registro hoje</td></tr>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const reg = doc.data();
+                        html += `
+                            <tr>
+                                <td>${reg.funcionarioNome || 'Desconhecido'}</td>
+                                <td>${reg.horario || '--:--'}</td>
+                                <td>${reg.tipo === 'entrada' ? 'Entrada' : 'Saída'}</td>
+                                <td>${reg.localizacao?.latitude ? '📍' : '--'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro ao carregar registros:', error);
+            }
+        }
+        
+        // Carregar estatísticas
+        async function carregarEstatisticas() {
+            if (!db) return;
+            
+            try {
+                // Total de funcionários ativos
+                const funcionariosSnapshot = await db.collection('usuarios')
+                    .where('tipo', '==', 'funcionario')
+                    .where('status', '==', 'ativo')
+                    .get();
+                
+                // Registros de hoje
+                const hoje = new Date().toISOString().split('T')[0];
+                const registrosSnapshot = await db.collection('pontos')
+                    .where('data', '==', hoje)
+                    .get();
+                
+                // Justificativas pendentes
+                let justificativasPendentes = 0;
+                try {
+                    const justificativasSnapshot = await db.collection('justificativas')
+                        .where('status', '==', 'pendente')
+                        .get();
+                    justificativasPendentes = justificativasSnapshot.size;
+                } catch (error) {
+                    console.log('Erro ao contar justificativas:', error);
+                }
+                
+                // Atualizar interface
+                const statsGrid = document.getElementById('statsGrid');
+                if (statsGrid) {
+                    statsGrid.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${funcionariosSnapshot.size}</div>
+                            <div class="stat-label">Funcionários Ativos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${registrosSnapshot.size}</div>
+                            <div class="stat-label">Registros Hoje</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${justificativasPendentes}</div>
+                            <div class="stat-label">Justificativas Pendentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">0</div>
+                            <div class="stat-label">Ajustes/Mês</div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+        
+        // Carregar justificativas pendentes
+        async function carregarJustificativasPendentes() {
+            if (!db) return;
+            
+            try {
+                const snapshot = await db.collection('justificativas')
+                    .where('status', '==', 'pendente')
+                    .orderBy('dataEnvio', 'desc')
+                    .get();
+                
+                const container = document.getElementById('justificativasContainer');
+                if (!container) return;
+                
+                let html = '';
+                
+                if (snapshot.empty) {
+                    html = '<p style="color: #666;">Nenhuma justificativa pendente</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const just = doc.data();
+                        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
+                        
+                        let tipoTexto = '';
+                        switch(just.tipo) {
+                            case 'falta_justificada': tipoTexto = 'Falta Justificada'; break;
+                            case 'atraso_justificado': tipoTexto = 'Atraso Justificado'; break;
+                            case 'saida_antecipada': tipoTexto = 'Saída Antecipada'; break;
+                            case 'ausencia_justificada': tipoTexto = 'Ausência Justificada'; break;
+                            default: tipoTexto = just.tipo;
+                        }
+                        
+                        html += `
+                            <div class="justificativa-item">
+                                <div class="justificativa-header">
+                                    <div>
+                                        <strong>${just.funcionarioNome}</strong>
+                                        <span style="color: #666; font-size: 14px; margin-left: 10px;">${dataBR} - ${tipoTexto}</span>
+                                    </div>
+                                    <span class="status-badge status-pendente">Pendente</span>
+                                </div>
+                                
+                                <p style="margin: 10px 0; color: #555;">${just.motivo}</p>
+                                
+                                ${just.hora ? `<p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Hora:</strong> ${just.hora}</p>` : ''}
+                                
+                                <div class="justificativa-actions">
+                                    <button class="btn btn-success" onclick="aprovarJustificativa('${doc.id}')" style="padding: 5px 10px; font-size: 12px;">
+                                        ✅ Aprovar
+                                    </button>
+                                    <button class="btn btn-danger" onclick="rejeitarJustificativa('${doc.id}')" style="padding: 5px 10px; font-size: 12px;">
+                                        ❌ Rejeitar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Erro ao carregar justificativas:', error);
+            }
+        }
+        
+        // Aprovar justificativa
+        async function aprovarJustificativa(justificativaId) {
+            if (!db) return;
+            
+            if (!confirm('Aprovar esta justificativa?')) return;
+            
+            try {
+                await db.collection('justificativas').doc(justificativaId).update({
+                    status: 'aprovada',
+                    dataAprovacao: new Date().toISOString(),
+                    aprovadoPor: usuarioAtual.id,
+                    aprovadoPorNome: usuarioAtual.nome
+                });
+                
+                alert('✅ Justificativa aprovada com sucesso!');
+                await carregarJustificativasPendentes();
+                await carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro ao aprovar justificativa:', error);
+                alert('Erro ao aprovar justificativa: ' + error.message);
+            }
+        }
+        
+        // Rejeitar justificativa
+        async function rejeitarJustificativa(justificativaId) {
+            if (!db) return;
+            
+            const motivoRejeicao = prompt('Informe o motivo da rejeição:');
+            
+            if (!motivoRejeicao || motivoRejeicao.trim() === '') {
+                alert('É necessário informar um motivo para rejeitar.');
+                return;
+            }
+            
+            try {
+                await db.collection('justificativas').doc(justificativaId).update({
+                    status: 'rejeitada',
+                    motivoRejeicao: motivoRejeicao.trim(),
+                    dataRejeicao: new Date().toISOString(),
+                    rejeitadoPor: usuarioAtual.id,
+                    rejeitadoPorNome: usuarioAtual.nome
+                });
+                
+                alert('✅ Justificativa rejeitada!');
+                await carregarJustificativasPendentes();
+                await carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro ao rejeitar justificativa:', error);
+                alert('Erro ao rejeitar justificativa: ' + error.message);
+            }
+        }
+        
+        // Carregar dados iniciais
+        async function carregarDadosIniciais() {
+            try {
+                await Promise.all([
+                    carregarFuncionarios(),
+                    carregarRegistrosHoje(),
+                    carregarEstatisticas(),
+                    carregarJustificativasPendentes()
+                ]);
+                console.log('✅ Dados iniciais carregados');
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+        
+        // Funções de interface do seu HTML
         function openModal(modalName) {
             const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
             if (modalElement) {
@@ -885,9 +490,6 @@
                     document.getElementById('formAjusteHoras').reset();
                     const hoje = new Date().toISOString().split('T')[0];
                     document.getElementById('dataAjuste').value = hoje;
-                    document.getElementById('totalHorasAjuste').value = '';
-                    document.getElementById('horariosExistentes').innerHTML = 
-                        '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
                 }
             }
         }
@@ -909,34 +511,6 @@
             }
         }
 
-        function calcularHoras() {
-            const entrada = document.getElementById('horaEntradaAjuste')?.value;
-            const saida = document.getElementById('horaSaidaAjuste')?.value;
-            
-            if (!entrada || !saida) {
-                if (document.getElementById('totalHorasAjuste')) {
-                    document.getElementById('totalHorasAjuste').value = '';
-                }
-                return;
-            }
-            
-            const [h1, m1] = entrada.split(':').map(Number);
-            const [h2, m2] = saida.split(':').map(Number);
-            
-            const entradaDate = new Date(0, 0, 0, h1, m1);
-            const saidaDate = new Date(0, 0, 0, h2, m2);
-            
-            const diffMs = saidaDate - entradaDate;
-            const diffMinutes = Math.floor(diffMs / 60000);
-            
-            const horas = Math.floor(diffMinutes / 60);
-            const minutos = diffMinutes % 60;
-            
-            if (document.getElementById('totalHorasAjuste')) {
-                document.getElementById('totalHorasAjuste').value = `${horas}:${minutos.toString().padStart(2, '0')}`;
-            }
-        }
-
         function filtrarFuncionarios() {
             const input = document.getElementById('searchFuncionarios')?.value.toLowerCase() || '';
             const rows = document.querySelectorAll('#tabelaFuncionarios tbody tr');
@@ -955,35 +529,113 @@
             }
         }
         
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            const hoje = new Date().toISOString().split('T')[0];
-            const mesAtual = new Date().toISOString().slice(0, 7);
+        // Funções de edição (simplificadas)
+        async function abrirEditarFuncionario(funcionarioId) {
+            try {
+                const doc = await db.collection('usuarios').doc(funcionarioId).get();
+                
+                if (!doc.exists) {
+                    alert('Funcionário não encontrado!');
+                    return;
+                }
+                
+                const func = doc.data();
+                
+                document.getElementById('editarFuncionarioId').value = funcionarioId;
+                document.getElementById('editarNome').value = func.nome || '';
+                document.getElementById('editarEmail').value = func.email || '';
+                document.getElementById('editarCpf').value = func.cpf || '';
+                document.getElementById('editarCargo').value = func.cargo || '';
+                document.getElementById('editarDepartamento').value = func.departamento || '';
+                
+                document.querySelectorAll('input[name="editarStatus"]').forEach(radio => {
+                    radio.checked = (radio.value === (func.status || 'ativo'));
+                });
+                
+                openModal('editarFuncionario');
+                
+            } catch (error) {
+                console.error('Erro ao abrir edição:', error);
+                alert('Erro ao carregar dados do funcionário');
+            }
+        }
+        
+        async function atualizarFuncionario() {
+            const funcionarioId = document.getElementById('editarFuncionarioId').value;
+            const nome = document.getElementById('editarNome').value.trim();
+            const email = document.getElementById('editarEmail').value.trim();
+            const cpf = document.getElementById('editarCpf').value.trim();
+            const cargo = document.getElementById('editarCargo').value.trim();
+            const departamento = document.getElementById('editarDepartamento').value.trim();
+            const status = document.querySelector('input[name="editarStatus"]:checked').value;
             
-            // Configurar datas
-            if (document.getElementById('dataAdmissao')) {
-                document.getElementById('dataAdmissao').value = hoje;
+            if (!nome || !email || !cargo || !departamento) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
             }
             
-            if (document.getElementById('dataAjuste')) {
-                document.getElementById('dataAjuste').value = hoje;
+            try {
+                await db.collection('usuarios').doc(funcionarioId).update({
+                    nome: nome,
+                    email: email,
+                    cpf: cpf,
+                    cargo: cargo,
+                    departamento: departamento,
+                    status: status,
+                    dataAtualizacao: new Date().toISOString()
+                });
+                
+                alert('✅ Funcionário atualizado com sucesso!');
+                closeModal('editarFuncionario');
+                await carregarFuncionarios();
+                await carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro ao atualizar funcionário:', error);
+                alert('Erro ao atualizar funcionário: ' + error.message);
+            }
+        }
+        
+        async function excluirFuncionario(funcionarioId, nomeFuncionario) {
+            const confirmMessage = confirm(
+                `⚠️ Tem certeza que deseja INATIVAR este funcionário?\n\nNome: ${nomeFuncionario || 'Funcionário'}\n\nEle não poderá mais acessar o sistema.`
+            );
+            
+            if (!confirmMessage) {
+                return;
             }
             
-            if (document.getElementById('mesRelatorio')) {
-                document.getElementById('mesRelatorio').value = mesAtual;
-                document.getElementById('periodoRelatorio').value = mesAtual;
-                document.getElementById('periodoAjustes').value = mesAtual;
+            try {
+                await db.collection('usuarios').doc(funcionarioId).update({
+                    status: 'inativo',
+                    dataDesativacao: new Date().toISOString()
+                });
+                
+                alert('✅ Funcionário marcado como inativo!');
+                await carregarFuncionarios();
+                await carregarEstatisticas();
+                
+            } catch (error) {
+                console.error('Erro ao excluir funcionário:', error);
+                alert('Erro ao processar funcionário: ' + error.message);
             }
-            
-            // Event listeners para cálculo de horas
-            const entradaInput = document.getElementById('horaEntradaAjuste');
-            const saidaInput = document.getElementById('horaSaidaAjuste');
-            
-            if (entradaInput && saidaInput) {
-                entradaInput.addEventListener('change', calcularHoras);
-                saidaInput.addEventListener('change', calcularHoras);
-            }
-        });
+        }
+        
+        // Exportar funções
+        window.cadastrarFuncionario = cadastrarFuncionario;
+        window.carregarFuncionarios = carregarFuncionarios;
+        window.carregarJustificativasPendentes = carregarJustificativasPendentes;
+        window.aprovarJustificativa = aprovarJustificativa;
+        window.rejeitarJustificativa = rejeitarJustificativa;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.openTab = openTab;
+        window.filtrarFuncionarios = filtrarFuncionarios;
+        window.logout = logout;
+        window.abrirEditarFuncionario = abrirEditarFuncionario;
+        window.atualizarFuncionario = atualizarFuncionario;
+        window.excluirFuncionario = excluirFuncionario;
+        
     </script>
 </body>
 </html>
