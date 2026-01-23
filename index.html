@@ -10,28 +10,230 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase -->
-    <script src="js/firebase-config.js"></script>
-    
     <style>
-        /* MANTER TODO O CSS DO SEU INDEX.HTML */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #1b5e20;
+            font-size: 28px;
+        }
+        
+        .logo span {
+            color: #388e3c;
+            font-weight: 300;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #1b5e20;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-login:hover {
+            background: #1b5e20;
+        }
+        
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .create-admin {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .create-admin a {
+            color: #2e7d32;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2e7d32;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <!-- MANTER TODO O HTML DO SEU INDEX.HTML -->
-    
+    <div class="login-container">
+        <div class="logo">
+            <h1>Essencial<span>Print</span></h1>
+            <p>Sistema de Ponto Eletrônico</p>
+        </div>
+        
+        <form id="loginForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" class="form-control" placeholder="Sua senha" required>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div> Processando...
+            </div>
+            
+            <button type="submit" class="btn-login" onclick="fazerLogin()" id="btnLogin">Entrar</button>
+        </form>
+        
+        <div class="create-admin">
+            <p>Primeiro acesso? <a onclick="criarAdminPadrao()">Criar administrador</a></p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
     <script>
-        // Inicialização SIMPLIFICADA
+        // ============ CONFIGURAÇÃO DO FIREBASE ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
+        
+        // ============ INICIALIZAÇÃO ============
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔧 Iniciando sistema de login...');
+            
             try {
-                firebase.initializeApp(firebaseConfig);
-                console.log('✅ Firebase inicializado para login');
+                // Inicializar Firebase
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK não carregado');
+                }
+                
+                // Verificar se já foi inicializado
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase inicializado');
+                }
+                
+                // Verificar sessão ativa
+                await verificarSessaoAtiva();
+                
             } catch (error) {
-                console.error('Erro ao inicializar Firebase:', error);
+                console.error('❌ Erro ao inicializar Firebase:', error);
+                showError('Erro ao conectar com o servidor');
             }
         });
         
-        // Função para criar administrador padrão
+        // ============ VERIFICAR SESSÃO ATIVA ============
+        async function verificarSessaoAtiva() {
+            try {
+                const auth = firebase.auth();
+                
+                // Aguardar inicialização do auth
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const user = auth.currentUser;
+                
+                if (user) {
+                    console.log('👤 Usuário já autenticado:', user.email);
+                    
+                    // Buscar dados do usuário no Firestore
+                    const db = firebase.firestore();
+                    const userDoc = await db.collection('usuarios').doc(user.uid).get();
+                    
+                    if (userDoc.exists) {
+                        const usuario = userDoc.data();
+                        
+                        localStorage.setItem('usuario_logado', JSON.stringify({
+                            id: user.uid,
+                            nome: usuario.nome,
+                            email: usuario.email,
+                            tipo: usuario.tipo,
+                            cargo: usuario.cargo,
+                            departamento: usuario.departamento
+                        }));
+                        
+                        // Redirecionar
+                        redirecionarUsuario(usuario.tipo);
+                    } else {
+                        console.log('⚠️ Usuário não encontrado no Firestore');
+                        // Deslogar
+                        await auth.signOut();
+                    }
+                }
+            } catch (error) {
+                console.log('ℹ️ Nenhuma sessão ativa ou erro:', error.message);
+            }
+        }
+        
+        // ============ FUNÇÃO PARA CRIAR ADMINISTRADOR ============
         async function criarAdminPadrao() {
             const email = 'admin@essencialprint.com';
             const senha = 'Admin123';
@@ -41,13 +243,24 @@
                 return;
             }
             
+            const btn = document.getElementById('btnLogin');
+            const loading = document.getElementById('loading');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Criando...';
+            btn.disabled = true;
+            loading.style.display = 'block';
+            
             try {
                 const auth = firebase.auth();
                 const db = firebase.firestore();
                 
                 // 1. Criar no Firebase Auth
+                console.log('🔐 Criando usuário no Firebase Auth...');
                 const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
                 const userId = userCredential.user.uid;
+                
+                console.log('✅ Usuário criado no Auth. ID:', userId);
                 
                 // 2. Atualizar perfil
                 await userCredential.user.updateProfile({
@@ -55,6 +268,7 @@
                 });
                 
                 // 3. Salvar no Firestore
+                console.log('💾 Salvando no Firestore...');
                 await db.collection('usuarios').doc(userId).set({
                     id: userId,
                     nome: nome,
@@ -66,11 +280,13 @@
                     dataCriacao: new Date().toISOString()
                 });
                 
+                console.log('✅ Administrador salvo no Firestore');
+                
                 // 4. Preencher formulário
                 document.getElementById('email').value = email;
                 document.getElementById('senha').value = senha;
                 
-                alert(`✅ Administrador criado com sucesso!\n\nEmail: ${email}\nSenha: ${senha}\n\nClique em "Entrar" para acessar.`);
+                alert(`✅ ADMINISTRADOR CRIADO COM SUCESSO!\n\n📋 Dados para login:\n• Email: ${email}\n• Senha: ${senha}\n\nClique em "Entrar" para acessar o sistema.`);
                 
             } catch (error) {
                 console.error('❌ Erro ao criar admin:', error);
@@ -79,39 +295,63 @@
                     alert('✅ Este administrador já existe!\n\nUse:\nEmail: admin@essencialprint.com\nSenha: Admin123');
                     document.getElementById('email').value = email;
                     document.getElementById('senha').value = senha;
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    alert('❌ Cadastro por email não está habilitado.\n\nVá no Firebase Console > Authentication > Sign-in method\nHabilite "Email/Password"');
+                } else if (error.code === 'auth/network-request-failed') {
+                    alert('❌ Erro de conexão. Verifique sua internet.');
                 } else {
-                    alert('Erro: ' + error.message);
+                    alert('❌ Erro: ' + error.message);
                 }
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
         
-        // Função de login SIMPLIFICADA
+        // ============ FUNÇÃO DE LOGIN ============
         async function fazerLogin() {
             const email = document.getElementById('email').value.trim().toLowerCase();
             const senha = document.getElementById('senha').value;
             
             if (!email || !senha) {
-                alert('Preencha email e senha');
+                showError('Preencha email e senha');
                 return;
             }
+            
+            // Botão loading
+            const btn = document.getElementById('btnLogin');
+            const loading = document.getElementById('loading');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Entrando...';
+            btn.disabled = true;
+            loading.style.display = 'block';
             
             try {
                 const auth = firebase.auth();
                 const db = firebase.firestore();
                 
+                console.log('🔐 Tentando login com Firebase Auth...');
+                
                 // 1. Autenticar com Firebase Auth
                 const userCredential = await auth.signInWithEmailAndPassword(email, senha);
                 const userId = userCredential.user.uid;
                 
-                // 2. Tentar buscar dados no Firestore
+                console.log('✅ Auth OK. User ID:', userId);
+                
+                // 2. Buscar dados do usuário no Firestore
                 let usuario = null;
                 try {
                     const userDoc = await db.collection('usuarios').doc(userId).get();
                     
                     if (userDoc.exists) {
                         usuario = userDoc.data();
+                        console.log('✅ Usuário encontrado no Firestore:', usuario.nome);
                     } else {
-                        // Se não encontrou, criar registro básico
+                        // Se não encontrou no Firestore, criar registro básico
+                        console.log('⚠️ Usuário não encontrado no Firestore. Criando registro...');
+                        
                         await db.collection('usuarios').doc(userId).set({
                             id: userId,
                             nome: userCredential.user.displayName || email.split('@')[0],
@@ -124,16 +364,21 @@
                         });
                         
                         usuario = {
+                            id: userId,
                             nome: email.split('@')[0],
                             email: email,
                             cargo: 'Funcionário',
                             departamento: 'Não informado',
                             tipo: 'funcionario'
                         };
+                        
+                        console.log('✅ Usuário criado no Firestore');
                     }
                 } catch (firestoreError) {
-                    // Se erro no Firestore, usar dados básicos
+                    console.warn('⚠️ Erro ao acessar Firestore:', firestoreError);
+                    // Se não conseguir acessar Firestore, usar dados básicos
                     usuario = {
+                        id: userId,
                         nome: email.split('@')[0],
                         email: email,
                         cargo: 'Funcionário',
@@ -142,7 +387,14 @@
                     };
                 }
                 
-                // 3. Salvar no localStorage
+                // 3. Verificar se usuário está ativo
+                if (usuario.status !== 'ativo') {
+                    showError('Usuário inativo. Contate o administrador.');
+                    await auth.signOut();
+                    return;
+                }
+                
+                // 4. Salvar no localStorage
                 localStorage.setItem('usuario_logado', JSON.stringify({
                     id: userId,
                     nome: usuario.nome,
@@ -152,31 +404,75 @@
                     departamento: usuario.departamento
                 }));
                 
-                // 4. Redirecionar
-                if (usuario.tipo === 'gestor') {
-                    window.location.href = 'gestor.html';
-                } else {
-                    window.location.href = 'funcionario.html';
-                }
+                localStorage.setItem('firebase_user', JSON.stringify({
+                    uid: userId,
+                    email: usuario.email,
+                    timestamp: Date.now()
+                }));
+                
+                console.log('✅ Login completo! Redirecionando...');
+                
+                // 5. Redirecionar
+                redirecionarUsuario(usuario.tipo);
                 
             } catch (error) {
-                console.error('❌ Erro no login:', error);
+                console.error('❌ Erro no login:', error.code, error.message);
                 
+                // Tratamento de erros específicos
                 if (error.code === 'auth/user-not-found' || 
-                    error.code === 'auth/wrong-password') {
-                    alert('Email ou senha incorretos');
+                    error.code === 'auth/wrong-password' ||
+                    error.code === 'auth/invalid-login-credentials') {
+                    showError('Email ou senha incorretos');
+                } else if (error.code === 'auth/too-many-requests') {
+                    showError('Muitas tentativas. Tente novamente mais tarde.');
+                } else if (error.code === 'auth/network-request-failed') {
+                    showError('Erro de conexão. Verifique sua internet.');
+                } else if (error.code === 'auth/user-disabled') {
+                    showError('Usuário desativado. Contate o administrador.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showError('Email inválido.');
                 } else {
-                    alert('Erro: ' + error.message);
+                    showError('Erro ao fazer login: ' + error.message);
                 }
+                
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
         
-        // Permitir login com Enter
+        // ============ FUNÇÃO PARA REDIRECIONAR ============
+        function redirecionarUsuario(tipo) {
+            if (tipo === 'gestor') {
+                console.log('➡️ Redirecionando para painel do gestor...');
+                window.location.href = 'gestor.html';
+            } else {
+                console.log('➡️ Redirecionando para área do funcionário...');
+                window.location.href = 'funcionario.html';
+            }
+        }
+        
+        // ============ FUNÇÃO PARA MOSTRAR ERRO ============
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ============ PERMITIR LOGIN COM ENTER ============
         document.getElementById('senha').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 fazerLogin();
             }
         });
+        
+        // ============ EXPORTAR FUNÇÕES ============
+        window.fazerLogin = fazerLogin;
+        window.criarAdminPadrao = criarAdminPadrao;
     </script>
 </body>
 </html>
