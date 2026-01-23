@@ -11,14 +11,313 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
-        /* MANTER TODO O CSS DO SEU ARQUIVO FUNCIONARIO10.HTML */
-        /* Copie o CSS completo do seu arquivo atual */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffeaa7;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #c3e6cb;
+        }
+        
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #2e7d32;
+        }
+        
+        .logo h1 {
+            color: #1b5e20;
+            font-size: 24px;
+        }
+        
+        .logo span {
+            color: #388e3c;
+            font-weight: 300;
+        }
+        
+        .user-info h3 {
+            color: #1b5e20;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .user-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn-logout {
+            background: #d32f2f;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #b71c1c;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4caf50;
+        }
+        
+        .card h2 {
+            color: #1b5e20;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #c8e6c9;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #2e7d32;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+        
+        .registro-info {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .registro-info h3 {
+            color: #1b5e20;
+            margin-bottom: 10px;
+        }
+        
+        .hora-atual {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2e7d32;
+            margin: 10px 0;
+        }
+        
+        .data-atual {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .status-presente {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+        
+        .status-ausente {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background-color: #e8f5e8;
+            color: #1b5e20;
+            font-weight: 600;
+        }
+        
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-    <!-- MANTER TODO O HTML DO SEU ARQUIVO FUNCIONARIO10.HTML -->
-    <!-- Copie o HTML completo do seu arquivo atual -->
-    
+    <div class="container">
+        <!-- Alerta de status -->
+        <div id="alertStatus" class="alert" style="display: none;"></div>
+        
+        <!-- Mensagem de erro -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        
+        <header>
+            <div class="logo">
+                <h1>Essencial<span>Print</span> - Ponto Eletrônico</h1>
+            </div>
+            <div class="user-info">
+                <h3 id="userName">Funcionário</h3>
+                <p id="userCargo">Registro de Ponto</p>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Card de Registro -->
+            <div class="card">
+                <h2>Registrar Ponto</h2>
+                <div class="registro-info">
+                    <h3 id="dataAtual">Carregando data...</h3>
+                    <div class="hora-atual" id="horaAtual">00:00:00</div>
+                    <div id="statusRegistro" class="status-badge status-ausente">Status: Aguardando registro</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="registrarEntrada()" id="btnEntrada">
+                    📥 Registrar Entrada
+                </button>
+                
+                <button class="btn btn-secondary" onclick="registrarSaida()" id="btnSaida" disabled>
+                    📤 Registrar Saída
+                </button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="color: #1b5e20; margin-bottom: 10px;">Último Registro</h4>
+                    <div id="ultimoRegistro">
+                        <p style="color: #666;">Nenhum registro hoje</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card de Histórico -->
+            <div class="card">
+                <h2>Seus Registros de Hoje</h2>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table id="tabelaRegistros">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrosBody">
+                            <tr><td colspan="3" style="text-align: center;" id="loadingRegistros">Carregando registros...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Essencial Print &copy; 2024 - Sistema de Ponto Eletrônico</p>
+            <p>Registre sua entrada e saída diariamente</p>
+        </footer>
+    </div>
+
     <script>
         // ============ CONFIGURAÇÃO DO FIREBASE ============
         const firebaseConfig = {
@@ -35,75 +334,67 @@
         let auth = null;
         let usuarioAtual = null;
         let timerHora = null;
+        let firebaseConectado = false;
         
         // ============ INICIALIZAÇÃO ============
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔧 Iniciando Página do Funcionário...');
             
-            // 1. Verificar login local
-            const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
-            
-            if (!usuarioLogado) {
-                alert('❌ Acesso restrito! Faça login primeiro.');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            usuarioAtual = usuarioLogado;
-            console.log('👤 Funcionário logado:', usuarioAtual.nome);
-            
-            // 2. Configurar interface
-            document.getElementById('userName').textContent = usuarioLogado.nome || 'Funcionário';
-            document.getElementById('userCargo').textContent = 
-                `${usuarioLogado.cargo || 'Funcionário'} - ${usuarioLogado.departamento || 'Departamento'}`;
-            
-            // 3. Iniciar relógio
-            iniciarRelogio();
-            
-            // 4. Inicializar Firebase
-            await inicializarFirebase();
-            
-            // 5. Carregar dados
-            if (db) {
-                await verificarRegistrosHoje();
-                await carregarRegistrosHoje();
-            }
-            
-            console.log('✅ Sistema do funcionário inicializado');
-        });
-        
-        // ============ INICIALIZAR FIREBASE ============
-        async function inicializarFirebase() {
             try {
-                console.log('⚙️ Inicializando Firebase...');
+                // 1. Verificar login local
+                const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
                 
-                if (typeof firebase === 'undefined') {
-                    throw new Error('Firebase SDK não carregado');
+                if (!usuarioLogado) {
+                    mostrarErro('❌ Acesso restrito! Faça login primeiro.');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
                 }
                 
-                // Verificar se já foi inicializado
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(firebaseConfig);
-                    console.log('✅ Firebase inicializado');
-                }
+                usuarioAtual = usuarioLogado;
+                console.log('👤 Usuário logado:', usuarioAtual);
                 
-                // Obter referências
-                auth = firebase.auth();
-                db = firebase.firestore();
+                // 2. Configurar interface (mesmo sem dados completos)
+                document.getElementById('userName').textContent = usuarioLogado.nome || 'Funcionário';
+                document.getElementById('userCargo').textContent = 
+                    `${usuarioLogado.cargo || 'Funcionário'} - ${usuarioLogado.departamento || 'Departamento'}`;
                 
-                console.log('✅ Serviços Firebase obtidos');
+                // 3. Iniciar relógio
+                iniciarRelogio();
                 
-                return true;
+                // 4. Inicializar Firebase (não bloqueante)
+                setTimeout(() => {
+                    inicializarFirebase();
+                }, 100);
+                
+                // 5. Mostrar que está carregando
+                document.getElementById('loadingRegistros').innerHTML = '<div class="loading">Carregando dados...</div>';
                 
             } catch (error) {
-                console.error('❌ Erro ao conectar ao Firebase:', error);
-                db = null;
-                alert('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.');
-                return false;
+                console.error('❌ Erro na inicialização:', error);
+                mostrarErro('Erro ao carregar a página. Recarregue.');
             }
+        });
+        
+        // ============ FUNÇÕES DE INTERFACE ============
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
         }
         
-        // ============ FUNÇÕES DO SISTEMA ============
+        function mostrarAlerta(mensagem, tipo) {
+            const alertDiv = document.getElementById('alertStatus');
+            alertDiv.textContent = mensagem;
+            alertDiv.className = `alert alert-${tipo}`;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
         function iniciarRelogio() {
             function atualizarHora() {
                 const agora = new Date();
@@ -129,8 +420,146 @@
             timerHora = setInterval(atualizarHora, 1000);
         }
         
+        // ============ FUNÇÕES DO FIREBASE ============
+        async function inicializarFirebase() {
+            try {
+                console.log('⚙️ Inicializando Firebase...');
+                
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase SDK não carregado');
+                    return false;
+                }
+                
+                // Inicializar Firebase se não estiver
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase inicializado');
+                }
+                
+                // Obter serviços
+                auth = firebase.auth();
+                db = firebase.firestore();
+                
+                // Testar conexão
+                await db.collection('test').limit(1).get().catch(() => {
+                    // Ignora erro de coleção não existente
+                });
+                
+                firebaseConectado = true;
+                console.log('✅ Firebase conectado');
+                
+                // Carregar dados após conexão
+                await carregarDados();
+                
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Erro ao conectar ao Firebase:', error);
+                firebaseConectado = false;
+                mostrarAlerta('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.', 'warning');
+                
+                // Carregar dados locais
+                carregarDadosLocais();
+                
+                return false;
+            }
+        }
+        
+        // ============ CARREGAR DADOS ============
+        async function carregarDados() {
+            if (!firebaseConectado || !db) {
+                carregarDadosLocais();
+                return;
+            }
+            
+            try {
+                // Verificar se usuário existe no Firestore
+                let usuarioFirestore = null;
+                try {
+                    const userDoc = await db.collection('usuarios').doc(usuarioAtual.id).get();
+                    
+                    if (userDoc.exists) {
+                        usuarioFirestore = userDoc.data();
+                        console.log('✅ Usuário encontrado no Firestore:', usuarioFirestore);
+                        
+                        // Atualizar dados locais se necessário
+                        if (usuarioFirestore.nome !== usuarioAtual.nome) {
+                            usuarioAtual = {
+                                ...usuarioAtual,
+                                nome: usuarioFirestore.nome,
+                                cargo: usuarioFirestore.cargo,
+                                departamento: usuarioFirestore.departamento
+                            };
+                            
+                            localStorage.setItem('usuario_logado', JSON.stringify(usuarioAtual));
+                            
+                            // Atualizar interface
+                            document.getElementById('userName').textContent = usuarioFirestore.nome;
+                            document.getElementById('userCargo').textContent = 
+                                `${usuarioFirestore.cargo} - ${usuarioFirestore.departamento}`;
+                        }
+                    } else {
+                        console.log('⚠️ Usuário não encontrado no Firestore. Criando...');
+                        
+                        // Criar registro básico no Firestore
+                        await db.collection('usuarios').doc(usuarioAtual.id).set({
+                            id: usuarioAtual.id,
+                            nome: usuarioAtual.nome || 'Funcionário',
+                            email: usuarioAtual.email || '',
+                            cargo: usuarioAtual.cargo || 'Funcionário',
+                            departamento: usuarioAtual.departamento || 'Departamento',
+                            tipo: 'funcionario',
+                            status: 'ativo',
+                            dataCriacao: new Date().toISOString()
+                        });
+                        
+                        console.log('✅ Registro criado no Firestore');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Erro ao verificar usuário no Firestore:', error);
+                }
+                
+                // Carregar registros
+                await verificarRegistrosHoje();
+                await carregarRegistrosHoje();
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                carregarDadosLocais();
+            }
+        }
+        
+        function carregarDadosLocais() {
+            console.log('📱 Carregando dados locais...');
+            
+            // Atualizar registros locais
+            const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            // Filtrar registros do usuário atual para hoje
+            const registrosHoje = registros.filter(r => 
+                r.data === hoje && 
+                r.funcionarioId === usuarioAtual.id
+            );
+            
+            // Ordenar por timestamp (mais recente primeiro)
+            registrosHoje.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Atualizar tabela
+            atualizarTabelaRegistros(registrosHoje, 'Local');
+            
+            // Atualizar status
+            if (registrosHoje.length > 0) {
+                const ultimo = registrosHoje[0];
+                atualizarStatus(ultimo);
+            }
+            
+            document.getElementById('loadingRegistros').style.display = 'none';
+        }
+        
+        // ============ FUNÇÕES DE REGISTRO DE PONTO ============
         async function verificarRegistrosHoje() {
-            if (!db) return;
+            if (!firebaseConectado || !db) return;
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -145,37 +574,40 @@
                 
                 if (!snapshot.empty) {
                     const ultimoRegistro = snapshot.docs[0].data();
-                    
-                    const statusDiv = document.getElementById('statusRegistro');
-                    const btnEntrada = document.getElementById('btnEntrada');
-                    const btnSaida = document.getElementById('btnSaida');
-                    const ultimoDiv = document.getElementById('ultimoRegistro');
-                    
-                    if (ultimoRegistro.tipo === 'entrada') {
-                        statusDiv.textContent = 'Status: Em trabalho';
-                        statusDiv.className = 'status-badge status-presente';
-                        btnEntrada.disabled = true;
-                        btnSaida.disabled = false;
-                        
-                        ultimoDiv.innerHTML = `
-                            <p><strong>Última entrada:</strong> ${ultimoRegistro.horario}</p>
-                            <p style="color: #666; font-size: 14px;">Aguardando registro de saída</p>
-                        `;
-                    } else {
-                        statusDiv.textContent = 'Status: Saída registrada';
-                        statusDiv.className = 'status-badge status-ausente';
-                        btnEntrada.disabled = false;
-                        btnSaida.disabled = true;
-                        
-                        ultimoDiv.innerHTML = `
-                            <p><strong>Última saída:</strong> ${ultimoRegistro.horario}</p>
-                            <p style="color: #666; font-size: 14px;">Aguardando nova entrada</p>
-                        `;
-                    }
+                    atualizarStatus(ultimoRegistro);
                 }
                 
             } catch (error) {
                 console.error('Erro ao verificar registros:', error);
+            }
+        }
+        
+        function atualizarStatus(registro) {
+            const statusDiv = document.getElementById('statusRegistro');
+            const btnEntrada = document.getElementById('btnEntrada');
+            const btnSaida = document.getElementById('btnSaida');
+            const ultimoDiv = document.getElementById('ultimoRegistro');
+            
+            if (registro.tipo === 'entrada') {
+                statusDiv.textContent = 'Status: Em trabalho';
+                statusDiv.className = 'status-badge status-presente';
+                btnEntrada.disabled = true;
+                btnSaida.disabled = false;
+                
+                ultimoDiv.innerHTML = `
+                    <p><strong>Última entrada:</strong> ${registro.horario}</p>
+                    <p style="color: #666; font-size: 14px;">Aguardando registro de saída</p>
+                `;
+            } else {
+                statusDiv.textContent = 'Status: Saída registrada';
+                statusDiv.className = 'status-badge status-ausente';
+                btnEntrada.disabled = false;
+                btnSaida.disabled = true;
+                
+                ultimoDiv.innerHTML = `
+                    <p><strong>Última saída:</strong> ${registro.horario}</p>
+                    <p style="color: #666; font-size: 14px;">Aguardando nova entrada</p>
+                `;
             }
         }
         
@@ -193,7 +625,7 @@
             
             const registro = {
                 funcionarioId: usuarioAtual.id,
-                funcionarioNome: usuarioAtual.nome,
+                funcionarioNome: usuarioAtual.nome || 'Funcionário',
                 tipo: 'entrada',
                 horario: horaAtual,
                 data: hoje,
@@ -203,25 +635,26 @@
             };
             
             try {
-                if (db) {
+                if (firebaseConectado && db) {
+                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Entrada registrada no Firestore');
-                    alert(`✅ Entrada registrada às ${horaAtual}`);
-                    
-                    // Atualizar interface
-                    await verificarRegistrosHoje();
-                    await carregarRegistrosHoje();
-                } else {
-                    // Salvar localmente
-                    const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
-                    registros.push(registro);
-                    localStorage.setItem('registros_locais', JSON.stringify(registros));
-                    alert(`✅ Entrada registrada localmente às ${horaAtual}`);
+                    mostrarAlerta(`✅ Entrada registrada às ${horaAtual}`, 'success');
                 }
+                
+                // Sempre salvar localmente
+                salvarRegistroLocal(registro);
+                
+                // Atualizar interface
+                atualizarStatus(registro);
+                await carregarRegistrosHoje();
                 
             } catch (error) {
                 console.error('❌ Erro ao registrar entrada:', error);
-                alert('Erro ao registrar entrada: ' + error.message);
+                // Salvar apenas localmente em caso de erro
+                salvarRegistroLocal(registro);
+                mostrarAlerta(`✅ Entrada registrada localmente às ${horaAtual}`, 'warning');
+                carregarDadosLocais();
             }
         }
         
@@ -239,7 +672,7 @@
             
             const registro = {
                 funcionarioId: usuarioAtual.id,
-                funcionarioNome: usuarioAtual.nome,
+                funcionarioNome: usuarioAtual.nome || 'Funcionário',
                 tipo: 'saida',
                 horario: horaAtual,
                 data: hoje,
@@ -249,56 +682,39 @@
             };
             
             try {
-                if (db) {
+                if (firebaseConectado && db) {
+                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Saída registrada no Firestore');
-                    alert(`✅ Saída registrada às ${horaAtual}`);
-                    
-                    // Atualizar interface
-                    await verificarRegistrosHoje();
-                    await carregarRegistrosHoje();
-                } else {
-                    // Salvar localmente
-                    const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
-                    registros.push(registro);
-                    localStorage.setItem('registros_locais', JSON.stringify(registros));
-                    alert(`✅ Saída registrada localmente às ${horaAtual}`);
+                    mostrarAlerta(`✅ Saída registrada às ${horaAtual}`, 'success');
                 }
+                
+                // Sempre salvar localmente
+                salvarRegistroLocal(registro);
+                
+                // Atualizar interface
+                atualizarStatus(registro);
+                await carregarRegistrosHoje();
                 
             } catch (error) {
                 console.error('❌ Erro ao registrar saída:', error);
-                alert('Erro ao registrar saída: ' + error.message);
+                // Salvar apenas localmente em caso de erro
+                salvarRegistroLocal(registro);
+                mostrarAlerta(`✅ Saída registrada localmente às ${horaAtual}`, 'warning');
+                carregarDadosLocais();
             }
         }
         
+        function salvarRegistroLocal(registro) {
+            const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
+            registros.push(registro);
+            localStorage.setItem('registros_locais', JSON.stringify(registros));
+            console.log('📝 Registro salvo localmente');
+        }
+        
         async function carregarRegistrosHoje() {
-            if (!db) {
-                // Carregar registros locais
-                const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
-                const hoje = new Date().toISOString().split('T')[0];
-                const registrosHoje = registros.filter(r => r.data === hoje && r.funcionarioId === usuarioAtual.id);
-                
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                let html = '';
-                
-                if (registrosHoje.length === 0) {
-                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje (local)</td></tr>';
-                } else {
-                    registrosHoje.forEach(reg => {
-                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
-                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
-                        
-                        html += `
-                            <tr>
-                                <td>${reg.horario}</td>
-                                <td>${tipoIcone} ${tipoTexto}</td>
-                                <td>Local</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
+            if (!firebaseConectado || !db) {
+                carregarDadosLocais();
                 return;
             }
             
@@ -312,34 +728,53 @@
                     .orderBy('timestamp', 'desc')
                     .get();
                 
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                let html = '';
+                const registros = [];
+                snapshot.forEach(doc => {
+                    registros.push(doc.data());
+                });
                 
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const reg = doc.data();
-                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
-                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
-                        
-                        html += `
-                            <tr>
-                                <td>${reg.horario}</td>
-                                <td>${tipoIcone} ${tipoTexto}</td>
-                                <td>Servidor</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
+                atualizarTabelaRegistros(registros, 'Servidor');
                 
             } catch (error) {
                 console.error('Erro ao carregar registros:', error);
+                carregarDadosLocais();
             }
         }
         
+        function atualizarTabelaRegistros(registros, origem) {
+            const tbody = document.getElementById('registrosBody');
+            
+            if (registros.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #666;">
+                            Nenhum registro hoje (${origem === 'Local' ? 'modo local' : 'servidor'})
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            registros.forEach(reg => {
+                const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
+                const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
+                
+                html += `
+                    <tr>
+                        <td>${reg.horario}</td>
+                        <td>${tipoIcone} ${tipoTexto}</td>
+                        <td>${origem}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            document.getElementById('loadingRegistros').style.display = 'none';
+        }
+        
+        // ============ FUNÇÃO DE LOGOUT ============
         function logout() {
             if (confirm('Deseja realmente sair?')) {
                 localStorage.removeItem('usuario_logado');
@@ -361,6 +796,7 @@
         window.registrarEntrada = registrarEntrada;
         window.registrarSaida = registrarSaida;
         window.logout = logout;
+        
     </script>
 </body>
 </html>
