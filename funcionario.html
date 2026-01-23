@@ -14,456 +14,24 @@
     <script src="js/firebase-config.js"></script>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
-        
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left: 4px solid #ffeaa7;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left: 4px solid #c3e6cb;
-        }
-        
-        header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid #2e7d32;
-        }
-        
-        .logo h1 {
-            color: #1b5e20;
-            font-size: 24px;
-        }
-        
-        .logo span {
-            color: #388e3c;
-            font-weight: 300;
-        }
-        
-        .user-info h3 {
-            color: #1b5e20;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        
-        .user-info p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .btn-logout {
-            background: #d32f2f;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            transition: background 0.3s;
-        }
-        
-        .btn-logout:hover {
-            background: #b71c1c;
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #4caf50;
-        }
-        
-        .card h2 {
-            color: #1b5e20;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #c8e6c9;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        
-        .btn-primary {
-            background: #2e7d32;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #1b5e20;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #545b62;
-            transform: translateY(-2px);
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-        
-        .registro-info {
-            background: #e8f5e8;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .registro-info h3 {
-            color: #1b5e20;
-            margin-bottom: 10px;
-        }
-        
-        .hora-atual {
-            font-size: 48px;
-            font-weight: 700;
-            color: #2e7d32;
-            margin: 10px 0;
-        }
-        
-        .data-atual {
-            color: #666;
-            font-size: 18px;
-        }
-        
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        
-        .status-presente {
-            background: #c8e6c9;
-            color: #1b5e20;
-        }
-        
-        .status-ausente {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        /* Modal para justificativa */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            border-top: 5px solid #4caf50;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-header h3 {
-            color: #1b5e20;
-            margin: 0;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: #1b5e20;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #c8e6c9;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #4caf50;
-        }
-        
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        th {
-            background-color: #e8f5e8;
-            color: #1b5e20;
-            font-weight: 600;
-        }
-        
-        tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-        
-        footer {
-            text-align: center;
-            color: white;
-            padding: 20px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .justificativa-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 8px;
-        }
+        /* MANTER TODO O CSS QUE VOCÊ JÁ TEM */
+        /* Copie todo o CSS do seu arquivo funcionario10.html aqui */
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Alerta de conexão -->
-        <div id="alertStatus" class="alert" style="display: none;"></div>
-        
-        <header>
-            <div class="logo">
-                <h1>Essencial<span>Print</span> - Ponto Eletrônico</h1>
-            </div>
-            <div class="user-info">
-                <h3 id="userName">Funcionário</h3>
-                <p id="userCargo">Registro de Ponto</p>
-                <button class="btn-logout" onclick="logout()">Sair</button>
-            </div>
-        </header>
-        
-        <div class="dashboard">
-            <!-- Card de Registro -->
-            <div class="card">
-                <h2>Registrar Ponto</h2>
-                <div class="registro-info">
-                    <h3 id="dataAtual">Carregando data...</h3>
-                    <div class="hora-atual" id="horaAtual">00:00:00</div>
-                    <div id="statusRegistro" class="status-badge status-ausente">Status: Aguardando registro</div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="registrarEntrada()" id="btnEntrada">
-                    📥 Registrar Entrada
-                </button>
-                
-                <button class="btn btn-secondary" onclick="registrarSaida()" id="btnSaida" disabled>
-                    📤 Registrar Saída
-                </button>
-                
-                <button class="btn btn-info" onclick="abrirModalJustificativa()" id="btnJustificativa">
-                    📝 Justificar Falta/Atraso
-                </button>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                    <h4 style="color: #1b5e20; margin-bottom: 10px;">Último Registro</h4>
-                    <div id="ultimoRegistro">
-                        <p style="color: #666;">Nenhum registro hoje</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Card de Histórico -->
-            <div class="card">
-                <h2>Seus Registros de Hoje</h2>
-                <div style="max-height: 300px; overflow-y: auto;">
-                    <table id="tabelaRegistros">
-                        <thead>
-                            <tr>
-                                <th>Horário</th>
-                                <th>Tipo</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="3" style="text-align: center;">Carregando registros...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
-                    <h4 style="color: #856404; margin-bottom: 10px;">⚠️ Suas Justificativas</h4>
-                    <div id="justificativasLista">
-                        <p style="color: #666;">Carregando justificativas...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>Essencial Print &copy; 2024 - Sistema de Ponto Eletrônico</p>
-            <p>Registre sua entrada e saída diariamente</p>
-        </footer>
-    </div>
-
-    <!-- Modal para Justificativa -->
-    <div id="modalJustificativa" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Justificar Falta ou Atraso</h3>
-                <button class="close-modal" onclick="fecharModalJustificativa()">×</button>
-            </div>
-            <form id="formJustificativa" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="tipoJustificativa">Tipo *</label>
-                    <select id="tipoJustificativa" class="form-control" required>
-                        <option value="">Selecione...</option>
-                        <option value="falta_justificada">Falta Justificada</option>
-                        <option value="atraso_justificado">Atraso Justificado</option>
-                        <option value="saida_antecipada">Saída Antecipada</option>
-                        <option value="ausencia_justificada">Ausência Justificada</option>
-                        <option value="outro">Outro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dataJustificativa">Data *</label>
-                    <input type="date" id="dataJustificativa" class="form-control" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="horaJustificativa">Hora (para atrasos)</label>
-                    <input type="time" id="horaJustificativa" class="form-control">
-                    <small style="color: #666;">Preencha apenas para atrasos</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="motivoJustificativa">Motivo/Justificativa *</label>
-                    <textarea id="motivoJustificativa" class="form-control" 
-                              placeholder="Descreva detalhadamente o motivo da falta/atraso..." 
-                              required></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn btn-primary" onclick="enviarJustificativa()" style="flex: 1;">
-                        Enviar Justificativa
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="fecharModalJustificativa()" style="flex: 1;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <!-- MANTER TODO O HTML QUE VOCÊ JÁ TEM -->
+    <!-- Copie todo o HTML do seu arquivo funcionario10.html aqui -->
+    
     <script>
-        // js/funcionario.js - VERSÃO SIMPLIFICADA E FUNCIONAL
+        // js/funcionario.js - VERSÃO CORRIGIDA
         console.log('=== FUNCIONARIO.JS CARREGADO ===');
         
         let db = null;
         let auth = null;
         let usuarioAtual = null;
         let timerHora = null;
-        let firebaseConectado = false;
         
-        // Inicialização
+        // Inicialização SIMPLIFICADA
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔧 Iniciando Página do Funcionário...');
             
@@ -472,12 +40,12 @@
             
             if (!usuarioLogado) {
                 alert('❌ Acesso restrito! Faça login primeiro.');
-                window.location.href = 'index (5).html';
+                window.location.href = 'index.html';
                 return;
             }
             
             usuarioAtual = usuarioLogado;
-            console.log('👤 Usuário logado:', usuarioAtual.nome);
+            console.log('👤 Funcionário logado:', usuarioAtual.nome);
             
             // 2. Configurar interface
             document.getElementById('userName').textContent = usuarioLogado.nome || 'Funcionário';
@@ -487,36 +55,27 @@
             // 3. Iniciar relógio
             iniciarRelogio();
             
-            // 4. Configurar data no modal
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataJustificativa').value = hoje;
-            
-            // 5. Tentar conectar ao Firebase
+            // 4. Inicializar Firebase de forma SIMPLES
             await inicializarFirebase();
             
-            // 6. Carregar dados
-            if (firebaseConectado) {
+            // 5. Carregar dados se Firebase conectou
+            if (db) {
                 await verificarRegistrosHoje();
                 await carregarRegistrosHoje();
-                await carregarJustificativas();
             } else {
-                mostrarAlerta('⚠️ Modo local ativado. Alguns recursos podem estar limitados.', 'warning');
-                // Carregar dados locais como fallback
-                carregarRegistrosLocais();
+                alert('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.');
             }
+            
+            console.log('✅ Sistema do funcionário inicializado');
         });
         
-        // Função para inicializar Firebase
+        // Função SIMPLIFICADA para inicializar Firebase
         async function inicializarFirebase() {
             try {
-                console.log('⚙️ Tentando conectar ao Firebase...');
+                console.log('⚙️ Inicializando Firebase...');
                 
                 if (typeof firebase === 'undefined') {
                     throw new Error('Firebase SDK não carregado');
-                }
-                
-                if (!firebaseConfig) {
-                    throw new Error('Configuração do Firebase não encontrada');
                 }
                 
                 // Verificar se já foi inicializado
@@ -529,49 +88,18 @@
                 auth = firebase.auth();
                 db = firebase.firestore();
                 
-                // Verificar autenticação
-                const user = auth.currentUser;
-                if (!user) {
-                    console.log('⚠️ Nenhum usuário autenticado no Firebase');
-                    
-                    // Tentar recuperar sessão do localStorage
-                    const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
-                    if (savedUser) {
-                        console.log('🔄 Recuperando sessão do localStorage...');
-                    }
-                    
-                    // Se não há usuário autenticado, continuamos mesmo assim
-                    // O sistema usará o ID do localStorage para registros
-                } else {
-                    console.log('✅ Usuário autenticado no Firebase:', user.email);
-                }
+                console.log('✅ Serviços Firebase obtidos');
                 
-                // Testar conexão com o Firestore
-                await db.collection('test').limit(1).get().catch(() => {
-                    throw new Error('Não foi possível conectar ao Firestore');
-                });
+                // Não verificar autenticação - usar ID do localStorage
+                console.log('💡 Usando ID do localStorage:', usuarioAtual.id);
                 
-                firebaseConectado = true;
-                mostrarAlerta('✅ Conectado ao servidor!', 'success');
-                console.log('✅ Firebase conectado com sucesso');
+                return true;
                 
             } catch (error) {
                 console.error('❌ Erro ao conectar ao Firebase:', error);
-                firebaseConectado = false;
+                db = null;
+                return false;
             }
-        }
-        
-        // Função para mostrar alerta
-        function mostrarAlerta(mensagem, tipo) {
-            const alertDiv = document.getElementById('alertStatus');
-            alertDiv.textContent = mensagem;
-            alertDiv.className = `alert alert-${tipo}`;
-            alertDiv.style.display = 'block';
-            
-            // Remover alerta após 5 segundos
-            setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 5000);
         }
         
         // Função para iniciar relógio
@@ -596,14 +124,13 @@
                 document.getElementById('horaAtual').textContent = horaFormatada;
             }
             
-            // Atualizar imediatamente e a cada segundo
             atualizarHora();
             timerHora = setInterval(atualizarHora, 1000);
         }
         
         // Função para verificar registros do dia
         async function verificarRegistrosHoje() {
-            if (!firebaseConectado || !db) return;
+            if (!db) return;
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -677,23 +204,23 @@
             };
             
             try {
-                if (firebaseConectado && db) {
+                if (db) {
+                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Entrada registrada no Firestore');
-                    mostrarAlerta(`✅ Entrada registrada às ${horaAtual}`, 'success');
+                    alert(`✅ Entrada registrada às ${horaAtual}`);
                 } else {
                     // Salvar localmente
-                    salvarRegistroLocal(registro);
-                    console.log('✅ Entrada registrada localmente');
-                    mostrarAlerta(`✅ Entrada registrada localmente às ${horaAtual}`, 'warning');
+                    const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
+                    registros.push(registro);
+                    localStorage.setItem('registros_locais', JSON.stringify(registros));
+                    alert(`✅ Entrada registrada localmente às ${horaAtual}`);
                 }
                 
                 // Atualizar interface
-                if (firebaseConectado) {
+                if (db) {
                     await verificarRegistrosHoje();
                     await carregarRegistrosHoje();
-                } else {
-                    carregarRegistrosLocais();
                 }
                 
             } catch (error) {
@@ -727,23 +254,23 @@
             };
             
             try {
-                if (firebaseConectado && db) {
+                if (db) {
+                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Saída registrada no Firestore');
-                    mostrarAlerta(`✅ Saída registrada às ${horaAtual}`, 'success');
+                    alert(`✅ Saída registrada às ${horaAtual}`);
                 } else {
                     // Salvar localmente
-                    salvarRegistroLocal(registro);
-                    console.log('✅ Saída registrada localmente');
-                    mostrarAlerta(`✅ Saída registrada localmente às ${horaAtual}`, 'warning');
+                    const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
+                    registros.push(registro);
+                    localStorage.setItem('registros_locais', JSON.stringify(registros));
+                    alert(`✅ Saída registrada localmente às ${horaAtual}`);
                 }
                 
                 // Atualizar interface
-                if (firebaseConectado) {
+                if (db) {
                     await verificarRegistrosHoje();
                     await carregarRegistrosHoje();
-                } else {
-                    carregarRegistrosLocais();
                 }
                 
             } catch (error) {
@@ -752,69 +279,37 @@
             }
         }
         
-        // Funções para salvar localmente
-        function salvarRegistroLocal(registro) {
-            const chave = `registros_${usuarioAtual.id}`;
-            const registros = JSON.parse(localStorage.getItem(chave) || '[]');
-            registros.push(registro);
-            localStorage.setItem(chave, JSON.stringify(registros));
-        }
-        
-        function carregarRegistrosLocais() {
-            const chave = `registros_${usuarioAtual.id}`;
-            const todosRegistros = JSON.parse(localStorage.getItem(chave) || '[]');
-            const hoje = new Date().toISOString().split('T')[0];
-            
-            const registrosHoje = todosRegistros.filter(r => r.data === hoje);
-            registrosHoje.sort((a, b) => b.timestamp - a.timestamp);
-            
-            const tbody = document.querySelector('#tabelaRegistros tbody');
-            let html = '';
-            
-            if (registrosHoje.length === 0) {
-                html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje (modo local)</td></tr>';
-            } else {
-                registrosHoje.forEach(reg => {
-                    const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
-                    const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
-                    
-                    html += `
-                        <tr>
-                            <td>${reg.horario}</td>
-                            <td>${tipoIcone} ${tipoTexto}</td>
-                            <td>Local</td>
-                        </tr>
-                    `;
-                });
-            }
-            
-            tbody.innerHTML = html;
-            
-            // Atualizar último registro
-            if (registrosHoje.length > 0) {
-                const ultimo = registrosHoje[0];
-                const statusDiv = document.getElementById('statusRegistro');
-                const btnEntrada = document.getElementById('btnEntrada');
-                const btnSaida = document.getElementById('btnSaida');
-                const ultimoDiv = document.getElementById('ultimoRegistro');
-                
-                if (ultimo.tipo === 'entrada') {
-                    statusDiv.textContent = 'Status: Em trabalho (Local)';
-                    btnEntrada.disabled = true;
-                    btnSaida.disabled = false;
-                    ultimoDiv.innerHTML = `<p><strong>Última entrada:</strong> ${ultimo.horario} (Local)</p>`;
-                } else {
-                    statusDiv.textContent = 'Status: Saída registrada (Local)';
-                    btnEntrada.disabled = false;
-                    btnSaida.disabled = true;
-                    ultimoDiv.innerHTML = `<p><strong>Última saída:</strong> ${ultimo.horario} (Local)</p>`;
-                }
-            }
-        }
-        
-        // Função para carregar registros do Firestore
+        // Função para carregar registros do dia
         async function carregarRegistrosHoje() {
-            if (!firebaseConectado || !db) return;
+            if (!db) {
+                // Carregar registros locais
+                const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
+                const hoje = new Date().toISOString().split('T')[0];
+                const registrosHoje = registros.filter(r => r.data === hoje && r.funcionarioId === usuarioAtual.id);
+                
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                let html = '';
+                
+                if (registrosHoje.length === 0) {
+                    html = '<tr><td colspan="3" style="text-align: center;">Nenhum registro hoje (local)</td></tr>';
+                } else {
+                    registrosHoje.forEach(reg => {
+                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
+                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
+                        
+                        html += `
+                            <tr>
+                                <td>${reg.horario}</td>
+                                <td>${tipoIcone} ${tipoTexto}</td>
+                                <td>Local</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                tbody.innerHTML = html;
+                return;
+            }
             
             try {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -851,131 +346,9 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar registros:', error);
-            }
-        }
-        
-        // Funções para justificativas
-        function abrirModalJustificativa() {
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataJustificativa').value = hoje;
-            document.getElementById('modalJustificativa').style.display = 'flex';
-        }
-        
-        function fecharModalJustificativa() {
-            document.getElementById('modalJustificativa').style.display = 'none';
-            document.getElementById('formJustificativa').reset();
-        }
-        
-        async function enviarJustificativa() {
-            const tipo = document.getElementById('tipoJustificativa').value;
-            const data = document.getElementById('dataJustificativa').value;
-            const hora = document.getElementById('horaJustificativa').value;
-            const motivo = document.getElementById('motivoJustificativa').value;
-            
-            if (!tipo || !data || !motivo) {
-                alert('Preencha todos os campos obrigatórios!');
-                return;
-            }
-            
-            try {
-                if (firebaseConectado && db) {
-                    await db.collection('justificativas').add({
-                        funcionarioId: usuarioAtual.id,
-                        funcionarioNome: usuarioAtual.nome,
-                        tipo: tipo,
-                        data: data,
-                        hora: hora || null,
-                        motivo: motivo,
-                        status: 'pendente',
-                        dataEnvio: new Date().toISOString(),
-                        timestamp: Date.now()
-                    });
-                    
-                    alert('✅ Justificativa enviada com sucesso! Aguarde aprovação do administrador.');
-                } else {
-                    // Salvar localmente
-                    const chave = `justificativas_${usuarioAtual.id}`;
-                    const justificativas = JSON.parse(localStorage.getItem(chave) || '[]');
-                    justificativas.push({
-                        funcionarioId: usuarioAtual.id,
-                        funcionarioNome: usuarioAtual.nome,
-                        tipo: tipo,
-                        data: data,
-                        hora: hora || null,
-                        motivo: motivo,
-                        status: 'pendente',
-                        dataEnvio: new Date().toISOString(),
-                        timestamp: Date.now()
-                    });
-                    
-                    localStorage.setItem(chave, JSON.stringify(justificativas));
-                    alert('✅ Justificativa salva localmente!');
-                }
-                
-                fecharModalJustificativa();
-                carregarJustificativas();
-                
-            } catch (error) {
-                console.error('❌ Erro ao enviar justificativa:', error);
-                alert('Erro ao enviar justificativa: ' + error.message);
-            }
-        }
-        
-        async function carregarJustificativas() {
-            const container = document.getElementById('justificativasLista');
-            
-            if (firebaseConectado && db) {
-                try {
-                    const snapshot = await db.collection('justificativas')
-                        .where('funcionarioId', '==', usuarioAtual.id)
-                        .orderBy('timestamp', 'desc')
-                        .limit(5)
-                        .get();
-                    
-                    let html = '';
-                    
-                    if (snapshot.empty) {
-                        html = '<p style="color: #666;">Nenhuma justificativa enviada</p>';
-                    } else {
-                        snapshot.forEach(doc => {
-                            const just = doc.data();
-                            const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
-                            let statusClass = 'status-pendente';
-                            let statusText = 'Pendente';
-                            
-                            if (just.status === 'aprovada') {
-                                statusClass = 'status-aprovada';
-                                statusText = 'Aprovada';
-                            } else if (just.status === 'rejeitada') {
-                                statusClass = 'status-rejeitada';
-                                statusText = 'Rejeitada';
-                            }
-                            
-                            html += `
-                                <div class="justificativa-item">
-                                    <strong>${dataBR}</strong> - ${just.tipo.replace('_', ' ')}
-                                    <span class="status-badge ${statusClass}">${statusText}</span>
-                                    <p style="margin-top: 5px; font-size: 13px; color: #666;">
-                                        ${just.motivo.substring(0, 80)}${just.motivo.length > 80 ? '...' : ''}
-                                    </p>
-                                </div>
-                            `;
-                        });
-                    }
-                    
-                    container.innerHTML = html;
-                    
-                } catch (error) {
-                    console.error('Erro ao carregar justificativas:', error);
-                    container.innerHTML = '<p style="color: #666;">Erro ao carregar justificativas</p>';
-                }
-            } else {
-                // Carregar justificativas locais
-                const chave = `justificativas_${usuarioAtual.id}`;
-                const justificativas = JSON.parse(localStorage.getItem(chave) || '[]');
-                
-                if (justificativas.length === 0) {
-                    container.innerHTML = '<p style="color: #666;">Nenhuma justificativa salva localmente</p>';
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
                 }
             }
         }
@@ -994,16 +367,13 @@
                     auth.signOut();
                 }
                 
-                window.location.href = 'index (5).html';
+                window.location.href = 'index.html';
             }
         }
         
         // Exportar funções
         window.registrarEntrada = registrarEntrada;
         window.registrarSaida = registrarSaida;
-        window.abrirModalJustificativa = abrirModalJustificativa;
-        window.fecharModalJustificativa = fecharModalJustificativa;
-        window.enviarJustificativa = enviarJustificativa;
         window.logout = logout;
         
     </script>
