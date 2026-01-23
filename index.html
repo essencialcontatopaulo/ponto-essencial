@@ -199,9 +199,9 @@
                         
                         // Redirecionar automaticamente
                         if (usuario.tipo === 'gestor') {
-                            window.location.href = 'gestor.html';
+                            window.location.href = 'gestor (3).html';
                         } else {
-                            window.location.href = 'funcionario.html';
+                            window.location.href = 'funcionario10.html';
                         }
                     }
                 }
@@ -283,7 +283,7 @@
             }
         }
         
-        // Função de login
+        // Função de login (SIMPLIFICADA - sem verificação extra)
         async function fazerLogin() {
             const email = document.getElementById('email').value.trim().toLowerCase();
             const senha = document.getElementById('senha').value;
@@ -314,27 +314,50 @@
                 
                 console.log('✅ Auth OK. User ID:', userId);
                 
-                // 2. Buscar dados do usuário no Firestore
-                const userDoc = await db.collection('usuarios').doc(userId).get();
-                
-                if (!userDoc.exists) {
-                    showError('Usuário não encontrado no sistema');
-                    await auth.signOut();
-                    return;
+                // 2. Tentar buscar dados no Firestore
+                let usuario = null;
+                try {
+                    const userDoc = await db.collection('usuarios').doc(userId).get();
+                    
+                    if (userDoc.exists) {
+                        usuario = userDoc.data();
+                        console.log('✅ Usuário encontrado no Firestore:', usuario.nome);
+                    } else {
+                        // Se não encontrou no Firestore, criar registro básico
+                        console.log('⚠️ Usuário não encontrado no Firestore. Criando registro...');
+                        
+                        await db.collection('usuarios').doc(userId).set({
+                            id: userId,
+                            nome: userCredential.user.displayName || email.split('@')[0],
+                            email: email,
+                            cargo: 'Funcionário',
+                            departamento: 'Não informado',
+                            tipo: 'funcionario',
+                            status: 'ativo',
+                            dataCriacao: new Date().toISOString()
+                        });
+                        
+                        usuario = {
+                            nome: email.split('@')[0],
+                            email: email,
+                            cargo: 'Funcionário',
+                            departamento: 'Não informado',
+                            tipo: 'funcionario'
+                        };
+                    }
+                } catch (firestoreError) {
+                    console.warn('⚠️ Erro ao acessar Firestore:', firestoreError);
+                    // Se não conseguir acessar Firestore, usar dados básicos
+                    usuario = {
+                        nome: email.split('@')[0],
+                        email: email,
+                        cargo: 'Funcionário',
+                        departamento: 'Não informado',
+                        tipo: 'funcionario'
+                    };
                 }
                 
-                const usuario = userDoc.data();
-                
-                // 3. Verificar se usuário está ativo
-                if (usuario.status !== 'ativo') {
-                    showError('Usuário inativo. Contate o administrador.');
-                    await auth.signOut();
-                    return;
-                }
-                
-                console.log('✅ Usuário encontrado no Firestore:', usuario.nome);
-                
-                // 4. Salvar no localStorage
+                // 3. Salvar no localStorage
                 localStorage.setItem('usuario_logado', JSON.stringify({
                     id: userId,
                     nome: usuario.nome,
@@ -350,11 +373,11 @@
                     timestamp: Date.now()
                 }));
                 
-                // 5. Redirecionar conforme tipo
+                // 4. Redirecionar conforme tipo
                 if (usuario.tipo === 'gestor') {
-                    window.location.href = 'gestor.html';
+                    window.location.href = 'gestor (3).html';
                 } else {
-                    window.location.href = 'funcionario.html';
+                    window.location.href = 'funcionario10.html';
                 }
                 
             } catch (error) {
