@@ -1,5 +1,4 @@
 // js/firebase-config.js
-// CONFIGURAÇÃO SIMPLES E DIRETA
 const firebaseConfig = {
     apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
     authDomain: "essencial-print-5a753.firebaseapp.com",
