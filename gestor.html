@@ -13,7 +13,7 @@
     <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
     <script src="js/firebase-config.js"></script>
     
-    <!-- Script do Gestor (AGORA COM DEFER) -->
+    <!-- Script do Gestor -->
     <script src="js/gestor.js" defer></script>
     
     <style>
@@ -155,6 +155,16 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #f57c00;
+            transform: translateY(-2px);
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -259,6 +269,21 @@
         .status-inativo {
             background: #e9ecef;
             color: #495057;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-aprovado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejeitado {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         /* Modal */
@@ -392,6 +417,36 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Justificativas */
+        .justificativa-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .justificativa-aprovada {
+            border-left-color: #4caf50;
+        }
+
+        .justificativa-rejeitada {
+            border-left-color: #f44336;
+        }
+
+        .justificativa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .justificativa-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -552,6 +607,18 @@
                 <div id="relatorioAjustesContent">
                     <p style="color: #666;">Selecione um período para ver os ajustes</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- JUSTIFICATIVAS PENDENTES -->
+        <div class="card" style="margin-bottom: 25px;">
+            <h2>Justificativas Pendentes 
+                <button class="btn btn-warning" onclick="carregarJustificativasPendentes()" title="Atualizar">
+                    Atualizar
+                </button>
+            </h2>
+            <div id="justificativasContainer">
+                <p style="color: #666;">Carregando justificativas pendentes...</p>
             </div>
         </div>
 
@@ -794,30 +861,30 @@
         </div>
     </div>
 
-    <!-- INICIALIZAÇÃO DO SISTEMA - SCRIPT EMBUTIDO -->
+    <!-- SCRIPT DE INTERFACE -->
     <script>
-        // ============ FUNÇÕES BÁSICAS DA INTERFACE ============
+        // Funções básicas de interface
         function openModal(modalName) {
-            const modalId = `modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`;
-            const modalElement = document.getElementById(modalId);
+            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
             if (modalElement) {
                 modalElement.style.display = 'flex';
             }
         }
 
         function closeModal(modalName) {
-            const modalId = `modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`;
-            const modalElement = document.getElementById(modalId);
+            const modalElement = document.getElementById(`modal${modalName.charAt(0).toUpperCase() + modalName.slice(1)}`);
             if (modalElement) {
                 modalElement.style.display = 'none';
                 
                 if (modalName === 'novoFuncionario') {
                     document.getElementById('formNovoFuncionario').reset();
-                    document.getElementById('dataAdmissao').value = new Date().toISOString().split('T')[0];
+                    const hoje = new Date().toISOString().split('T')[0];
+                    document.getElementById('dataAdmissao').value = hoje;
                 }
                 if (modalName === 'ajusteHoras') {
                     document.getElementById('formAjusteHoras').reset();
-                    document.getElementById('dataAjuste').value = new Date().toISOString().split('T')[0];
+                    const hoje = new Date().toISOString().split('T')[0];
+                    document.getElementById('dataAjuste').value = hoje;
                     document.getElementById('totalHorasAjuste').value = '';
                     document.getElementById('horariosExistentes').innerHTML = 
                         '<p style="color: #666;">Selecione um funcionário e data para ver os horários</p>';
@@ -826,7 +893,6 @@
         }
 
         function openTab(tabName) {
-            // Remove active de todas as tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -834,15 +900,12 @@
                 btn.classList.remove('active');
             });
             
-            // Ativa a tab clicada
             const tabElement = document.getElementById(tabName);
-            const clickedBtn = event.target;
-            
             if (tabElement) {
                 tabElement.classList.add('active');
             }
-            if (clickedBtn) {
-                clickedBtn.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
             }
         }
 
@@ -860,15 +923,12 @@
             const [h1, m1] = entrada.split(':').map(Number);
             const [h2, m2] = saida.split(':').map(Number);
             
-            // Criar objetos Date para o mesmo dia
             const entradaDate = new Date(0, 0, 0, h1, m1);
             const saidaDate = new Date(0, 0, 0, h2, m2);
             
-            // Calcular diferença em milissegundos
             const diffMs = saidaDate - entradaDate;
-            
-            // Converter para horas e minutos
             const diffMinutes = Math.floor(diffMs / 60000);
+            
             const horas = Math.floor(diffMinutes / 60);
             const minutos = diffMinutes % 60;
             
@@ -890,35 +950,32 @@
         function logout() {
             if (confirm('Deseja realmente sair?')) {
                 localStorage.removeItem('usuario_logado');
-                localStorage.removeItem('funcionario_logado');
+                localStorage.removeItem('firebase_user');
                 window.location.href = 'index.html';
             }
         }
         
-        // ============ INICIALIZAÇÃO DA PÁGINA ============
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar datas padrão
             const hoje = new Date().toISOString().split('T')[0];
             const mesAtual = new Date().toISOString().slice(0, 7);
             
-            // Data de admissão padrão: hoje
+            // Configurar datas
             if (document.getElementById('dataAdmissao')) {
                 document.getElementById('dataAdmissao').value = hoje;
             }
             
-            // Data de ajuste padrão: hoje
             if (document.getElementById('dataAjuste')) {
                 document.getElementById('dataAjuste').value = hoje;
             }
             
-            // Configurar relatórios para o mês atual
             if (document.getElementById('mesRelatorio')) {
                 document.getElementById('mesRelatorio').value = mesAtual;
                 document.getElementById('periodoRelatorio').value = mesAtual;
                 document.getElementById('periodoAjustes').value = mesAtual;
             }
             
-            // Adicionar listeners para cálculo automático de horas
+            // Event listeners para cálculo de horas
             const entradaInput = document.getElementById('horaEntradaAjuste');
             const saidaInput = document.getElementById('horaSaidaAjuste');
             
@@ -926,8 +983,6 @@
                 entradaInput.addEventListener('change', calcularHoras);
                 saidaInput.addEventListener('change', calcularHoras);
             }
-            
-            console.log('✅ Interface do gestor inicializada');
         });
     </script>
 </body>
