@@ -102,6 +102,28 @@
             cursor: pointer;
             text-decoration: underline;
         }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2e7d32;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -122,7 +144,11 @@
                 <input type="password" id="senha" class="form-control" placeholder="Sua senha" required>
             </div>
             
-            <button type="submit" class="btn-login" onclick="fazerLogin()">Entrar</button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div> Processando...
+            </div>
+            
+            <button type="submit" class="btn-login" onclick="fazerLogin()" id="btnLogin">Entrar</button>
         </form>
         
         <div class="create-admin">
@@ -138,10 +164,51 @@
             try {
                 firebase.initializeApp(firebaseConfig);
                 console.log('✅ Firebase inicializado para login');
+                
+                // Verificar se já está logado
+                verificarSessaoAtiva();
             } catch (error) {
                 console.error('Erro ao inicializar Firebase:', error);
             }
         });
+        
+        // Verificar sessão ativa
+        async function verificarSessaoAtiva() {
+            try {
+                const auth = firebase.auth();
+                const user = auth.currentUser;
+                
+                if (user) {
+                    console.log('👤 Usuário já autenticado:', user.email);
+                    
+                    // Verificar tipo de usuário
+                    const db = firebase.firestore();
+                    const userDoc = await db.collection('usuarios').doc(user.uid).get();
+                    
+                    if (userDoc.exists) {
+                        const usuario = userDoc.data();
+                        
+                        localStorage.setItem('usuario_logado', JSON.stringify({
+                            id: user.uid,
+                            nome: usuario.nome,
+                            email: usuario.email,
+                            tipo: usuario.tipo,
+                            cargo: usuario.cargo,
+                            departamento: usuario.departamento
+                        }));
+                        
+                        // Redirecionar automaticamente
+                        if (usuario.tipo === 'gestor') {
+                            window.location.href = 'gestor.html';
+                        } else {
+                            window.location.href = 'funcionario.html';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Nenhuma sessão ativa ou erro:', error);
+            }
+        }
         
         // Função para criar administrador padrão
         async function criarAdminPadrao() {
@@ -153,10 +220,13 @@
                 return;
             }
             
-            const btn = document.querySelector('.btn-login');
+            const btn = document.getElementById('btnLogin');
+            const loading = document.getElementById('loading');
             const originalText = btn.textContent;
-            btn.textContent = 'Criando admin...';
+            
+            btn.textContent = 'Criando...';
             btn.disabled = true;
+            loading.style.display = 'block';
             
             try {
                 const auth = firebase.auth();
@@ -188,7 +258,7 @@
                 
                 console.log('✅ Usuário salvo no Firestore');
                 
-                // 4. Preencher formulário e fazer login automático
+                // 4. Preencher formulário
                 document.getElementById('email').value = email;
                 document.getElementById('senha').value = senha;
                 
@@ -209,6 +279,7 @@
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
         
@@ -223,10 +294,13 @@
             }
             
             // Botão loading
-            const btn = document.querySelector('.btn-login');
+            const btn = document.getElementById('btnLogin');
+            const loading = document.getElementById('loading');
             const originalText = btn.textContent;
+            
             btn.textContent = 'Entrando...';
             btn.disabled = true;
+            loading.style.display = 'block';
             
             try {
                 const auth = firebase.auth();
@@ -272,7 +346,8 @@
                 
                 localStorage.setItem('firebase_user', JSON.stringify({
                     uid: userId,
-                    email: usuario.email
+                    email: usuario.email,
+                    timestamp: Date.now()
                 }));
                 
                 // 5. Redirecionar conforme tipo
@@ -286,16 +361,18 @@
                 console.error('❌ Erro no login:', error.code, error.message);
                 
                 // Tratamento de erros específicos
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                if (error.code === 'auth/user-not-found' || 
+                    error.code === 'auth/wrong-password' ||
+                    error.code === 'auth/invalid-login-credentials') {
                     showError('Email ou senha incorretos');
-                } else if (error.code === 'auth/invalid-login-credentials') {
-                    showError('Credenciais inválidas. Verifique email e senha.');
                 } else if (error.code === 'auth/too-many-requests') {
                     showError('Muitas tentativas. Tente novamente mais tarde.');
                 } else if (error.code === 'auth/network-request-failed') {
                     showError('Erro de conexão. Verifique sua internet.');
                 } else if (error.code === 'auth/user-disabled') {
                     showError('Usuário desativado. Contate o administrador.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showError('Email inválido.');
                 } else {
                     showError('Erro: ' + error.message);
                 }
@@ -303,6 +380,7 @@
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
         
