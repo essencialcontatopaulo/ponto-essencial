@@ -90,6 +90,18 @@
             margin-top: 15px;
             display: none;
         }
+        
+        .create-admin {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .create-admin a {
+            color: #2e7d32;
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +125,10 @@
             <button type="submit" class="btn-login" onclick="fazerLogin()">Entrar</button>
         </form>
         
+        <div class="create-admin">
+            <p>Primeiro acesso? <a onclick="criarAdminPadrao()">Criar administrador</a></p>
+        </div>
+        
         <div id="errorMessage" class="error-message"></div>
     </div>
 
@@ -126,6 +142,75 @@
                 console.error('Erro ao inicializar Firebase:', error);
             }
         });
+        
+        // Função para criar administrador padrão
+        async function criarAdminPadrao() {
+            const email = 'admin@essencialprint.com';
+            const senha = 'Admin123';
+            const nome = 'Administrador Principal';
+            
+            if (!confirm(`Criar administrador padrão?\n\nEmail: ${email}\nSenha: ${senha}`)) {
+                return;
+            }
+            
+            const btn = document.querySelector('.btn-login');
+            const originalText = btn.textContent;
+            btn.textContent = 'Criando admin...';
+            btn.disabled = true;
+            
+            try {
+                const auth = firebase.auth();
+                const db = firebase.firestore();
+                
+                // 1. Criar no Firebase Auth
+                console.log('Criando usuário no Firebase Auth...');
+                const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                const userId = userCredential.user.uid;
+                
+                console.log('✅ Usuário criado no Auth. ID:', userId);
+                
+                // 2. Atualizar perfil
+                await userCredential.user.updateProfile({
+                    displayName: nome
+                });
+                
+                // 3. Salvar no Firestore
+                await db.collection('usuarios').doc(userId).set({
+                    id: userId,
+                    nome: nome,
+                    email: email,
+                    cargo: 'Gestor',
+                    departamento: 'Administração',
+                    tipo: 'gestor',
+                    status: 'ativo',
+                    dataCriacao: new Date().toISOString()
+                });
+                
+                console.log('✅ Usuário salvo no Firestore');
+                
+                // 4. Preencher formulário e fazer login automático
+                document.getElementById('email').value = email;
+                document.getElementById('senha').value = senha;
+                
+                alert(`✅ Administrador criado com sucesso!\n\nEmail: ${email}\nSenha: ${senha}\n\nClique em "Entrar" para acessar.`);
+                
+            } catch (error) {
+                console.error('❌ Erro ao criar admin:', error);
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('✅ Este administrador já existe!\n\nUse:\nEmail: admin@essencialprint.com\nSenha: Admin123');
+                    document.getElementById('email').value = email;
+                    document.getElementById('senha').value = senha;
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    alert('❌ Cadastro por email não está habilitado.\n\nVá no Firebase Console > Authentication > Sign-in method\nHabilite "Email/Password"');
+                } else {
+                    alert('Erro: ' + error.message);
+                }
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
         
         // Função de login
         async function fazerLogin() {
@@ -198,15 +283,19 @@
                 }
                 
             } catch (error) {
-                console.error('❌ Erro no login:', error);
+                console.error('❌ Erro no login:', error.code, error.message);
                 
                 // Tratamento de erros específicos
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                     showError('Email ou senha incorretos');
+                } else if (error.code === 'auth/invalid-login-credentials') {
+                    showError('Credenciais inválidas. Verifique email e senha.');
                 } else if (error.code === 'auth/too-many-requests') {
                     showError('Muitas tentativas. Tente novamente mais tarde.');
                 } else if (error.code === 'auth/network-request-failed') {
                     showError('Erro de conexão. Verifique sua internet.');
+                } else if (error.code === 'auth/user-disabled') {
+                    showError('Usuário desativado. Contate o administrador.');
                 } else {
                     showError('Erro: ' + error.message);
                 }
