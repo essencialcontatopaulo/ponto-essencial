@@ -313,6 +313,18 @@
             background: #d4edda;
             color: #155724;
         }
+        
+        .justificativa-rejeitada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .justificativa-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -361,18 +373,17 @@
             <!-- Card de Histórico -->
             <div class="card">
                 <h2>Seus Registros de Hoje</h2>
-                <div style="max-height: 400px; overflow-y: auto;">
+                <div style="max-height: 300px; overflow-y: auto;">
                     <table id="tabelaRegistros">
                         <thead>
                             <tr>
                                 <th>Horário</th>
                                 <th>Tipo</th>
                                 <th>Justificativa</th>
-                                <th>Localização</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="4" style="text-align: center;">Carregando registros...</td></tr>
+                            <tr><td colspan="3" style="text-align: center;">Carregando registros...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -430,12 +441,6 @@
                               required></textarea>
                 </div>
                 
-                <div class="form-group">
-                    <label for="anexoJustificativa">Anexar Comprovante (opcional)</label>
-                    <input type="file" id="anexoJustificativa" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                    <small style="color: #666;">Aceito: PDF, JPG, PNG (max 5MB)</small>
-                </div>
-                
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn btn-primary" onclick="enviarJustificativa()" style="flex: 1;">
                         Enviar Justificativa
@@ -449,7 +454,7 @@
     </div>
 
     <script>
-        // js/funcionario.js - Versão completa com justificativa
+        // js/funcionario.js - Versão CORRIGIDA (sem erro de sessão)
         console.log('=== FUNCIONARIO.JS CARREGADO ===');
         
         let db = null;
@@ -499,28 +504,37 @@
                 
                 console.log('✅ Serviços Firebase obtidos');
                 
-                // 4. Verificar autenticação
+                // 4. Verificar autenticação no Firebase
                 const user = auth.currentUser;
                 if (!user) {
                     console.log('⚠️ Nenhum usuário autenticado no Firebase');
                     
-                    // Tentar fazer login com email/senha do localStorage
-                    try {
-                        const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
-                        if (savedUser && savedUser.email) {
-                            console.log('🔄 Tentando login automático...');
-                            // Nota: Não podemos fazer login sem senha aqui
-                            // O usuário precisa fazer login manualmente
-                        }
-                    } catch (e) {
-                        console.error('Erro ao recuperar sessão:', e);
-                    }
+                    // Tentar recuperar sessão do localStorage
+                    const savedUser = JSON.parse(localStorage.getItem('firebase_user') || 'null');
                     
-                    alert('⚠️ Sessão expirada. Faça login novamente.');
-                    window.location.href = 'index.html';
-                    return;
+                    if (savedUser && savedUser.uid === usuarioAtual.id) {
+                        console.log('🔄 Recuperando sessão do localStorage...');
+                        
+                        // IMPORTANTE: Não podemos fazer login sem senha aqui
+                        // O sistema deve redirecionar para login se a sessão expirou
+                        alert('⚠️ Sessão expirada. Faça login novamente.');
+                        window.location.href = 'index.html';
+                        return;
+                    } else {
+                        alert('⚠️ Faça login para continuar.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
                 } else {
                     console.log('✅ Usuário autenticado no Firebase:', user.email);
+                    
+                    // Verificar se o usuário autenticado é o mesmo do localStorage
+                    if (user.uid !== usuarioAtual.id) {
+                        console.warn('⚠️ ID do Firebase diferente do localStorage:', user.uid, usuarioAtual.id);
+                        alert('⚠️ Dados inconsistentes. Faça login novamente.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
                 }
                 
                 // 5. Configurar data no modal de justificativa
@@ -722,200 +736,4 @@
         
         // Função para fechar modal
         function fecharModalJustificativa() {
-            document.getElementById('modalJustificativa').style.display = 'none';
-            document.getElementById('formJustificativa').reset();
-            document.getElementById('dataJustificativa').value = new Date().toISOString().split('T')[0];
-        }
-        
-        // Função para enviar justificativa
-        async function enviarJustificativa() {
-            const tipo = document.getElementById('tipoJustificativa').value;
-            const data = document.getElementById('dataJustificativa').value;
-            const hora = document.getElementById('horaJustificativa').value;
-            const motivo = document.getElementById('motivoJustificativa').value.trim();
-            
-            if (!tipo || !data || !motivo) {
-                alert('Preencha todos os campos obrigatórios!');
-                return;
-            }
-            
-            if (motivo.length < 10) {
-                alert('A justificativa deve ter pelo menos 10 caracteres');
-                return;
-            }
-            
-            try {
-                const justificativaId = 'just-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                
-                // Dados da justificativa
-                const justificativaData = {
-                    id: justificativaId,
-                    funcionarioId: usuarioAtual.id,
-                    funcionarioNome: usuarioAtual.nome,
-                    tipo: tipo,
-                    data: data,
-                    hora: hora || null,
-                    motivo: motivo,
-                    status: 'pendente',
-                    dataEnvio: new Date().toISOString()
-                };
-                
-                // Salvar no Firestore
-                await db.collection('justificativas').doc(justificativaId).set(justificativaData);
-                
-                console.log('✅ Justificativa enviada:', justificativaId);
-                
-                alert('✅ Justificativa enviada com sucesso!\n\nAguardando aprovação do gestor.');
-                
-                // Fechar modal e limpar formulário
-                fecharModalJustificativa();
-                
-                // Atualizar lista de justificativas
-                await carregarJustificativas();
-                
-            } catch (error) {
-                console.error('❌ Erro ao enviar justificativa:', error);
-                alert('Erro ao enviar justificativa: ' + error.message);
-            }
-        }
-        
-        // Função para carregar justificativas
-        async function carregarJustificativas() {
-            try {
-                const userId = usuarioAtual.id;
-                const hoje = new Date().toISOString().split('T')[0];
-                
-                // Buscar justificativas do usuário (últimos 30 dias)
-                const trintaDiasAtras = new Date();
-                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-                const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
-                
-                const snapshot = await db.collection('justificativas')
-                    .where('funcionarioId', '==', userId)
-                    .where('data', '>=', dataInicio)
-                    .orderBy('data', 'desc')
-                    .limit(10)
-                    .get();
-                
-                const listaDiv = document.getElementById('justificativasLista');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<p style="color: #666;">Nenhuma justificativa nos últimos 30 dias</p>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const just = doc.data();
-                        const dataBR = new Date(just.data).toLocaleDateString('pt-BR');
-                        const statusClass = just.status === 'aprovada' ? 'justificativa-aprovada' : 'justificativa-pendente';
-                        const statusText = just.status === 'aprovada' ? 'Aprovada' : 'Pendente';
-                        
-                        let tipoTexto = '';
-                        switch(just.tipo) {
-                            case 'falta_justificada': tipoTexto = 'Falta'; break;
-                            case 'atraso_justificado': tipoTexto = 'Atraso'; break;
-                            case 'saida_antecipada': tipoTexto = 'Saída Antecipada'; break;
-                            case 'ausencia_justificada': tipoTexto = 'Ausência'; break;
-                            default: tipoTexto = just.tipo;
-                        }
-                        
-                        html += `
-                            <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                                <p style="margin: 0; font-weight: 600;">${dataBR} - ${tipoTexto}</p>
-                                <p style="margin: 5px 0 0 0; color: #666; font-size: 13px;">${just.motivo.substring(0, 50)}${just.motivo.length > 50 ? '...' : ''}</p>
-                                <span class="justificativa-badge ${statusClass}">${statusText}</span>
-                            </div>
-                        `;
-                    });
-                }
-                
-                listaDiv.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro ao carregar justificativas:', error);
-                document.getElementById('justificativasLista').innerHTML = 
-                    '<p style="color: red;">Erro ao carregar justificativas</p>';
-            }
-        }
-        
-        // Função para carregar registros do dia
-        async function carregarRegistrosHoje() {
-            try {
-                const hoje = new Date().toISOString().split('T')[0];
-                const userId = usuarioAtual.id;
-                
-                const snapshot = await db.collection('pontos')
-                    .where('funcionarioId', '==', userId)
-                    .where('data', '==', hoje)
-                    .orderBy('timestamp', 'desc')
-                    .get();
-                
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                let html = '';
-                
-                if (snapshot.empty) {
-                    html = '<tr><td colspan="4" style="text-align: center;">Nenhum registro hoje</td></tr>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const reg = doc.data();
-                        const tipoTexto = reg.tipo === 'entrada' ? 'Entrada' : 'Saída';
-                        const tipoIcone = reg.tipo === 'entrada' ? '📥' : '📤';
-                        
-                        // Verificar se tem justificativa associada
-                        let justificativa = '--';
-                        if (reg.justificativaId) {
-                            justificativa = '<span class="justificativa-badge justificativa-aprovada">Justificado</span>';
-                        } else if (reg.observacao && reg.observacao.includes('Ajuste')) {
-                            justificativa = '<span class="justificativa-badge justificativa-aprovada">Ajustado</span>';
-                        }
-                        
-                        html += `
-                            <tr>
-                                <td>${reg.horario}</td>
-                                <td>${tipoIcone} ${tipoTexto}</td>
-                                <td>${justificativa}</td>
-                                <td>${reg.localizacao?.latitude ? '📍' : '--'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                tbody.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro ao carregar registros:', error);
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
-                }
-            }
-        }
-        
-        // Função de logout
-        function logout() {
-            if (confirm('Deseja realmente sair?')) {
-                localStorage.removeItem('usuario_logado');
-                localStorage.removeItem('firebase_user');
-                
-                if (auth) {
-                    auth.signOut();
-                }
-                
-                if (timerHora) {
-                    clearInterval(timerHora);
-                }
-                
-                window.location.href = 'index.html';
-            }
-        }
-        
-        // Exportar funções
-        window.registrarEntrada = registrarEntrada;
-        window.registrarSaida = registrarSaida;
-        window.abrirModalJustificativa = abrirModalJustificativa;
-        window.fecharModalJustificativa = fecharModalJustificativa;
-        window.enviarJustificativa = enviarJustificativa;
-        window.logout = logout;
-        
-    </script>
-</body>
-</html>
+            document.getElementById
