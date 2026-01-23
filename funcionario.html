@@ -10,28 +10,33 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase -->
-    <script src="js/firebase-config.js"></script>
-    
     <style>
-        /* MANTER TODO O CSS QUE VOCÊ JÁ TEM */
-        /* Copie todo o CSS do seu arquivo funcionario10.html aqui */
+        /* MANTER TODO O CSS DO SEU ARQUIVO FUNCIONARIO10.HTML */
+        /* Copie o CSS completo do seu arquivo atual */
     </style>
 </head>
 <body>
-    <!-- MANTER TODO O HTML QUE VOCÊ JÁ TEM -->
-    <!-- Copie todo o HTML do seu arquivo funcionario10.html aqui -->
+    <!-- MANTER TODO O HTML DO SEU ARQUIVO FUNCIONARIO10.HTML -->
+    <!-- Copie o HTML completo do seu arquivo atual -->
     
     <script>
-        // js/funcionario.js - VERSÃO CORRIGIDA
-        console.log('=== FUNCIONARIO.JS CARREGADO ===');
+        // ============ CONFIGURAÇÃO DO FIREBASE ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
+            authDomain: "essencial-print-5a753.firebaseapp.com",
+            projectId: "essencial-print-5a753",
+            storageBucket: "essencial-print-5a753.firebasestorage.app",
+            messagingSenderId: "544082416072",
+            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+        };
         
+        // ============ VARIÁVEIS GLOBAIS ============
         let db = null;
         let auth = null;
         let usuarioAtual = null;
         let timerHora = null;
         
-        // Inicialização SIMPLIFICADA
+        // ============ INICIALIZAÇÃO ============
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔧 Iniciando Página do Funcionário...');
             
@@ -40,7 +45,7 @@
             
             if (!usuarioLogado) {
                 alert('❌ Acesso restrito! Faça login primeiro.');
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
                 return;
             }
             
@@ -55,21 +60,19 @@
             // 3. Iniciar relógio
             iniciarRelogio();
             
-            // 4. Inicializar Firebase de forma SIMPLES
+            // 4. Inicializar Firebase
             await inicializarFirebase();
             
-            // 5. Carregar dados se Firebase conectou
+            // 5. Carregar dados
             if (db) {
                 await verificarRegistrosHoje();
                 await carregarRegistrosHoje();
-            } else {
-                alert('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.');
             }
             
             console.log('✅ Sistema do funcionário inicializado');
         });
         
-        // Função SIMPLIFICADA para inicializar Firebase
+        // ============ INICIALIZAR FIREBASE ============
         async function inicializarFirebase() {
             try {
                 console.log('⚙️ Inicializando Firebase...');
@@ -90,19 +93,17 @@
                 
                 console.log('✅ Serviços Firebase obtidos');
                 
-                // Não verificar autenticação - usar ID do localStorage
-                console.log('💡 Usando ID do localStorage:', usuarioAtual.id);
-                
                 return true;
                 
             } catch (error) {
                 console.error('❌ Erro ao conectar ao Firebase:', error);
                 db = null;
+                alert('⚠️ Modo local ativado. Registros serão salvos apenas neste navegador.');
                 return false;
             }
         }
         
-        // Função para iniciar relógio
+        // ============ FUNÇÕES DO SISTEMA ============
         function iniciarRelogio() {
             function atualizarHora() {
                 const agora = new Date();
@@ -128,7 +129,6 @@
             timerHora = setInterval(atualizarHora, 1000);
         }
         
-        // Função para verificar registros do dia
         async function verificarRegistrosHoje() {
             if (!db) return;
             
@@ -179,7 +179,6 @@
             }
         }
         
-        // Função para registrar entrada
         async function registrarEntrada() {
             if (!confirm('Deseja registrar sua ENTRADA agora?')) {
                 return;
@@ -205,10 +204,13 @@
             
             try {
                 if (db) {
-                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Entrada registrada no Firestore');
                     alert(`✅ Entrada registrada às ${horaAtual}`);
+                    
+                    // Atualizar interface
+                    await verificarRegistrosHoje();
+                    await carregarRegistrosHoje();
                 } else {
                     // Salvar localmente
                     const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
@@ -217,19 +219,12 @@
                     alert(`✅ Entrada registrada localmente às ${horaAtual}`);
                 }
                 
-                // Atualizar interface
-                if (db) {
-                    await verificarRegistrosHoje();
-                    await carregarRegistrosHoje();
-                }
-                
             } catch (error) {
                 console.error('❌ Erro ao registrar entrada:', error);
                 alert('Erro ao registrar entrada: ' + error.message);
             }
         }
         
-        // Função para registrar saída
         async function registrarSaida() {
             if (!confirm('Deseja registrar sua SAÍDA agora?')) {
                 return;
@@ -255,10 +250,13 @@
             
             try {
                 if (db) {
-                    // Salvar no Firestore
                     await db.collection('pontos').add(registro);
                     console.log('✅ Saída registrada no Firestore');
                     alert(`✅ Saída registrada às ${horaAtual}`);
+                    
+                    // Atualizar interface
+                    await verificarRegistrosHoje();
+                    await carregarRegistrosHoje();
                 } else {
                     // Salvar localmente
                     const registros = JSON.parse(localStorage.getItem('registros_locais') || '[]');
@@ -267,19 +265,12 @@
                     alert(`✅ Saída registrada localmente às ${horaAtual}`);
                 }
                 
-                // Atualizar interface
-                if (db) {
-                    await verificarRegistrosHoje();
-                    await carregarRegistrosHoje();
-                }
-                
             } catch (error) {
                 console.error('❌ Erro ao registrar saída:', error);
                 alert('Erro ao registrar saída: ' + error.message);
             }
         }
         
-        // Função para carregar registros do dia
         async function carregarRegistrosHoje() {
             if (!db) {
                 // Carregar registros locais
@@ -346,14 +337,9 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar registros:', error);
-                const tbody = document.querySelector('#tabelaRegistros tbody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar registros</td></tr>';
-                }
             }
         }
         
-        // Função de logout
         function logout() {
             if (confirm('Deseja realmente sair?')) {
                 localStorage.removeItem('usuario_logado');
@@ -367,15 +353,14 @@
                     auth.signOut();
                 }
                 
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
             }
         }
         
-        // Exportar funções
+        // ============ EXPORTAR FUNÇÕES ============
         window.registrarEntrada = registrarEntrada;
         window.registrarSaida = registrarSaida;
         window.logout = logout;
-        
     </script>
 </body>
 </html>
