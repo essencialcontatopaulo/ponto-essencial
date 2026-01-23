@@ -10,482 +10,188 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Configuração Firebase (APENAS ARQUIVO EXTERNO) -->
+    <!-- Configuração Firebase -->
     <script src="js/firebase-config.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         .login-container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 450px;
-            overflow: hidden;
-            border-top: 5px solid #4caf50;
-        }
-
-        .login-header {
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-            padding: 30px;
-            text-align: center;
-            color: white;
-        }
-
-        .login-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .login-header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .login-body {
+            border-radius: 15px;
             padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
-
+        
         .logo {
             text-align: center;
             margin-bottom: 30px;
         }
-
-        .logo h2 {
+        
+        .logo h1 {
             color: #1b5e20;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 28px;
         }
-
+        
         .logo span {
             color: #388e3c;
             font-weight: 300;
         }
-
+        
         .form-group {
             margin-bottom: 20px;
         }
-
+        
         .form-group label {
             display: block;
             color: #1b5e20;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 5px;
         }
-
+        
         .form-control {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #c8e6c9;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #4caf50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
+        
         .btn-login {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            padding: 14px;
+            background: #2e7d32;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-login:active {
-            transform: translateY(-1px);
-        }
-
-        .login-footer {
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid #e0e0e0;
-            margin-top: 30px;
-        }
-
-        .login-footer p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .test-credentials {
-            background: #e8f5e8;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 13px;
-            border-left: 4px solid #4caf50;
-        }
-
-        .test-credentials h4 {
-            color: #1b5e20;
-            margin-bottom: 10px;
-        }
-
-        .test-credentials button {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            margin: 5px;
-            cursor: pointer;
-            font-size: 12px;
             transition: background 0.3s;
         }
-
-        .test-credentials button:hover {
-            background: #388e3c;
+        
+        .btn-login:hover {
+            background: #1b5e20;
         }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .warning-box h4 {
-            margin-top: 0;
-            color: #856404;
-        }
-
-        @media (max-width: 480px) {
-            .login-body {
-                padding: 30px 20px;
-            }
-            
-            .login-header {
-                padding: 25px 20px;
-            }
+        
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <h1>Essencial Print</h1>
-            <p>Sistema de Controle de Ponto</p>
+        <div class="logo">
+            <h1>Essencial<span>Print</span></h1>
+            <p>Sistema de Ponto Eletrônico</p>
         </div>
         
-        <div class="login-body">
-            <div class="logo">
-                <h2>Área de <span>Acesso</span></h2>
+        <form id="loginForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
             </div>
             
-            <div class="error-message" id="errorMessage"></div>
-            
-            <!-- Aviso sobre configuração do Firebase -->
-            <div class="warning-box" id="firebaseWarning" style="display: none;">
-                <h4>⚠️ Configuração do Firebase Necessária</h4>
-                <p>O sistema precisa ser configurado para funcionar.</p>
-                <p>Por favor, configure o arquivo <strong>js/firebase-config.js</strong> com sua API Key do Firebase.</p>
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" class="form-control" placeholder="Sua senha" required>
             </div>
             
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" 
-                           id="email" 
-                           class="form-control" 
-                           placeholder="seu@email.com"
-                           required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <div class="password-container">
-                        <input type="password" 
-                               id="password" 
-                               class="form-control" 
-                               placeholder="••••••••"
-                               required>
-                        <button type="button" class="toggle-password" onclick="togglePassword()">
-                            👁️
-                        </button>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-login" id="btnLogin">
-                    Entrar no Sistema
-                </button>
-            </form>
-
-            <div class="test-credentials">
-                <h4>Credenciais de Teste</h4>
-                <button onclick="preencherCredenciais('gestor')">Acesso Gestor</button>
-                <button onclick="preencherCredenciais('funcionario')">Acesso Funcionário</button>
-            </div>
-            
-            <div class="login-footer">
-                <p>Em caso de problemas, entre em contato com o suporte técnico</p>
-                <p style="font-size: 12px; margin-top: 10px; color: #999;">
-                    Versão 1.0 | © 2024 Essencial Print
-                </p>
-            </div>
-        </div>
+            <button type="submit" class="btn-login" onclick="fazerLogin()">Entrar</button>
+        </form>
+        
+        <div id="errorMessage" class="error-message"></div>
     </div>
 
     <script>
-        // Configuração alternativa de fallback
-        const firebaseConfigFallback = {
-            apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-            authDomain: "essencial-print-5a753.firebaseapp.com",
-            projectId: "essencial-print-5a753",
-            storageBucket: "essencial-print-5a753.firebasestorage.app",
-            messagingSenderId: "544082416072",
-            appId: "1:544082416072:web:85d3c8549b25158284f0fd"
-        };
-
-        // Funções de interface
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = '🙈';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = '👁️';
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
-            
-            setTimeout(() => {
-                errorDiv.classList.remove('show');
-            }, 5000);
-        }
-
-        function showWarning(show) {
-            document.getElementById('firebaseWarning').style.display = show ? 'block' : 'none';
-        }
-
-        function preencherCredenciais(tipo) {
-            if (tipo === 'gestor') {
-                document.getElementById('email').value = 'gestor@essencialprint.com';
-                document.getElementById('password').value = 'Gestor123@';
-                showError('Credenciais de gestor preenchidas. Clique em "Entrar no Sistema".');
-            } else if (tipo === 'funcionario') {
-                document.getElementById('email').value = 'funcionario@essencialprint.com';
-                document.getElementById('password').value = 'Funcionario123@';
-                showError('Credenciais de funcionário preenchidas. Clique em "Entrar no Sistema".');
-            }
-        }
-
-        // Função para testar conexão com Firebase
-        async function testarConexaoFirebase() {
+        // Inicializar Firebase
+        document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('🔍 Testando conexão com Firebase...');
-                
-                if (typeof firebase === 'undefined') {
-                    showWarning(true);
-                    showError('Firebase SDK não carregado. Recarregue a página.');
-                    return false;
-                }
-                
-                // Tentar usar a configuração principal
-                let configUsada = window.firebaseConfig || firebaseConfigFallback;
-                
-                // Verificar se a API Key está configurada
-                if (!configUsada.apiKey || configUsada.apiKey.includes('SUA_NOVA_API_KEY_AQUI')) {
-                    console.warn('API Key não configurada, usando fallback');
-                    configUsada = firebaseConfigFallback;
-                }
-                
-                // Inicializar Firebase
-                let app;
-                if (!firebase.apps.length) {
-                    app = firebase.initializeApp(configUsada);
-                    console.log('✅ Firebase inicializado com configuração:', configUsada.projectId);
-                } else {
-                    app = firebase.apps[0];
-                    console.log('✅ Firebase já estava inicializado');
-                }
-                
-                // Testar conexão simples
-                const auth = firebase.auth();
-                await auth.signInAnonymously().catch(() => {});
-                await auth.signOut();
-                
-                console.log('✅ Conexão com Firebase OK');
-                showWarning(false);
-                return true;
-                
+                firebase.initializeApp(firebaseConfig);
+                console.log('✅ Firebase inicializado para login');
             } catch (error) {
-                console.error('❌ Erro na conexão Firebase:', error);
-                
-                // Se a API Key estiver inválida, mostrar aviso
-                if (error.code === 'auth/invalid-api-key' || error.code === 'auth/api-key-not-valid') {
-                    showWarning(true);
-                    showError('API Key do Firebase inválida. Configure uma nova no Firebase Console.');
-                } else {
-                    showError('Erro de conexão: ' + error.message);
-                }
-                
-                return false;
+                console.error('Erro ao inicializar Firebase:', error);
             }
-        }
-
-        // Função principal de login
-        async function login(event) {
-            event.preventDefault();
+        });
+        
+        // Função de login
+        async function fazerLogin() {
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const senha = document.getElementById('senha').value;
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                showError('Por favor, preencha todos os campos.');
+            if (!email || !senha) {
+                showError('Preencha email e senha');
                 return;
             }
             
-            const loginBtn = document.getElementById('btnLogin');
-            const originalText = loginBtn.innerHTML;
-            loginBtn.innerHTML = 'Entrando...';
-            loginBtn.disabled = true;
+            // Botão loading
+            const btn = document.querySelector('.btn-login');
+            const originalText = btn.textContent;
+            btn.textContent = 'Entrando...';
+            btn.disabled = true;
             
             try {
-                console.log(`🔐 Tentando login com: ${email}`);
-                
-                // Verificar Firebase
-                if (typeof firebase === 'undefined') {
-                    throw new Error('Firebase não carregado. Recarregue a página.');
-                }
-                
-                // Usar configuração disponível
-                let configUsada = window.firebaseConfig || firebaseConfigFallback;
-                
-                // Inicializar se necessário
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(configUsada);
-                }
-                
                 const auth = firebase.auth();
                 const db = firebase.firestore();
                 
-                // Autenticar
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
+                console.log('🔐 Tentando login com Firebase Auth...');
                 
-                console.log('✅ Usuário autenticado:', user.email);
+                // 1. Autenticar com Firebase Auth
+                const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+                const userId = userCredential.user.uid;
                 
-                // Buscar dados no Firestore
-                const userDoc = await db.collection('usuarios').doc(user.uid).get();
+                console.log('✅ Auth OK. User ID:', userId);
                 
-                let userData;
-                if (userDoc.exists) {
-                    userData = userDoc.data();
-                } else {
-                    // Se não existe no Firestore, criar automaticamente
-                    if (email === 'gestor@essencialprint.com') {
-                        userData = {
-                            nome: 'Administrador Gestor',
-                            email: email,
-                            tipo: 'gestor',
-                            cargo: 'Gestor',
-                            departamento: 'Administração',
-                            dataCriacao: new Date().toISOString(),
-                            status: 'ativo'
-                        };
-                        await db.collection('usuarios').doc(user.uid).set(userData);
-                    } else {
-                        userData = {
-                            nome: email.split('@')[0],
-                            email: email,
-                            tipo: 'funcionario',
-                            cargo: 'Funcionário',
-                            departamento: 'Não informado',
-                            dataCriacao: new Date().toISOString(),
-                            status: 'ativo'
-                        };
-                        await db.collection('usuarios').doc(user.uid).set(userData);
-                    }
+                // 2. Buscar dados do usuário no Firestore
+                const userDoc = await db.collection('usuarios').doc(userId).get();
+                
+                if (!userDoc.exists) {
+                    showError('Usuário não encontrado no sistema');
+                    await auth.signOut();
+                    return;
                 }
                 
-                // Salvar dados no localStorage
-                const userInfo = {
-                    id: user.uid,
-                    email: user.email,
-                    nome: userData.nome,
-                    cargo: userData.cargo,
-                    departamento: userData.departamento,
-                    tipo: userData.tipo,
-                    cpf: userData.cpf || ''
-                };
+                const usuario = userDoc.data();
                 
-                localStorage.setItem('usuario_logado', JSON.stringify(userInfo));
+                // 3. Verificar se usuário está ativo
+                if (usuario.status !== 'ativo') {
+                    showError('Usuário inativo. Contate o administrador.');
+                    await auth.signOut();
+                    return;
+                }
                 
-                // Redirecionar
-                if (userData.tipo === 'gestor') {
+                console.log('✅ Usuário encontrado no Firestore:', usuario.nome);
+                
+                // 4. Salvar no localStorage
+                localStorage.setItem('usuario_logado', JSON.stringify({
+                    id: userId,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    tipo: usuario.tipo,
+                    cargo: usuario.cargo,
+                    departamento: usuario.departamento
+                }));
+                
+                localStorage.setItem('firebase_user', JSON.stringify({
+                    uid: userId,
+                    email: usuario.email
+                }));
+                
+                // 5. Redirecionar conforme tipo
+                if (usuario.tipo === 'gestor') {
                     window.location.href = 'gestor.html';
                 } else {
                     window.location.href = 'funcionario.html';
@@ -495,58 +201,36 @@
                 console.error('❌ Erro no login:', error);
                 
                 // Tratamento de erros específicos
-                let errorMessage = 'Erro ao fazer login';
-                
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'Usuário não encontrado.';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Senha incorreta.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'E-mail inválido.';
-                } else if (error.code === 'auth/invalid-login-credentials') {
-                    errorMessage = 'Credenciais inválidas.';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    showError('Email ou senha incorretos');
+                } else if (error.code === 'auth/too-many-requests') {
+                    showError('Muitas tentativas. Tente novamente mais tarde.');
                 } else if (error.code === 'auth/network-request-failed') {
-                    errorMessage = 'Erro de conexão. Verifique sua internet.';
-                } else if (error.code === 'auth/api-key-not-valid' || error.code === 'auth/invalid-api-key') {
-                    errorMessage = 'API Key do Firebase inválida. Contate o administrador.';
-                    showWarning(true);
-                } else if (error.code === 'firestore/permission-denied') {
-                    errorMessage = 'Permissão negada no banco de dados. Configure as regras do Firestore.';
+                    showError('Erro de conexão. Verifique sua internet.');
                 } else {
-                    errorMessage = 'Erro ao fazer login: ' + error.message;
+                    showError('Erro: ' + error.message);
                 }
                 
-                showError(errorMessage);
-                loginBtn.innerHTML = originalText;
-                loginBtn.disabled = false;
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('📱 Página de login carregada');
-            
-            // Configurar evento do formulário
-            document.getElementById('loginForm').addEventListener('submit', login);
-            
-            // Verificar se já está logado
-            const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || 'null');
-            if (usuarioLogado) {
-                if (usuarioLogado.tipo === 'gestor') {
-                    window.location.href = 'gestor.html';
-                } else {
-                    window.location.href = 'funcionario.html';
-                }
-            }
-            
-            // Testar conexão com Firebase
-            await testarConexaoFirebase();
-            
-            // Preencher automaticamente para testes
+        
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
             setTimeout(() => {
-                console.log('🔍 Testando credenciais automaticamente...');
-                preencherCredenciais('gestor');
-            }, 1000);
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Permitir login com Enter
+        document.getElementById('senha').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fazerLogin();
+            }
         });
     </script>
 </body>
