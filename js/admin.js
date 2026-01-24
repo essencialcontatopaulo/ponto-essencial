@@ -1,13 +1,21 @@
 import { auth, db } from "./firebase-config.js";
 import { collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Registra ponto do admin
+// Jornada e cálculo de horas
+const jornada = {
+  segunda: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+  terca: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+  quarta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+  quinta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+  sexta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+  sabado: [{ entrada: "08:00", saida: "13:00" }],
+  domingo: []
+};
+
+// Registrar ponto admin
 window.registrar = async function(tipo) {
   navigator.geolocation.getCurrentPosition(async (pos) => {
-
-    // Calcular horas extras mesmo para admin
     const extras = calcularHorasExtras(tipo);
-
     await addDoc(collection(db, "pontos"), {
       uid: auth.currentUser.uid,
       tipo,
@@ -15,30 +23,19 @@ window.registrar = async function(tipo) {
       localizacao: { lat: pos.coords.latitude, lng: pos.coords.longitude },
       horasExtras: extras
     });
-
     alert(`Registro feito! Horas extras: ${extras}`);
+    carregarRelatorios();
   });
 };
 
-// Função de cálculo de horas (mesma lógica do funcionário)
+// Função de cálculo de horas extras
 function calcularHorasExtras(tipo) {
-  const jornada = {
-    segunda: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-    terca: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-    quarta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-    quinta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-    sexta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-    sabado: [{ entrada: "08:00", saida: "13:00" }],
-    domingo: []
-  };
-
   const dias = ["domingo","segunda","terca","quarta","quinta","sexta","sabado"];
   const dia = dias[new Date().getDay()];
-
   const now = new Date();
   const hora = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
-
   let extras = 0;
+
   const periodos = jornada[dia];
   if (!periodos || periodos.length === 0) return 0;
 
@@ -53,16 +50,51 @@ function calcularHorasExtras(tipo) {
   return extras.toFixed(2);
 }
 
-// Relatórios simples
-async function carregarRelatorios() {
+// Função para carregar relatórios
+window.carregarRelatorios = async function() {
+  const tipo = document.getElementById("tipoRelatorio").value;
   const snapshot = await getDocs(collection(db, "pontos"));
-  const div = document.getElementById("relatorios");
-  div.innerHTML = "";
+  const relDiv = document.getElementById("relatorios");
+  relDiv.innerHTML = "";
+
+  const agora = new Date();
+  const semanaAtual = getNumeroSemana(agora);
+  const mesAtual = agora.getMonth();
+  const anoAtual = agora.getFullYear();
+
+  const registrosPorUsuario = {};
 
   snapshot.forEach(doc => {
     const d = doc.data();
-    div.innerHTML += `<p>${d.tipo} - ${d.uid} - Horas extras: ${d.horasExtras || 0}</p>`;
+    const data = d.data.toDate ? d.data.toDate() : d.data; // converte Timestamp
+    const uid = d.uid;
+
+    // Filtro por período
+    let incluir = false;
+    if (tipo === "semana" && getNumeroSemana(data) === semanaAtual && data.getFullYear() === anoAtual) incluir = true;
+    if (tipo === "mes" && data.getMonth() === mesAtual && data.getFullYear() === anoAtual) incluir = true;
+    if (tipo === "ano" && data.getFullYear() === anoAtual) incluir = true;
+    if (!incluir) return;
+
+    if (!registrosPorUsuario[uid]) registrosPorUsuario[uid] = { pontos: 0, horasExtras: 0 };
+    registrosPorUsuario[uid].pontos += 1;
+    registrosPorUsuario[uid].horasExtras += parseFloat(d.horasExtras || 0);
   });
+
+  for (let uid in registrosPorUsuario) {
+    const r = registrosPorUsuario[uid];
+    relDiv.innerHTML += `<p>Usuário: ${uid} | Registros: ${r.pontos} | Horas Extras: ${r.horasExtras.toFixed(2)}</p>`;
+  }
+};
+
+// Função para calcular o número da semana
+function getNumeroSemana(d) {
+  const data = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const diaSemana = data.getUTCDay() || 7;
+  data.setUTCDate(data.getUTCDate() + 4 - diaSemana);
+  const anoInicio = new Date(Date.UTC(data.getUTCFullYear(),0,1));
+  return Math.ceil((((data - anoInicio) / 86400000) + 1)/7);
 }
 
+// Carregar relatório ao abrir a página
 carregarRelatorios();
