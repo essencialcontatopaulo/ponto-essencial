@@ -19,7 +19,8 @@ body {
 
 .login-box h1 {
   color: #1f5e3b;
-  margin-bo
+  margin-bottom: 20px;
+}
 
 .login-box input {
   width: 100%;
