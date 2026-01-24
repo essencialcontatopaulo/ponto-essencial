@@ -3,39 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ponto Eletrônico - Funcionário</title>
+<title>Ponto - Funcionário</title>
 <link rel="stylesheet" href="css/base.css">
 </head>
 <body>
 
-<div class="painel">
-  <h1>Bem-vindo, Funcionário</h1>
+<div class="container">
+  <h1>Registro de Ponto</h1>
 
-  <div class="botoes">
-    <button id="btnEntrada">Registrar Entrada</button>
-    <button id="btnSaida">Registrar Saída</button>
-    <button id="btnJustificativa">Registrar Justificativa</button>
-  </div>
+  <button onclick="registrar('entrada')">Registrar Entrada</button>
+  <button onclick="registrar('saida')">Registrar Saída</button>
 
-  <div id="formJustificativa" style="display:none; margin-top:20px;">
-    <label>Tipo de justificativa:</label>
-    <select id="tipoJustificativa">
-      <option value="">Selecione</option>
-      <option value="esqueci_entrada">Esqueci de registrar entrada</option>
-      <option value="esqueci_saida">Esqueci de registrar saída</option>
-      <option value="falta">Falta</option>
-      <option value="atraso">Atraso</option>
-      <option value="doenca">Doença</option>
-      <option value="outro">Outro</option>
-    </select>
-    <textarea id="descricaoJustificativa" placeholder="Descreva..."></textarea>
-    <button id="btnEnviarJustificativa">Enviar</button>
-  </div>
+  <select id="justificativa">
+    <option value="">Justificativa</option>
+    <option value="falta">Falta</option>
+    <option value="atraso">Atraso</option>
+    <option value="esquecimento">Esquecimento</option>
+    <option value="doenca">Doença</option>
+  </select>
 
-  <div id="mensagem" style="margin-top:20px; color:green;"></div>
+  <button onclick="registrarJustificativa()">Enviar Justificativa</button>
 
-  <h2>Histórico do ponto</h2>
-  <div id="historico"></div>
+  <p id="msg"></p>
 </div>
 
 <script type="module" src="js/funcionario.js"></script>
