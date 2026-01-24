@@ -2,45 +2,46 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background-color: #e6f0e6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
-.login-box {
+.painel {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
   background-color: #ffffff;
-  padding: 30px;
   border-radius: 10px;
-  box-shadow: 0px 0px 10px #999;
-  text-align: center;
-  width: 300px;
+  box-shadow: 0 0 10px #999;
 }
 
-.login-box h1 {
+h1, h2 {
   color: #1f5e3b;
+  text-align: center;
+}
+
+.botoes {
+  display: flex;
+  justify-content: space-around;
   margin-bottom: 20px;
 }
 
-.login-box input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #1f5e3b;
-  border-radius: 5px;
-}
-
-.login-box button {
-  width: 100%;
-  padding: 10px;
+button {
+  padding: 10px 15px;
   background-color: #1f5e3b;
   color: #fff;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
   font-weight: 600;
+  cursor: pointer;
 }
 
-.login-box button:hover {
+button:hover {
   background-color: #2a7c4a;
+}
+
+textarea, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #1f5e3b;
+  border-radius: 5px;
 }
