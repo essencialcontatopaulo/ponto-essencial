@@ -1,16 +1,5 @@
 import { auth, db } from "./firebase-config.js";
-import { collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-// Jornada e cálculo de horas
-const jornada = {
-  segunda: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-  terca: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-  quarta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-  quinta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-  sexta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
-  sabado: [{ entrada: "08:00", saida: "13:00" }],
-  domingo: []
-};
+import { collection, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // Registrar ponto admin
 window.registrar = async function(tipo) {
@@ -28,14 +17,23 @@ window.registrar = async function(tipo) {
   });
 };
 
-// Função de cálculo de horas extras
+// Cálculo de horas extras
 function calcularHorasExtras(tipo) {
+  const jornada = {
+    segunda: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+    terca: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+    quarta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+    quinta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+    sexta: [{ entrada: "08:00", saida: "12:00" }, { entrada: "14:00", saida: "18:00" }],
+    sabado: [{ entrada: "08:00", saida: "13:00" }],
+    domingo: []
+  };
+
   const dias = ["domingo","segunda","terca","quarta","quinta","sexta","sabado"];
   const dia = dias[new Date().getDay()];
   const now = new Date();
   const hora = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
   let extras = 0;
-
   const periodos = jornada[dia];
   if (!periodos || periodos.length === 0) return 0;
 
@@ -50,7 +48,7 @@ function calcularHorasExtras(tipo) {
   return extras.toFixed(2);
 }
 
-// Função para carregar relatórios
+// Relatórios
 window.carregarRelatorios = async function() {
   const tipo = document.getElementById("tipoRelatorio").value;
   const snapshot = await getDocs(collection(db, "pontos"));
@@ -64,30 +62,58 @@ window.carregarRelatorios = async function() {
 
   const registrosPorUsuario = {};
 
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    const data = d.data.toDate ? d.data.toDate() : d.data; // converte Timestamp
+  for (let docSnap of snapshot.docs) {
+    const d = docSnap.data();
+    const data = d.data.toDate ? d.data.toDate() : d.data;
     const uid = d.uid;
 
-    // Filtro por período
     let incluir = false;
     if (tipo === "semana" && getNumeroSemana(data) === semanaAtual && data.getFullYear() === anoAtual) incluir = true;
     if (tipo === "mes" && data.getMonth() === mesAtual && data.getFullYear() === anoAtual) incluir = true;
     if (tipo === "ano" && data.getFullYear() === anoAtual) incluir = true;
-    if (!incluir) return;
+    if (!incluir) continue;
 
     if (!registrosPorUsuario[uid]) registrosPorUsuario[uid] = { pontos: 0, horasExtras: 0 };
     registrosPorUsuario[uid].pontos += 1;
     registrosPorUsuario[uid].horasExtras += parseFloat(d.horasExtras || 0);
-  });
+  }
 
+  // Buscar nomes dos usuários
   for (let uid in registrosPorUsuario) {
+    const userSnap = await getDoc(doc(db, "usuarios", uid));
+    const nome = userSnap.exists() ? userSnap.data().nome : uid;
     const r = registrosPorUsuario[uid];
-    relDiv.innerHTML += `<p>Usuário: ${uid} | Registros: ${r.pontos} | Horas Extras: ${r.horasExtras.toFixed(2)}</p>`;
+
+    relDiv.innerHTML += `<p>Usuário: ${nome} | Registros: ${r.pontos} | Horas Extras: ${r.horasExtras.toFixed(2)}</p>`;
+  }
+
+  // Adicionar botão de exportação CSV
+  if (relDiv.innerHTML) {
+    const btn = document.createElement("button");
+    btn.textContent = "Exportar CSV";
+    btn.onclick = () => exportarCSV(registrosPorUsuario);
+    relDiv.appendChild(btn);
   }
 };
 
-// Função para calcular o número da semana
+// Função para gerar CSV
+function exportarCSV(dados) {
+  let csv = "Nome;Registros;Horas Extras\n";
+  Object.keys(dados).forEach(async uid => {
+    const userSnap = await getDoc(doc(db, "usuarios", uid));
+    const nome = userSnap.exists() ? userSnap.data().nome : uid;
+    const r = dados[uid];
+    csv += `${nome};${r.pontos};${r.horasExtras.toFixed(2)}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "relatorio.csv";
+  link.click();
+}
+
+// Número da semana
 function getNumeroSemana(d) {
   const data = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const diaSemana = data.getUTCDay() || 7;
@@ -96,5 +122,5 @@ function getNumeroSemana(d) {
   return Math.ceil((((data - anoInicio) / 86400000) + 1)/7);
 }
 
-// Carregar relatório ao abrir a página
+// Carrega relatório ao abrir a página
 carregarRelatorios();
