@@ -1,134 +1,40 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atualizar Sistema - Ponto Eletrônico</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #2E8B57 0%, #1b5e20 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: white;
-            text-align: center;
-        }
-        
-        .container {
-            background: rgba(255,255,255,0.95);
-            padding: 40px;
-            border-radius: 20px;
-            max-width: 500px;
-            color: #333;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        h1 {
-            color: #2E8B57;
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            background: #2E8B57;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 18px;
-            cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            background: #1b5e20;
-            transform: translateY(-3px);
-        }
-        
-        .steps {
-            text-align: left;
-            margin: 30px 0;
-            background: #f1f8e9;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #2E8B57;
-        }
-        
-        .steps li {
-            margin: 10px 0;
-            color: #2E8B57;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponto Eletrônico - Administrador</title>
+<link rel="stylesheet" href="css/base.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🔄 Atualizar Sistema</h1>
-        <p>Se o sistema não está mostrando as atualizações recentes, siga estes passos:</p>
-        
-        <div class="steps">
-            <h3>Para iOS (iPhone/iPad):</h3>
-            <ol>
-                <li>Feche completamente o Safari (swipe up)</li>
-                <li>Vá em Ajustes → Safari → Limpar Histórico e Dados</li>
-                <li>Reabra o Safari e acesse o sistema novamente</li>
-            </ol>
-            
-            <h3>Para qualquer navegador:</h3>
-            <ol>
-                <li>Pressione <strong>Ctrl+F5</strong> (Windows/Linux) ou <strong>Cmd+Shift+R</strong> (Mac)</li>
-                <li>Ou use o botão abaixo para forçar atualização</li>
-            </ol>
-        </div>
-        
-        <button class="btn" onclick="forceUpdate()">🔄 Forçar Atualização Agora</button>
-        <button class="btn" onclick="window.location.href='index.html'">🏠 Voltar ao Sistema</button>
-        
-        <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
-            <strong>Versão atual do sistema:</strong> 2.0.1<br>
-            <strong>Última atualização:</strong> 20/01/2024
-        </p>
-    </div>
-    
-    <script>
-        function forceUpdate() {
-            // Limpar localStorage
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Limpar caches
-            if ('caches' in window) {
-                caches.keys().then(cacheNames => {
-                    cacheNames.forEach(cacheName => {
-                        caches.delete(cacheName);
-                    });
-                });
-            }
-            
-            // Limpar Service Workers
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(registration => {
-                        registration.unregister();
-                    });
-                });
-            }
-            
-            // Recarregar com parâmetro anti-cache
-            const url = new URL(window.location.origin + '/index.html');
-            url.searchParams.set('force', Date.now());
-            url.searchParams.set('nocache', 'true');
-            
-            alert('✅ Cache limpo! O sistema será recarregado.');
-            window.location.href = url.toString();
-        }
-        
-        // Auto-redirect após 10 segundos
-        setTimeout(() => {
-            window.location.href = 'index.html?force=' + Date.now();
-        }, 10000);
-    </script>
+
+<div class="painel">
+  <h1>Administrador</h1>
+
+  <!-- Registro manual de ponto -->
+  <div class="botoes">
+    <button id="btnEntradaManual">Registrar Entrada</button>
+    <button id="btnSaidaManual">Registrar Saída</button>
+  </div>
+
+  <!-- Cadastro de funcionários -->
+  <h2>Cadastro de Funcionários</h2>
+  <input type="text" id="nomeFuncionario" placeholder="Nome">
+  <input type="email" id="emailFuncionario" placeholder="Email">
+  <input type="password" id="senhaFuncionario" placeholder="Senha">
+  <button id="btnCadastrarFuncionario">Cadastrar</button>
+  <div id="mensagemFuncionario" style="margin-top:10px; color:green;"></div>
+
+  <!-- Justificativas pendentes -->
+  <h2>Justificativas Pendentes</h2>
+  <div id="justificativasPendentes"></div>
+
+  <!-- Relatórios -->
+  <h2>Relatórios</h2>
+  <div id="relatorios"></div>
+
+</div>
+
+<script type="module" src="js/admin.js"></script>
 </body>
 </html>
