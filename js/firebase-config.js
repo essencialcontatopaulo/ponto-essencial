@@ -1,9 +1,20 @@
-// js/firebase-config.js
+// Importar módulos do Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// Configuração do seu projeto Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyBNe8ryLTnb-IJBzR9CCmJ9Ljg_lawzTtk",
-    authDomain: "essencial-print-5a753.firebaseapp.com",
-    projectId: "essencial-print-5a753",
-    storageBucket: "essencial-print-5a753.firebasestorage.app",
-    messagingSenderId: "544082416072",
-    appId: "1:544082416072:web:85d3c8549b25158284f0fd"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "ID",
+  appId: "APP_ID"
 };
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+export const db = getFirestore(app);
