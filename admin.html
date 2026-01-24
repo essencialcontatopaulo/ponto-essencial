@@ -1,23 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Admin</title>
-<link rel="stylesheet" href="css/base.css">
-</head>
-<body>
+<h2>Relatórios</h2>
 
-<div class="container">
-  <h1>Administrador</h1>
+<label for="tipoRelatorio">Visualizar:</label>
+<select id="tipoRelatorio" onchange="carregarRelatorios()">
+  <option value="semana">Semana atual</option>
+  <option value="mes">Mês atual</option>
+  <option value="ano">Ano atual</option>
+</select>
 
-  <button onclick="registrar('entrada')">Registrar Entrada</button>
-  <button onclick="registrar('saida')">Registrar Saída</button>
-
-  <h2>Relatórios</h2>
-  <div id="relatorios"></div>
-</div>
-
-<script type="module" src="js/admin.js"></script>
-</body>
-</html>
+<div id="relatorios" style="margin-top:20px;"></div>
