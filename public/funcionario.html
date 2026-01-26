@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionário - Ponto Eletrônico</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2E7D32">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="d-flex align-center">
+            <h1>Ponto Eletrônico</h1>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar" id="userInitials">U</div>
+            <button onclick="funcionarioApp.logout()" class="btn-secondary btn-sm">Sair</button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="container">
+        <!-- Status do Dia -->
+        <div class="card">
+            <div class="card-title">Status do Dia</div>
+            <div class="status-container">
+                <div class="current-date" id="currentDate">Carregando...</div>
+                <div class="current-time" id="currentTime">--:--</div>
+                <div class="status-badge" id="dailyStatus">Status: Aguardando</div>
+            </div>
+        </div>
+
+        <!-- Controles de Registro -->
+        <div class="card">
+            <div class="card-title">Registrar Ponto</div>
+            <div class="action-buttons">
+                <button onclick="funcionarioApp.registrarEntrada()" class="btn-primary" id="btnEntrada">
+                    Registrar Entrada
+                </button>
+                <button onclick="funcionarioApp.registrarSaida()" class="btn-primary" id="btnSaida" disabled>
+                    Registrar Saída
+                </button>
+                <button onclick="funcionarioApp.abrirJustificativa()" class="btn-secondary">
+                    Registrar Justificativa
+                </button>
+            </div>
+            
+            <div class="location-info" id="locationInfo">
+                <span class="location-icon">📍</span>
+                <span id="locationText">Obtendo localização...</span>
+            </div>
+        </div>
+
+        <!-- Histórico da Semana -->
+        <div class="card">
+            <div class="card-title">Histórico da Semana</div>
+            <div class="table-container">
+                <table class="data-table" id="weeklyHistory">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Saída</th>
+                            <th>Horas</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Os dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="loading-container" id="loadingHistory">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- Resumo de Horas -->
+        <div class="card">
+            <div class="card-title">Resumo Semanal</div>
+            <div class="d-flex justify-between">
+                <div>
+                    <p>Horas trabalhadas:</p>
+                    <h3 id="totalHours">0h 00min</h3>
+                </div>
+                <div>
+                    <p>Horas extras:</p>
+                    <h3 id="extraHours">0h 00min</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Justificativa -->
+    <div class="modal-overlay" id="justificationModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Justificativa</h2>
+                <button class="modal-close" onclick="funcionarioApp.fecharModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="justificationForm">
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Justificativa *</label>
+                        <select class="form-select" id="justificationType" required>
+                            <option value="">Selecione...</option>
+                            <option value="esqueceu_entrada">Esqueci de registrar entrada</option>
+                            <option value="esqueceu_saida">Esqueci de registrar saída</option>
+                            <option value="falta">Falta</option>
+                            <option value="atraso">Atraso</option>
+                            <option value="doenca">Doença/Atestado</option>
+                            <option value="outro">Outro motivo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Data *</label>
+                        <input type="date" class="form-control" id="justificationDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Descrição *</label>
+                        <textarea class="form-textarea" id="justificationDescription" 
+                                  placeholder="Descreva o motivo da justificativa..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group" id="medicalCertificateSection" style="display: none;">
+                        <label class="form-label">Foto do Atestado Médico</label>
+                        <div class="file-upload" onclick="document.getElementById('medicalCertificate').click()">
+                            <div class="file-upload-icon">📄</div>
+                            <div class="file-upload-label" id="fileName">Clique para selecionar arquivo</div>
+                            <input type="file" id="medicalCertificate" accept="image/*" 
+                                   onchange="funcionarioApp.updateFileName(this)">
+                        </div>
+                        <small>Formatos aceitos: JPG, PNG (máx. 5MB)</small>
+                    </div>
+                    
+                    <div class="form-group mt-30">
+                        <button type="submit" class="btn-primary btn-block">Enviar Justificativa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="js/funcionario.js"></script>
+    
+    <script>
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            funcionarioApp.init();
+        });
+    </script>
+</body>
+</html>
