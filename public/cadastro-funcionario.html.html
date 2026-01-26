@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Funcionários</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="d-flex align-center">
+            <h1>Cadastro de Funcionários</h1>
+        </div>
+        <div class="user-info">
+            <button onclick="window.location.href='admin.html'" class="btn-secondary btn-sm">
+                Voltar
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- O conteúdo será carregado do admin.js -->
+        <div id="cadastroContent"></div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+    
+    <script>
+        // Redirecionar para página principal se não for admin
+        firebaseAuth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Verificar se é admin
+            const userDoc = await firebaseDb.collection('usuarios').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().tipo !== 'admin') {
+                alert('Acesso restrito a administradores');
+                window.location.href = 'funcionario.html';
+                return;
+            }
+            
+            // Carregar funcionalidade de cadastro
+            document.getElementById('cadastroContent').innerHTML = `
+                <div class="card">
+                    <div class="card-title">Cadastrar Novo Funcionário</div>
+                    <p>Use o painel administrativo para cadastrar funcionários.</p>
+                    <button onclick="window.location.href='admin.html'" class="btn-primary">
+                        Ir para Painel Administrativo
+                    </button>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

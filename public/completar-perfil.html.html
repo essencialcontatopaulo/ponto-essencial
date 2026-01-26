@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completar Perfil</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="logo">
+            <div class="logo-icon">👤</div>
+            <h1>Completar Perfil</h1>
+            <p class="slogan">Precisamos de algumas informações adicionais</p>
+        </div>
+        
+        <form id="completeProfileForm">
+            <div class="form-group">
+                <label class="form-label">Nome Completo *</label>
+                <input type="text" class="form-control" id="fullName" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Matrícula *</label>
+                <input type="text" class="form-control" id="matricula" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Departamento *</label>
+                <select class="form-select" id="department" required>
+                    <option value="">Selecione...</option>
+                    <option value="administrativo">Administrativo</option>
+                    <option value="vendas">Vendas</option>
+                    <option value="producao">Produção</option>
+                    <option value="rh">Recursos Humanos</option>
+                    <option value="ti">Tecnologia da Informação</option>
+                    <option value="financeiro">Financeiro</option>
+                    <option value="operacional">Operacional</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Cargo *</label>
+                <input type="text" class="form-control" id="position" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Data de Admissão *</label>
+                <input type="date" class="form-control" id="admissionDate" required>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn-primary btn-block">Completar Cadastro</button>
+            </div>
+        </form>
+        
+        <div class="footer-login">
+            <p>Sistema de Ponto Eletrônico</p>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Configurar data máxima (hoje)
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('admissionDate').max = hoje;
+        
+        // Formulário de completar perfil
+        document.getElementById('completeProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const user = firebaseAuth.currentUser;
+            if (!user) {
+                alert('Usuário não autenticado');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                const profileData = {
+                    nome: document.getElementById('fullName').value,
+                    matricula: document.getElementById('matricula').value,
+                    departamento: document.getElementById('department').value,
+                    cargo: document.getElementById('position').value,
+                    dataAdmissao: document.getElementById('admissionDate').value,
+                    tipo: 'funcionario',
+                    ativo: true,
+                    dataCadastro: new Date(),
+                    email: user.email
+                };
+                
+                // Salvar no Firestore
+                await firebaseDb.collection('usuarios').doc(user.uid).set(profileData);
+                
+                alert('Perfil completado com sucesso!');
+                window.location.href = 'funcionario.html';
+                
+            } catch (error) {
+                console.error('Erro ao completar perfil:', error);
+                alert('Erro ao salvar perfil: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
